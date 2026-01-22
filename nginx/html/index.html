@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BiblioHub - Digital Library Suite</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <span class="logo-icon">📚</span>
+                <h1>BiblioHub</h1>
+            </div>
+            <p class="tagline">Your Digital Library Suite</p>
+        </header>
+
+        <main>
+            <section class="intro">
+                <p>BiblioHub brings together powerful tools for managing and enjoying your digital book collection. 
+                   From organizing your e-book library to converting books into audiobooks, everything you need in one place.</p>
+            </section>
+
+            <section class="services">
+                <h2>Services</h2>
+                <div class="service-grid">
+                    
+                    <a href="/opds/" class="service-card">
+                        <div class="service-icon">📖</div>
+                        <h3>Biblio OPDS Server</h3>
+                        <p>Browse and manage your e-book library via OPDS protocol. Import FB2 collections, search by author, series, or genre, and download books to your favorite reading app.</p>
+                        <div class="service-meta">
+                            <span class="port">Port: 9988</span>
+                            <span class="status" id="status-opds">Checking...</span>
+                        </div>
+                    </a>
+
+                    <a href="/audiobook/" class="service-card">
+                        <div class="service-icon">🎧</div>
+                        <h3>Biblio Audiobook Builder</h3>
+                        <p>Convert your e-books into high-quality audiobooks using text-to-speech technology. Supports EPUB and FB2 formats with multiple voice options.</p>
+                        <div class="service-meta">
+                            <span class="port">Port: 8080</span>
+                            <span class="status" id="status-audiobook">Checking...</span>
+                        </div>
+                    </a>
+
+                    <a href="/tts/" class="service-card">
+                        <div class="service-icon">🔊</div>
+                        <h3>Biblio TTS Server</h3>
+                        <p>High-quality text-to-speech engine powered by Silero models. Provides REST API for speech synthesis with support for multiple languages and voices.</p>
+                        <div class="service-meta">
+                            <span class="port">Port: 5555</span>
+                            <span class="status" id="status-tts">Checking...</span>
+                        </div>
+                    </a>
+
+                </div>
+            </section>
+
+            <section class="quick-links">
+                <h2>Quick Links</h2>
+                <div class="links-grid">
+                    <a href="https://github.com/vpoluyaktov/biblio-hub" target="_blank" class="link-card">
+                        <span class="link-icon">🏠</span>
+                        <span>BiblioHub Repository</span>
+                    </a>
+                    <a href="https://github.com/vpoluyaktov/biblio-opds-server" target="_blank" class="link-card">
+                        <span class="link-icon">📖</span>
+                        <span>OPDS Server Docs</span>
+                    </a>
+                    <a href="https://github.com/vpoluyaktov/biblio-audiobook-builder-tts" target="_blank" class="link-card">
+                        <span class="link-icon">🎧</span>
+                        <span>Audiobook Builder Docs</span>
+                    </a>
+                    <a href="https://github.com/vpoluyaktov/biblio-tts-server-silero" target="_blank" class="link-card">
+                        <span class="link-icon">🔊</span>
+                        <span>TTS Server Docs</span>
+                    </a>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 BiblioHub. Part of the Biblio Application Suite.</p>
+            <p class="version">Version 1.0.0</p>
+        </footer>
+    </div>
+
+    <script>
+        async function checkServiceHealth(url, elementId) {
+            const statusEl = document.getElementById(elementId);
+            try {
+                const response = await fetch(url, { method: 'GET', mode: 'no-cors' });
+                statusEl.textContent = 'Online';
+                statusEl.classList.add('online');
+            } catch (error) {
+                statusEl.textContent = 'Offline';
+                statusEl.classList.add('offline');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkServiceHealth('/opds/api/setup/check', 'status-opds');
+            checkServiceHealth('/audiobook/health', 'status-audiobook');
+            checkServiceHealth('/tts/health', 'status-tts');
+        });
+    </script>
+</body>
+</html>
