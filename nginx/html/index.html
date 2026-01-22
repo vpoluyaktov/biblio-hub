@@ -27,9 +27,9 @@
                 <h2>Services</h2>
                 <div class="service-grid">
                     
-                    <a href="/abb-tts/" class="service-card">
+                    <a href="#" data-port="9901" class="service-card" target="bibliohub-9901">
                         <div class="service-icon">🎧</div>
-                        <h3>Audiobook Builder TTS (ABB_TTS)</h3>
+                        <h3>Audiobook Builder TTS</h3>
                         <p>Convert your e-books into high-quality audiobooks using text-to-speech technology. Supports EPUB and FB2 formats with multiple voice options.</p>
                         <div class="service-meta">
                             <span class="port">Port: 9901</span>
@@ -37,9 +37,9 @@
                         </div>
                     </a>
 
-                    <a href="/tts-silero/" class="service-card">
+                    <a href="#" data-port="9902" class="service-card" target="bibliohub-9902">
                         <div class="service-icon">🔊</div>
-                        <h3>TTS Server Silero (TTS_SILERO)</h3>
+                        <h3>TTS Server Silero</h3>
                         <p>High-quality text-to-speech engine powered by Silero models. Provides REST API for speech synthesis with support for multiple languages and voices.</p>
                         <div class="service-meta">
                             <span class="port">Port: 9902</span>
@@ -47,9 +47,9 @@
                         </div>
                     </a>
 
-                    <a href="/opds/" class="service-card">
+                    <a href="#" data-port="9903" class="service-card" target="bibliohub-9903">
                         <div class="service-icon">📖</div>
-                        <h3>OPDS Server</h3>
+                        <h3>Biblio OPDS Server</h3>
                         <p>Browse and manage your e-book library via OPDS protocol. Import FB2 collections, search by author, series, or genre, and download books to your favorite reading app.</p>
                         <div class="service-meta">
                             <span class="port">Port: 9903</span>
@@ -90,10 +90,21 @@
     </div>
 
     <script>
-        async function checkServiceHealth(url, elementId) {
+        function getServiceUrl(port) {
+            return `${window.location.protocol}//${window.location.hostname}:${port}`;
+        }
+
+        function initServiceLinks() {
+            document.querySelectorAll('.service-card[data-port]').forEach(link => {
+                const port = link.dataset.port;
+                link.href = getServiceUrl(port);
+            });
+        }
+
+        async function checkServiceHealth(port, elementId, healthPath) {
             const statusEl = document.getElementById(elementId);
             try {
-                const response = await fetch(url, { method: 'GET', mode: 'no-cors' });
+                const response = await fetch(`${getServiceUrl(port)}${healthPath}`, { method: 'GET', mode: 'no-cors' });
                 statusEl.textContent = 'Online';
                 statusEl.classList.add('online');
             } catch (error) {
@@ -103,9 +114,10 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            checkServiceHealth('/abb-tts/health', 'status-abb-tts');
-            checkServiceHealth('/tts-silero/health', 'status-tts-silero');
-            checkServiceHealth('/opds/api/setup/check', 'status-opds');
+            initServiceLinks();
+            checkServiceHealth(9901, 'status-abb-tts', '/health');
+            checkServiceHealth(9902, 'status-tts-silero', '/health');
+            checkServiceHealth(9903, 'status-opds', '/api/setup/check');
         });
     </script>
 </body>

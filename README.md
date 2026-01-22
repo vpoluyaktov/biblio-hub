@@ -8,9 +8,10 @@ BiblioHub provides unified deployment and a landing page for all Biblio services
 
 | Service | Description | Port |
 |---------|-------------|------|
-| **Biblio OPDS Server** | E-book library catalog via OPDS protocol | 9988 |
-| **Biblio Audiobook Builder** | Convert e-books to audiobooks using TTS | 8080 |
-| **Biblio TTS Server** | Text-to-speech engine (Silero models) | 5555 |
+| **Landing Page** | Central hub with links to all services | 9900 |
+| **Biblio Audiobook Builder TTS** | Convert e-books to audiobooks using TTS | 9901 |
+| **Biblio TTS Server Silero** | Text-to-speech engine (Silero models) | 9902 |
+| **Biblio OPDS Server** | E-book library catalog via OPDS protocol | 9903 |
 
 ## Quick Start
 
@@ -23,28 +24,28 @@ BiblioHub provides unified deployment and a landing page for all Biblio services
 ### Deploy
 
 ```bash
-# Initialize Docker Swarm (if not already)
-docker swarm init
-
-# Deploy the stack
-docker stack deploy -c stack.yaml biblio
+# Start the stack (creates directories and deploys)
+./scripts/start_stack.sh
 
 # Check services status
-docker stack services biblio
+docker stack services bibliohub
 
 # View logs
-docker service logs -f biblio_nginx-gateway
+docker service logs -f bibliohub_nginx-gateway
 ```
 
 ### Access
 
-Once deployed, access the landing page at: **http://localhost**
+Once deployed, access the services at:
 
-Individual services:
-- Landing Page: http://localhost/
-- OPDS Server: http://localhost/opds/
-- Audiobook Builder: http://localhost/audiobook/
-- TTS Server: http://localhost/tts/
+| Service | URL |
+|---------|-----|
+| Landing Page | http://localhost:9900 |
+| Audiobook Builder TTS | http://localhost:9901 |
+| TTS Server Silero | http://localhost:9902 |
+| OPDS Server | http://localhost:9903 |
+
+The landing page provides links that open each service in a new browser tab.
 
 ## Building Images
 
@@ -94,16 +95,19 @@ The stack uses the following persistent volumes:
 
 ```bash
 # Scale TTS service
-docker service scale biblio_biblio-tts-server-silero=5
+docker service scale bibliohub_tts-silero=5
 
 # Update a service
-docker service update --image biblio-opds-server:v2 biblio_biblio-opds-server
+docker service update --image biblio-opds-server:v2 bibliohub_opds-server
 
-# Remove the stack
-docker stack rm biblio
+# Stop the stack
+./scripts/stop_stack.sh
+
+# Rebuild all images
+./scripts/rebuild_stack.sh
 
 # View service logs
-docker service logs biblio_biblio-opds-server
+docker service logs bibliohub_opds-server
 ```
 
 ## Project Structure
@@ -113,13 +117,19 @@ biblio-hub/
 ├── README.md              # This file
 ├── Specification.md       # Detailed specification
 ├── stack.yaml             # Docker Swarm stack definition
+├── scripts/
+│   ├── start_stack.sh     # Start the stack
+│   ├── stop_stack.sh      # Stop the stack
+│   └── rebuild_stack.sh   # Rebuild all Docker images
 ├── nginx/
-│   ├── nginx.conf         # Nginx reverse proxy config
+│   ├── nginx.conf         # Nginx config for landing page
 │   └── html/
 │       ├── index.html     # Landing page
 │       └── style.css      # Landing page styles
-└── config/
-    └── .env.example       # Environment template
+└── data/                  # Persistent data (created by start_stack.sh)
+    ├── abb_tts/           # Audiobook Builder data
+    ├── tts_silero/        # TTS models cache
+    └── opds_server/       # OPDS database and books
 ```
 
 ## Related Repositories

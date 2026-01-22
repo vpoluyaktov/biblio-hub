@@ -8,15 +8,16 @@ BiblioHub is the central orchestration and landing page for the Biblio applicati
 
 1. **Docker Swarm Stack** - Unified deployment of all Biblio services
 2. **Landing Page** - Central web portal with links to all services
-3. **Service Discovery** - Nginx reverse proxy for routing to services
+3. **Direct Port Access** - Each service exposed on its own port for maximum compatibility
 
 ## Biblio Application Suite
 
 | Service | Description | Port | Repository |
 |---------|-------------|------|------------|
-| **Biblio OPDS Server** | OPDS catalog server for e-book libraries | 9988 | [biblio-opds-server](https://github.com/vpoluyaktov/biblio-opds-server) |
-| **Biblio Audiobook Builder TTS** | Converts e-books to audiobooks using TTS | 8080 | [biblio-audiobook-builder-tts](https://github.com/vpoluyaktov/biblio-audiobook-builder-tts) |
-| **Biblio TTS Server (Silero)** | REST API for Silero TTS models | 5555 | [biblio-tts-server-silero](https://github.com/vpoluyaktov/biblio-tts-server-silero) |
+| **Landing Page (nginx)** | Central hub with links to all services | 9900 | This repository |
+| **Biblio Audiobook Builder TTS** | Converts e-books to audiobooks using TTS | 9901 | [biblio-audiobook-builder-tts](https://github.com/vpoluyaktov/biblio-audiobook-builder-tts) |
+| **Biblio TTS Server (Silero)** | REST API for Silero TTS models | 9902 | [biblio-tts-server-silero](https://github.com/vpoluyaktov/biblio-tts-server-silero) |
+| **Biblio OPDS Server** | OPDS catalog server for e-book libraries | 9903 | [biblio-opds-server](https://github.com/vpoluyaktov/biblio-opds-server) |
 
 ## Architecture
 
@@ -24,28 +25,20 @@ BiblioHub is the central orchestration and landing page for the Biblio applicati
                     ┌─────────────────────────────────────────────────────────┐
                     │                    Docker Swarm                          │
                     │                                                          │
-    Internet        │   ┌─────────────┐                                       │
-        │           │   │   Nginx     │                                       │
-        │           │   │  (Gateway)  │                                       │
-        ▼           │   │             │                                       │
-    ┌───────┐       │   │  :80/:443   │                                       │
-    │ Users │◄─────►│   └──────┬──────┘                                       │
-    └───────┘       │          │                                              │
-                    │          ▼                                              │
-                    │   ┌──────────────────────────────────────────────┐      │
-                    │   │              Internal Network                 │      │
-                    │   │                                              │      │
-                    │   │  ┌─────────────┐  ┌─────────────────────┐   │      │
-                    │   │  │ OPDS Server │  │ Audiobook Builder   │   │      │
-                    │   │  │   :9988     │  │       :8080         │   │      │
-                    │   │  └─────────────┘  └──────────┬──────────┘   │      │
-                    │   │                              │              │      │
-                    │   │                              ▼              │      │
-                    │   │                   ┌─────────────────────┐   │      │
-                    │   │                   │  TTS Server Silero  │   │      │
-                    │   │                   │  (5 replicas) :5555 │   │      │
-                    │   │                   └─────────────────────┘   │      │
-                    │   └──────────────────────────────────────────────┘      │
+    Internet        │   ┌─────────────┐   ┌─────────────────────┐             │
+        │           │   │   Nginx     │   │ Audiobook Builder   │             │
+        │           │   │  (Landing)  │   │     (ABB_TTS)       │             │
+        ▼           │   │   :9900     │   │       :9901         │             │
+    ┌───────┐       │   └─────────────┘   └──────────┬──────────┘             │
+    │ Users │◄─────►│                                │                        │
+    └───────┘       │   ┌─────────────┐              ▼                        │
+                    │   │ OPDS Server │   ┌─────────────────────┐             │
+                    │   │   :9903     │   │  TTS Server Silero  │             │
+                    │   └─────────────┘   │  (3 replicas) :9902 │             │
+                    │                     └─────────────────────┘             │
+                    │                                                          │
+                    │   All services exposed on dedicated ports               │
+                    │   Landing page opens each service in new browser tab    │
                     └─────────────────────────────────────────────────────────┘
 ```
 
@@ -82,13 +75,19 @@ biblio-hub/
 ├── Specification.md          # This file
 ├── README.md                 # Deployment instructions
 ├── stack.yaml                # Docker Swarm stack definition
+├── scripts/
+│   ├── start_stack.sh        # Start the stack
+│   ├── stop_stack.sh         # Stop the stack
+│   └── rebuild_stack.sh      # Rebuild all Docker images
 ├── nginx/
-│   ├── nginx.conf            # Nginx configuration
+│   ├── nginx.conf            # Nginx configuration (landing page only)
 │   └── html/
 │       ├── index.html        # Landing page
 │       └── style.css         # Landing page styles
-└── config/
-    └── .env.example          # Environment variables template
+└── data/                     # Persistent data (created by start_stack.sh)
+    ├── abb_tts/              # Audiobook Builder data
+    ├── tts_silero/           # TTS models cache
+    └── opds_server/          # OPDS database and books
 ```
 
 ## Docker Swarm Stack Configuration
@@ -97,34 +96,33 @@ biblio-hub/
 
 #### 1. nginx-gateway
 - **Image**: nginx:alpine
-- **Ports**: 80 (HTTP), 443 (HTTPS future)
-- **Role**: Reverse proxy and landing page server
+- **Port**: 9900 (external)
+- **Role**: Landing page server with links to all services
 - **Replicas**: 1
 
-#### 2. biblio-opds-server
+#### 2. abb-tts (Audiobook Builder)
+- **Image**: biblio-audiobook-builder-tts:latest
+- **Port**: 9901 (external)
+- **Volumes**: Database, output, temp
+- **Dependencies**: tts-silero, opds-server
+- **Replicas**: 1
+
+#### 3. tts-silero (TTS Server)
+- **Image**: biblio-tts-server-silero:latest
+- **Port**: 9902 (external)
+- **Volumes**: TTS models cache
+- **Replicas**: 3 (for parallel TTS processing)
+
+#### 4. opds-server
 - **Image**: biblio-opds-server:latest
-- **Internal Port**: 9988
-- **External Path**: /opds
+- **Port**: 9903 (external)
 - **Volumes**: Database, book library
 - **Replicas**: 1
 
-#### 3. biblio-audiobook-builder-tts
-- **Image**: biblio-audiobook-builder-tts:latest
-- **Internal Port**: 8080
-- **External Path**: /audiobook
-- **Dependencies**: biblio-tts-server-silero
-- **Replicas**: 1
-
-#### 4. biblio-tts-server-silero
-- **Image**: biblio-tts-server-silero:latest
-- **Internal Port**: 5555
-- **External Path**: /tts (optional, mainly internal)
-- **Replicas**: 5 (for parallel TTS processing)
-
 ### Networks
 
-- **biblio-frontend**: External-facing network for nginx
-- **biblio-backend**: Internal network for service communication
+- **bibliohub-frontend**: External-facing network (all services with exposed ports)
+- **bibliohub-backend**: Internal network for service-to-service communication
 
 ### Volumes
 
@@ -137,13 +135,15 @@ biblio-hub/
 | Variable | Service | Description | Default |
 |----------|---------|-------------|---------|
 | `OPDS_DATABASE_PATH` | opds-server | Path to SQLite database | /data/opds.db |
-| `OPDS_SERVER_PORT` | opds-server | Server port | 9988 |
-| `ABB_DATABASE_PATH` | audiobook-builder | Path to SQLite database | /data/abb.db |
-| `ABB_SERVER_PORT` | audiobook-builder | Server port | 8080 |
-| `ABB_TTS_SERVER_URL` | audiobook-builder | URL to TTS server | http://biblio-tts-server-silero:5555 |
-| `SILERO_PORT` | tts-server | TTS server port | 5555 |
-| `SILERO_DEVICE` | tts-server | PyTorch device (cpu/cuda) | cpu |
-| `SILERO_SERVED_MODELS` | tts-server | Models to load | v3_en,v5_ru |
+| `OPDS_SERVER_PORT` | opds-server | Server port | 9903 |
+| `ABB_TTS_DATABASE_PATH` | abb-tts | Path to SQLite database | /app/data/audiobook-builder.db |
+| `ABB_TTS_PORT` | abb-tts | Server port | 9901 |
+| `ABB_TTS_SERVER_URL` | abb-tts | URL to TTS server | http://tts-silero:9902 |
+| `ABB_TTS_OPDS_SERVER_URL` | abb-tts | URL to OPDS server | http://opds-server:9903 |
+| `SILERO_PORT` | tts-silero | TTS server port | 9902 |
+| `SILERO_DEVICE` | tts-silero | PyTorch device (cpu/cuda) | cpu |
+| `SILERO_SERVED_MODELS` | tts-silero | Models to load | v3_en,v5_ru,v5_1_ru |
+| `TTS_SILERO_REPLICAS` | tts-silero | Number of TTS replicas | 3 |
 
 ## Deployment
 
@@ -156,33 +156,40 @@ biblio-hub/
 ### Quick Start
 
 ```bash
-# Initialize swarm (if not already)
-docker swarm init
-
-# Deploy the stack
-docker stack deploy -c stack.yaml biblio
+# Start the stack (creates directories and deploys)
+./scripts/start_stack.sh
 
 # Check services
-docker stack services biblio
+docker stack services bibliohub
 
 # View logs
-docker service logs biblio_nginx-gateway
+docker service logs bibliohub_nginx-gateway
+
+# Stop the stack
+./scripts/stop_stack.sh
 ```
 
 ### Building Images
 
 ```bash
+# Rebuild all images using the provided script
+./scripts/rebuild_stack.sh
+```
+
+Or build individually:
+
+```bash
+# Build Audiobook Builder TTS
+cd ../biblio-audiobook-builder-tts
+docker build -t biblio-audiobook-builder-tts:latest .
+
+# Build TTS Server Silero
+cd ../biblio-tts-server-silero
+docker build -t biblio-tts-server-silero:latest -f docker/Dockerfile .
+
 # Build OPDS Server
 cd ../biblio-opds-server
 docker build -t biblio-opds-server:latest -f docker/Dockerfile .
-
-# Build Audiobook Builder
-cd ../biblio-audiobook-builder-tts
-docker build -t biblio-audiobook-builder-tts:latest -f Dockerfile .
-
-# Build TTS Server
-cd ../biblio-tts-server-silero
-docker build -t biblio-tts-server-silero:latest -f docker/Dockerfile .
 ```
 
 ## Progress Tracking

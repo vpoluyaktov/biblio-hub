@@ -30,18 +30,20 @@ services:
   # =============================================================================
   abb-tts:
     image: biblio-audiobook-builder-tts:latest
+    ports:
+      - "9901:9901"
     environment:
-      - ABB_DATABASE_PATH=/data/audiobook-builder.db
-      - ABB_SERVER_HOST=0.0.0.0
-      - ABB_SERVER_PORT=9901
+      - ABB_TTS_HOST=0.0.0.0
+      - ABB_TTS_PORT=9901
       - ABB_TTS_SERVER_URL=http://tts-silero:9902
-      - ABB_OPDS_SERVER_URL=http://opds-server:9903
+      - ABB_TTS_OPDS_SERVER_URL=http://opds-server:9903
       - TZ=UTC
     volumes:
-      - abb-tts-data:/data
-      - abb-tts-output:/output
+      - ./data/abb_tts/db:/db
+      - ./data/abb_tts/temp:/temp
     networks:
       - bibliohub-backend
+      - bibliohub-frontend
     depends_on:
       - tts-silero
       - opds-server
@@ -62,6 +64,8 @@ services:
   # =============================================================================
   tts-silero:
     image: biblio-tts-server-silero:latest
+    ports:
+      - "9902:9902"
     environment:
       - SILERO_HOST=0.0.0.0
       - SILERO_PORT=9902
@@ -70,7 +74,7 @@ services:
       - SILERO_SERVED_MODELS=${SILERO_MODELS:-v3_en,v5_ru,v5_1_ru}
       - SILERO_LOG_LEVEL=INFO
     volumes:
-      - tts-silero-models:/data/silero
+      - ./data/tts_silero/models:/data/silero
     networks:
       - bibliohub-backend
       - bibliohub-frontend
@@ -80,10 +84,10 @@ services:
         condition: any
         delay: 5s
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9902/health"]
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:9902/health"]
       interval: 30s
       timeout: 10s
-      start_period: 120s
+      start_period: 300s
       retries: 5
 
   # =============================================================================
@@ -91,16 +95,18 @@ services:
   # =============================================================================
   opds-server:
     image: biblio-opds-server:latest
+    ports:
+      - "9903:9903"
     environment:
-      - OPDS_DATABASE_PATH=/data/opds.db
       - OPDS_SERVER_HOST=0.0.0.0
       - OPDS_SERVER_PORT=9903
       - TZ=UTC
     volumes:
-      - opds-server-data:/data
-      - opds-server-books:/books:ro
+      - ./data/opds/db:/db
+      - ./data/opds/books:/books:ro
     networks:
       - bibliohub-backend
+      - bibliohub-frontend
     deploy:
       replicas: 1
       restart_policy:
@@ -124,16 +130,6 @@ networks:
     driver: overlay
 
 # =============================================================================
-# Volumes
+# Note: Using bind mounts to ./data directory
+# Run ./scripts/start_stack.sh to create required directories
 # =============================================================================
-volumes:
-  abb-tts-data:
-    driver: local
-  abb-tts-output:
-    driver: local
-  tts-silero-models:
-    driver: local
-  opds-server-data:
-    driver: local
-  opds-server-books:
-    driver: local

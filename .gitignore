@@ -2,6 +2,9 @@
 .env
 *.env.local
 
+# Data directories (created by start_stack.sh)
+data/
+
 # Docker
 docker-compose.override.yml
 
