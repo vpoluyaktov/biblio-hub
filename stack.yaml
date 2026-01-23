@@ -94,6 +94,39 @@ services:
       retries: 5
 
   # =============================================================================
+  # Biblio TTS Server OpenVoice (TTS_OPENVOICE) - MeloTTS engine (Port 9904)
+  # =============================================================================
+  tts-openvoice:
+    image: vpoluyaktov/bibliohub-tts-server-openvoice:dev-latest
+    ports:
+      - "9904:9904"
+    environment:
+      - OPENVOICE_HOST=0.0.0.0
+      - OPENVOICE_PORT=9904
+      - OPENVOICE_DEVICE=cpu
+      - OPENVOICE_CACHE_DIR=/data/openvoice
+      - OPENVOICE_SERVED_LANGUAGES=${OPENVOICE_LANGUAGES:-EN,ES}
+      - OPENVOICE_LOG_LEVEL=INFO
+    volumes:
+      - ./data/tts_openvoice/models:/data/openvoice
+    networks:
+      - bibliohub-backend
+      - bibliohub-frontend
+    deploy:
+      replicas: ${TTS_OPENVOICE_REPLICAS:-1}
+      update_config:
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:9904/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 300s
+      retries: 5
+
+  # =============================================================================
   # Biblio OPDS Server - E-book library catalog (Port 9903)
   # =============================================================================
   opds-server:
