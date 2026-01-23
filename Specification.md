@@ -14,12 +14,14 @@ BiblioHub is the central deployment and orchestration platform for the Biblio ap
 | **Audiobook Builder TTS** | Converts e-books to audiobooks using TTS | 9901 | [Specification.md](https://github.com/vpoluyaktov/biblio-audiobook-builder-tts/blob/main/Specification.md) |
 | **TTS Server (Silero)** | REST API for Silero TTS models | 9902 | [Specification.md](https://github.com/vpoluyaktov/biblio-tts-server-silero/blob/main/Specification.md) |
 | **OPDS Server** | OPDS catalog server for e-book libraries | 9903 | [Specification.md](https://github.com/vpoluyaktov/biblio-opds-server/blob/main/Specification.md) |
+| **TTS Server (OpenVoice)** | REST API for MeloTTS models | 9904 | [Specification.md](https://github.com/vpoluyaktov/biblio-tts-server-openvoice/blob/main/Specification.md) |
 
 ### Component Repositories
 
 - **biblio-hub** (this repo): [github.com/vpoluyaktov/biblio-hub](https://github.com/vpoluyaktov/biblio-hub)
 - **biblio-audiobook-builder-tts**: [github.com/vpoluyaktov/biblio-audiobook-builder-tts](https://github.com/vpoluyaktov/biblio-audiobook-builder-tts)
 - **biblio-tts-server-silero**: [github.com/vpoluyaktov/biblio-tts-server-silero](https://github.com/vpoluyaktov/biblio-tts-server-silero)
+- **biblio-tts-server-openvoice**: [github.com/vpoluyaktov/biblio-tts-server-openvoice](https://github.com/vpoluyaktov/biblio-tts-server-openvoice)
 - **biblio-opds-server**: [github.com/vpoluyaktov/biblio-opds-server](https://github.com/vpoluyaktov/biblio-opds-server)
 
 ## Architecture
@@ -31,13 +33,17 @@ BiblioHub is the central deployment and orchestration platform for the Biblio ap
     Internet        │   ┌─────────────┐   ┌─────────────────────┐             │
         │           │   │   Nginx     │   │ Audiobook Builder   │             │
         │           │   │  (Landing)  │   │     (ABB_TTS)       │             │
-        ▼           │   │   :9900     │   │       :9901         │             │
-    ┌───────┐       │   └─────────────┘   └──────────┬──────────┘             │
-    │ Users │◄─────►│                                │                        │
-    └───────┘       │   ┌─────────────┐              ▼                        │
-                    │   │ OPDS Server │   ┌─────────────────────┐             │
+        │           │   │   :9900     │   │       :9901         │             │
+        ▼           │   └─────────────┘   └──────────┬──────────┘             │
+    ┌───────┐       │                                │                        │
+    │ Users │◄─────►│   ┌─────────────┐              ▼                        │
+    └───────┘       │   │ OPDS Server │   ┌─────────────────────┐             │
                     │   │   :9903     │   │  TTS Server Silero  │             │
                     │   └─────────────┘   │ (N replicas) :9902  │             │
+                    │                     └─────────────────────┘             │
+                    │                     ┌─────────────────────┐             │
+                    │                     │ TTS Server OpenVoice│             │
+                    │                     │ (N replicas) :9904  │             │
                     │                     └─────────────────────┘             │
                     │                                                          │
                     └─────────────────────────────────────────────────────────┘
@@ -73,6 +79,7 @@ biblio-hub/
     ├── abb_tts/db/           # Audiobook Builder database
     ├── abb_tts/temp/         # Temporary files and audiobooks
     ├── tts_silero/models/    # Silero TTS model cache
+    ├── tts_openvoice/models/ # OpenVoice TTS model cache
     └── opds/db/              # OPDS server database
 ```
 
@@ -108,7 +115,9 @@ nano .env
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `SILERO_MODELS` | Comma-separated list of Silero models to load | `v3_en,v5_ru,v5_1_ru` |
-| `TTS_SILERO_REPLICAS` | Number of TTS server replicas | `3` |
+| `TTS_SILERO_REPLICAS` | Number of Silero TTS server replicas | `3` |
+| `OPENVOICE_LANGUAGES` | Comma-separated list of OpenVoice languages | `EN,ES` |
+| `TTS_OPENVOICE_REPLICAS` | Number of OpenVoice TTS server replicas | `1` |
 | `BOOKS_LIBRARY_PATH` | Path to e-book library for OPDS | `/data/books` |
 | `TZ` | Timezone | `UTC` |
 
@@ -170,6 +179,7 @@ docker stack services bibliohub
 # Specific service logs
 docker service logs bibliohub_abb-tts --tail 100 -f
 docker service logs bibliohub_tts-silero --tail 100 -f
+docker service logs bibliohub_tts-openvoice --tail 100 -f
 docker service logs bibliohub_opds-server --tail 100 -f
 ```
 
@@ -199,12 +209,19 @@ echo "TTS_SILERO_REPLICAS=5" >> .env
   - `./data/abb_tts/temp:/temp` - Temp files and audiobooks
 - **Dependencies**: tts-silero, opds-server
 
-### tts-silero (TTS Server)
+### tts-silero (TTS Server Silero)
 - **Image**: `vpoluyaktov/bibliohub-tts-server-silero:dev-latest`
 - **Port**: 9902
 - **Volumes**: `./data/tts_silero/models:/data/silero` - Model cache
 - **Replicas**: Configurable via `TTS_SILERO_REPLICAS`
 - **Models**: Configurable via `SILERO_MODELS`
+
+### tts-openvoice (TTS Server OpenVoice)
+- **Image**: `vpoluyaktov/bibliohub-tts-server-openvoice:dev-latest`
+- **Port**: 9904
+- **Volumes**: `./data/tts_openvoice/models:/data/openvoice` - Model cache
+- **Replicas**: Configurable via `TTS_OPENVOICE_REPLICAS`
+- **Languages**: Configurable via `OPENVOICE_LANGUAGES` (EN, ES, FR, ZH, JP, KR)
 
 ### opds-server (OPDS Catalog)
 - **Image**: `vpoluyaktov/bibliohub-opds-server:dev-latest`
@@ -227,13 +244,13 @@ echo "TTS_SILERO_REPLICAS=5" >> .env
 All core services are deployed and functional:
 - ✅ Landing page with service links
 - ✅ Audiobook Builder TTS with per-provider chunk size configuration
-- ✅ TTS Server with multiple Silero models and scalable replicas
+- ✅ TTS Server Silero with multiple models and scalable replicas
+- ✅ TTS Server OpenVoice with MeloTTS multi-language support
 - ✅ OPDS Server for e-book catalog
 
 **Future Enhancements**:
 - Traefik for automatic SSL/TLS
 - Monitoring (Prometheus/Grafana)
-- Additional TTS providers (OpenVoice)
 - Health check dashboard
 
 ---
