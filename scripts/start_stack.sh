@@ -8,6 +8,14 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 HUB_DIR="$(dirname "$SCRIPT_DIR")"
 STACK_NAME="bibliohub"
 
+# Load environment variables from .env file if it exists
+if [ -f "$HUB_DIR/.env" ]; then
+    echo "Loading environment from .env file..."
+    set -a  # automatically export all variables
+    source "$HUB_DIR/.env"
+    set +a
+fi
+
 echo "=========================================="
 echo "  BiblioHub - Starting Stack"
 echo "=========================================="
