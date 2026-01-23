@@ -29,7 +29,7 @@ services:
   # Biblio Audiobook Builder TTS (ABB_TTS) - E-book to audiobook converter (Port 9901)
   # =============================================================================
   abb-tts:
-    image: biblio-audiobook-builder-tts:latest
+    image: vpoluyaktov/bibliohub-audiobook-builder-tts:dev-latest
     ports:
       - "9901:9901"
     environment:
@@ -63,7 +63,7 @@ services:
   # Biblio TTS Server Silero (TTS_SILERO) - Text-to-Speech engine (Port 9902)
   # =============================================================================
   tts-silero:
-    image: biblio-tts-server-silero:latest
+    image: vpoluyaktov/bibliohub-tts-server-silero:dev-latest
     ports:
       - "9902:9902"
     environment:
@@ -94,7 +94,7 @@ services:
   # Biblio OPDS Server - E-book library catalog (Port 9903)
   # =============================================================================
   opds-server:
-    image: biblio-opds-server:latest
+    image: vpoluyaktov/bibliohub-opds-server:dev-latest
     ports:
       - "9903:9903"
     environment:
