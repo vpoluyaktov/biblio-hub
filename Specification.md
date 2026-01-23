@@ -62,11 +62,21 @@ BiblioHub is the central orchestration and landing page for the Biblio applicati
 - [x] Document environment variables
 - [ ] Add troubleshooting guide
 
-### Phase 4: Future Enhancements
+### Phase 4: ABB-TTS Environment Variable Support
+- [ ] Add environment variable support for external service URLs in ABB-TTS:
+  - `ABB_TTS_SILERO_URL` - Silero TTS server URL (e.g., `http://tts-silero:9902`)
+  - `ABB_TTS_OPENVOICE_URL` - OpenVoice TTS server URL (future)
+  - `ABB_TTS_OPDS_URL` - OPDS server URL (e.g., `http://opds-server:9903`)
+  - `ABB_TTS_AUDIOBOOKSHELF_URL` - Audiobookshelf server URL
+- [ ] Environment variables should override database-stored provider URLs on startup
+- [ ] This enables proper service discovery in Docker Swarm without manual UI configuration
+
+### Phase 5: Future Enhancements
 - [ ] Add Traefik for automatic SSL/TLS
 - [ ] Add monitoring (Prometheus/Grafana)
 - [ ] Add centralized logging
 - [ ] Add health check dashboard
+- [ ] Add biblio-tts-server-openvoice to stack
 
 ## Project Structure
 
