@@ -8,12 +8,19 @@ BiblioHub is the central deployment and orchestration platform for the Biblio ap
 
 ## Biblio Application Suite
 
-| Service | Description | Port | Repository |
-|---------|-------------|------|------------|
-| **Landing Page** | Central hub with links to all services | 9900 | This repository |
-| **Audiobook Builder TTS** | Converts e-books to audiobooks using TTS | 9901 | [biblio-audiobook-builder-tts](https://github.com/vpoluyaktov/biblio-audiobook-builder-tts) |
-| **TTS Server (Silero)** | REST API for Silero TTS models | 9902 | [biblio-tts-server-silero](https://github.com/vpoluyaktov/biblio-tts-server-silero) |
-| **OPDS Server** | OPDS catalog server for e-book libraries | 9903 | [biblio-opds-server](https://github.com/vpoluyaktov/biblio-opds-server) |
+| Service | Description | Port | Specification |
+|---------|-------------|------|---------------|
+| **Landing Page** | Central hub with links to all services | 9900 | This document |
+| **Audiobook Builder TTS** | Converts e-books to audiobooks using TTS | 9901 | [Specification.md](https://github.com/vpoluyaktov/biblio-audiobook-builder-tts/blob/main/Specification.md) |
+| **TTS Server (Silero)** | REST API for Silero TTS models | 9902 | [Specification.md](https://github.com/vpoluyaktov/biblio-tts-server-silero/blob/main/Specification.md) |
+| **OPDS Server** | OPDS catalog server for e-book libraries | 9903 | [Specification.md](https://github.com/vpoluyaktov/biblio-opds-server/blob/main/Specification.md) |
+
+### Component Repositories
+
+- **biblio-hub** (this repo): [github.com/vpoluyaktov/biblio-hub](https://github.com/vpoluyaktov/biblio-hub)
+- **biblio-audiobook-builder-tts**: [github.com/vpoluyaktov/biblio-audiobook-builder-tts](https://github.com/vpoluyaktov/biblio-audiobook-builder-tts)
+- **biblio-tts-server-silero**: [github.com/vpoluyaktov/biblio-tts-server-silero](https://github.com/vpoluyaktov/biblio-tts-server-silero)
+- **biblio-opds-server**: [github.com/vpoluyaktov/biblio-opds-server](https://github.com/vpoluyaktov/biblio-opds-server)
 
 ## Architecture
 
