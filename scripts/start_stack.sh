@@ -32,11 +32,11 @@ echo "  - data/tts_silero/models (TTS models cache)"
 echo "  - data/opds/db           (database)"
 echo "  - data/opds/books        (e-book library)"
 
-# Deploy the stack
+# Deploy the stack (--resolve-image always forces pulling latest images)
 echo ""
 echo "Deploying stack '$STACK_NAME'..."
 cd "$HUB_DIR"
-docker stack deploy -c stack.yaml "$STACK_NAME"
+docker stack deploy -c stack.yaml --resolve-image always "$STACK_NAME"
 
 echo ""
 echo "Waiting for services to start..."

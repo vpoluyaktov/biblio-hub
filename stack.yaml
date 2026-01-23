@@ -5,17 +5,16 @@ services:
   # NGINX Gateway - Landing page and reverse proxy (Port 9900)
   # =============================================================================
   nginx-gateway:
-    image: nginx:alpine
+    image: vpoluyaktov/bibliohub-gateway:dev-latest
     ports:
       - "9900:80"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/html:/usr/share/nginx/html:ro
     networks:
       - bibliohub-frontend
       - bibliohub-backend
     deploy:
       replicas: 1
+      update_config:
+        order: stop-first
       restart_policy:
         condition: any
         delay: 5s
@@ -49,6 +48,8 @@ services:
       - opds-server
     deploy:
       replicas: 1
+      update_config:
+        order: stop-first
       restart_policy:
         condition: any
         delay: 5s
@@ -80,6 +81,8 @@ services:
       - bibliohub-frontend
     deploy:
       replicas: ${TTS_SILERO_REPLICAS:-3}
+      update_config:
+        order: stop-first
       restart_policy:
         condition: any
         delay: 5s
@@ -109,6 +112,8 @@ services:
       - bibliohub-frontend
     deploy:
       replicas: 1
+      update_config:
+        order: stop-first
       restart_policy:
         condition: any
         delay: 5s
