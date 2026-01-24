@@ -37,10 +37,12 @@ services:
       - ABB_TTS_SERVER_URL=http://tts-silero:9902
       - ABB_TTS_OPDS_SERVER_URL=http://opds-server:9903
       - ABB_TTS_TEMP_DIR=/data
+      - ABB_TTS_LOG_FILE=/logs/abb_tts.log
       - TZ=UTC
     volumes:
       - ./data/abb_tts/db:/db
       - ./data/abb_tts/temp:/data
+      - ./data/abb_tts/logs:/logs
     networks:
       - bibliohub-backend
       - bibliohub-frontend

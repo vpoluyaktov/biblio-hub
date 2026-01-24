@@ -78,6 +78,7 @@ biblio-hub/
 └── data/                     # Persistent data (auto-created)
     ├── abb_tts/db/           # Audiobook Builder database
     ├── abb_tts/temp/         # Working directory (ebook downloads, chapter files, audiobooks)
+    ├── abb_tts/logs/         # Log files
     ├── tts_silero/models/    # Silero TTS model cache
     ├── tts_openvoice/models/ # OpenVoice TTS model cache
     └── opds/db/              # OPDS server database
@@ -207,8 +208,10 @@ echo "TTS_SILERO_REPLICAS=5" >> .env
 - **Volumes**: 
   - `./data/abb_tts/db:/db` - SQLite database
   - `./data/abb_tts/temp:/data` - Working directory (ebook downloads, chapter files, audiobooks)
+  - `./data/abb_tts/logs:/logs` - Log files
 - **Environment**:
   - `ABB_TTS_TEMP_DIR=/data` - Working directory for all files
+  - `ABB_TTS_LOG_FILE=/logs/abb_tts.log` - Log file path
 - **Dependencies**: tts-silero, opds-server
 
 ### tts-silero (TTS Server Silero)
