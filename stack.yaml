@@ -36,8 +36,7 @@ services:
       - ABB_TTS_PORT=9901
       - ABB_TTS_SERVER_URL=http://tts-silero:9902
       - ABB_TTS_OPDS_SERVER_URL=http://opds-server:9903
-      - ABB_TTS_OUTPUT_DIR=/data/output
-      - ABB_TTS_TEMP_DIR=/data/temp
+      - ABB_TTS_TEMP_DIR=/data
       - TZ=UTC
     volumes:
       - ./data/abb_tts/db:/db
