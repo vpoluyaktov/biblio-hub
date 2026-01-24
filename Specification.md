@@ -77,7 +77,8 @@ biblio-hub/
 │       └── style.css         # Landing page styles
 └── data/                     # Persistent data (auto-created)
     ├── abb_tts/db/           # Audiobook Builder database
-    ├── abb_tts/temp/         # Temporary files and audiobooks
+    ├── abb_tts/data/temp/    # Temporary processing files
+    ├── abb_tts/data/output/  # Generated audiobooks
     ├── tts_silero/models/    # Silero TTS model cache
     ├── tts_openvoice/models/ # OpenVoice TTS model cache
     └── opds/db/              # OPDS server database
@@ -206,7 +207,10 @@ echo "TTS_SILERO_REPLICAS=5" >> .env
 - **Port**: 9901
 - **Volumes**: 
   - `./data/abb_tts/db:/db` - SQLite database
-  - `./data/abb_tts/temp:/temp` - Temp files and audiobooks
+  - `./data/abb_tts/data:/data` - Temp files and audiobooks (output + temp)
+- **Environment**:
+  - `ABB_TTS_OUTPUT_DIR=/data/output` - Output directory for audiobooks
+  - `ABB_TTS_TEMP_DIR=/data/temp` - Temp directory for processing
 - **Dependencies**: tts-silero, opds-server
 
 ### tts-silero (TTS Server Silero)
@@ -255,4 +259,4 @@ All core services are deployed and functional:
 
 ---
 
-*Last updated: 2026-01-23*
+*Last updated: 2026-01-24*
