@@ -40,7 +40,7 @@ services:
       - TZ=UTC
     volumes:
       - ./data/abb_tts/db:/db
-      - ./data/abb_tts/data:/data
+      - ./data/abb_tts/temp:/data
     networks:
       - bibliohub-backend
       - bibliohub-frontend
