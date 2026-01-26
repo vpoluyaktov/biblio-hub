@@ -1,6 +1,9 @@
-# Environment files
+# Environment variables
 .env
 *.env.local
+
+# Test samples
+pitch_test_samples/
 
 # Data directories (created by start_stack.sh)
 data/
