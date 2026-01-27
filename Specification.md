@@ -260,4 +260,194 @@ All core services are deployed and functional:
 
 ---
 
-*Last updated: 2026-01-24*
+## In Progress: Path-Based Routing (feature/path-based-routing)
+
+### Problem Statement
+
+Currently, each service is exposed on its own port (9900-9904), which is not suitable for internet exposure:
+- Multiple ports need to be opened in firewall
+- No centralized authentication/authorization
+- Difficult to manage SSL/TLS certificates for multiple ports
+- Poor user experience with different port numbers
+
+### Solution: Single-Port Gateway with Path-Based Routing
+
+Implement a reverse proxy architecture where:
+- **Single entry point**: All services accessible through port 9900
+- **Path-based routing**: Services accessed via URL paths (e.g., `/abb-tts/`, `/opds/`, `/tts-silero/`)
+- **Internal communication**: Services communicate internally using Docker network (no external ports)
+- **Future authentication**: Gateway will handle authentication/authorization (to be implemented later)
+
+### URL Structure
+
+| Service | Current URL | New URL |
+|---------|-------------|---------|
+| Landing Page | `http://host:9900/` | `http://host:9900/` |
+| Audiobook Builder | `http://host:9901/` | `http://host:9900/abb-tts/` |
+| OPDS Server | `http://host:9903/` | `http://host:9900/opds/` |
+| TTS Silero | `http://host:9902/` | `http://host:9900/tts-silero/` (internal only) |
+| TTS OpenVoice | `http://host:9904/` | `http://host:9900/tts-openvoice/` (internal only) |
+
+### Architecture Changes
+
+```
+                    ┌─────────────────────────────────────────────────────────┐
+                    │                    Docker Swarm                          │
+                    │                                                          │
+    Internet        │   ┌─────────────────────────────────────┐               │
+        │           │   │   Nginx Gateway (:9900)             │               │
+        │           │   │   - Landing page (/)                │               │
+        │           │   │   - Proxy /abb-tts/* → abb-tts:80  │               │
+        │           │   │   - Proxy /opds/* → opds-server:80 │               │
+        ▼           │   │   - Proxy /tts-silero/* (internal) │               │
+    ┌───────┐       │   │   - Proxy /tts-openvoice/* (int)   │               │
+    │ Users │◄─────►│   └─────────────────────────────────────┘               │
+    └───────┘       │                      │                                  │
+                    │          ┌───────────┼───────────┐                      │
+                    │          ▼           ▼           ▼                      │
+                    │   ┌──────────┐ ┌──────────┐ ┌──────────┐               │
+                    │   │ ABB-TTS  │ │   OPDS   │ │ TTS Svrs │               │
+                    │   │  :80     │ │  :80     │ │  :80     │               │
+                    │   │(internal)│ │(internal)│ │(internal)│               │
+                    │   └──────────┘ └──────────┘ └──────────┘               │
+                    │                                                          │
+                    └─────────────────────────────────────────────────────────┘
+```
+
+### Implementation Steps
+
+#### Phase 1: Nginx Gateway Configuration ✅
+- [x] Create feature branch `feature/path-based-routing`
+- [ ] Update `nginx/nginx.conf` with path-based routing rules
+- [ ] Configure proxy headers (X-Forwarded-For, X-Real-IP, etc.)
+- [ ] Add location blocks for each service
+- [ ] Update landing page links to use new paths
+
+#### Phase 2: Audiobook Builder TTS (Go)
+- [x] Create feature branch `feature/path-based-routing`
+- [ ] Add `BASE_PATH` environment variable (default: `/`)
+- [ ] Update HTTP router to use base path prefix
+- [ ] Fix static asset paths (CSS, JS) to be relative or use base path
+- [ ] Update WebSocket connection URLs in frontend
+- [ ] Update API endpoint URLs in frontend
+- [ ] Test with `BASE_PATH=/abb-tts`
+
+#### Phase 3: OPDS Server (Go)
+- [x] Create feature branch `feature/path-based-routing`
+- [ ] Add `BASE_PATH` environment variable (default: `/`)
+- [ ] Update chi router to use base path prefix
+- [ ] Fix static asset paths (CSS, JS) to be relative or use base path
+- [ ] Update OPDS feed URLs to include base path
+- [ ] Update API endpoint URLs in frontend
+- [ ] Test with `BASE_PATH=/opds`
+
+#### Phase 4: TTS Server Silero (Python/FastAPI)
+- [x] Create feature branch `feature/path-based-routing`
+- [ ] Add `BASE_PATH` environment variable (default: `/`)
+- [ ] Configure FastAPI `root_path` parameter
+- [ ] Update API endpoint paths if needed
+- [ ] Test with `BASE_PATH=/tts-silero`
+
+#### Phase 5: TTS Server OpenVoice (Python/FastAPI)
+- [x] Create feature branch `feature/path-based-routing`
+- [ ] Add `BASE_PATH` environment variable (default: `/`)
+- [ ] Configure FastAPI `root_path` parameter
+- [ ] Update static file serving paths
+- [ ] Update test UI URLs
+- [ ] Test with `BASE_PATH=/tts-openvoice`
+
+#### Phase 6: Docker Stack Configuration
+- [ ] Update `stack.yaml`:
+  - Remove external port mappings for services (except nginx:9900)
+  - Add `BASE_PATH` environment variables
+  - Services listen on internal port 80
+- [ ] Update `.env.example` with new configuration
+- [ ] Update deployment scripts if needed
+
+#### Phase 7: Documentation & Testing
+- [ ] Update README.md with new URL structure
+- [ ] Update service-specific Specification.md files
+- [ ] Test all services with path-based routing
+- [ ] Test internal service-to-service communication
+- [ ] Verify WebSocket connections work through proxy
+- [ ] Test file downloads through proxy
+
+### Technical Considerations
+
+**Nginx Proxy Configuration:**
+```nginx
+location /abb-tts/ {
+    proxy_pass http://abb-tts:80/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    
+    # WebSocket support
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+}
+```
+
+**Go Router (chi) with Base Path:**
+```go
+basePath := os.Getenv("BASE_PATH")
+if basePath == "" {
+    basePath = "/"
+}
+r := chi.NewRouter()
+r.Route(basePath, func(r chi.Router) {
+    r.Get("/", handler)
+    r.Get("/api/jobs", handler)
+})
+```
+
+**FastAPI with Base Path:**
+```python
+base_path = os.getenv("BASE_PATH", "")
+app = FastAPI(root_path=base_path)
+```
+
+**Frontend Asset Paths:**
+- Use relative paths: `./style.css` instead of `/style.css`
+- Or use base path variable: `{{.BasePath}}/static/style.css`
+
+### Environment Variables
+
+| Service | Variable | Default | Example |
+|---------|----------|---------|---------|
+| ABB-TTS | `BASE_PATH` | `/` | `/abb-tts` |
+| OPDS Server | `BASE_PATH` | `/` | `/opds` |
+| TTS Silero | `BASE_PATH` | `/` | `/tts-silero` |
+| TTS OpenVoice | `BASE_PATH` | `/` | `/tts-openvoice` |
+
+### Testing Checklist
+
+- [ ] Landing page loads at `http://host:9900/`
+- [ ] ABB-TTS UI loads at `http://host:9900/abb-tts/`
+- [ ] ABB-TTS WebSocket connects successfully
+- [ ] ABB-TTS can upload and process books
+- [ ] ABB-TTS can download completed audiobooks
+- [ ] OPDS Server UI loads at `http://host:9900/opds/`
+- [ ] OPDS feeds work at `http://host:9900/opds/opds/{lib_id}`
+- [ ] OPDS Server can download books
+- [ ] TTS Silero API accessible internally
+- [ ] TTS OpenVoice API accessible internally
+- [ ] ABB-TTS can communicate with TTS servers
+- [ ] ABB-TTS can communicate with OPDS server
+- [ ] All static assets (CSS, JS, images) load correctly
+- [ ] No mixed content warnings
+- [ ] No CORS errors
+
+### Migration Path
+
+1. Deploy new version with path-based routing
+2. Keep old port-based access working temporarily (for testing)
+3. Update documentation and notify users
+4. After validation period, remove external port mappings
+5. Only nginx gateway exposed to internet
+
+---
+
+*Last updated: 2026-01-27*
