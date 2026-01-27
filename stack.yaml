@@ -142,7 +142,7 @@ services:
       - TZ=UTC
     volumes:
       - ./data/opds/db:/db
-      - /data/EBooks/FB2:/books/FB2:ro
+      - ${EBOOKS_PATH}:/books:ro
     networks:
       - bibliohub-backend
       - bibliohub-frontend
