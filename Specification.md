@@ -318,53 +318,56 @@ Implement a reverse proxy architecture where:
 
 #### Phase 1: Nginx Gateway Configuration ✅
 - [x] Create feature branch `feature/path-based-routing`
-- [ ] Update `nginx/nginx.conf` with path-based routing rules
-- [ ] Configure proxy headers (X-Forwarded-For, X-Real-IP, etc.)
-- [ ] Add location blocks for each service
-- [ ] Update landing page links to use new paths
+- [x] Update `nginx/nginx.conf` with path-based routing rules
+- [x] Configure proxy headers (X-Forwarded-For, X-Real-IP, etc.)
+- [x] Add location blocks for each service
+- [x] Update landing page links to use new paths
+- [x] Add WebSocket support with connection upgrade mapping
+- [x] Add Keycloak proxy configuration (commented, ready for future use)
 
-#### Phase 2: Audiobook Builder TTS (Go)
+#### Phase 2: Audiobook Builder TTS (Go) ✅
 - [x] Create feature branch `feature/path-based-routing`
-- [ ] Add `BASE_PATH` environment variable (default: `/`)
-- [ ] Update HTTP router to use base path prefix
-- [ ] Fix static asset paths (CSS, JS) to be relative or use base path
-- [ ] Update WebSocket connection URLs in frontend
-- [ ] Update API endpoint URLs in frontend
-- [ ] Test with `BASE_PATH=/abb-tts`
+- [x] Add `BASE_PATH` environment variable (default: `/`)
+- [x] Update HTTP router to use base path prefix
+- [x] Fix static asset paths (CSS, JS) to be relative or use base path
+- [x] Update WebSocket connection URLs in frontend
+- [x] Update API endpoint URLs in frontend
+- [x] Committed and pushed to feature branch
 
-#### Phase 3: OPDS Server (Go)
+#### Phase 3: OPDS Server (Go) ✅
 - [x] Create feature branch `feature/path-based-routing`
-- [ ] Add `BASE_PATH` environment variable (default: `/`)
-- [ ] Update chi router to use base path prefix
-- [ ] Fix static asset paths (CSS, JS) to be relative or use base path
-- [ ] Update OPDS feed URLs to include base path
-- [ ] Update API endpoint URLs in frontend
-- [ ] Test with `BASE_PATH=/opds`
+- [x] Add `BASE_PATH` environment variable (default: `/`)
+- [x] Update chi router to use base path prefix
+- [x] Fix static asset paths (CSS, JS) to be relative or use base path
+- [x] Update OPDS feed URLs to include base path
+- [x] Update API endpoint URLs in frontend
+- [x] Committed and pushed to feature branch
 
-#### Phase 4: TTS Server Silero (Python/FastAPI)
+#### Phase 4: TTS Server Silero (Python/FastAPI) ✅
 - [x] Create feature branch `feature/path-based-routing`
-- [ ] Add `BASE_PATH` environment variable (default: `/`)
-- [ ] Configure FastAPI `root_path` parameter
-- [ ] Update API endpoint paths if needed
-- [ ] Test with `BASE_PATH=/tts-silero`
+- [x] Add `BASE_PATH` environment variable (default: `/`)
+- [x] Configure FastAPI `root_path` parameter
+- [x] Mount static files properly
+- [x] Committed and pushed to feature branch
 
-#### Phase 5: TTS Server OpenVoice (Python/FastAPI)
+#### Phase 5: TTS Server OpenVoice (Python/FastAPI) ✅
 - [x] Create feature branch `feature/path-based-routing`
-- [ ] Add `BASE_PATH` environment variable (default: `/`)
-- [ ] Configure FastAPI `root_path` parameter
-- [ ] Update static file serving paths
-- [ ] Update test UI URLs
-- [ ] Test with `BASE_PATH=/tts-openvoice`
+- [x] Add `BASE_PATH` environment variable (default: `/`)
+- [x] Configure FastAPI `root_path` parameter
+- [x] Static file serving already configured
+- [x] Committed and pushed to feature branch
 
-#### Phase 6: Docker Stack Configuration
-- [ ] Update `stack.yaml`:
-  - Remove external port mappings for services (except nginx:9900)
-  - Add `BASE_PATH` environment variables
-  - Services listen on internal port 80
-- [ ] Update `.env.example` with new configuration
-- [ ] Update deployment scripts if needed
+#### Phase 6: Docker Stack Configuration ✅
+- [x] Update `stack.yaml`:
+  - [x] Remove external port mappings for services (except nginx:9900)
+  - [x] Add `BASE_PATH` environment variables for all services
+  - [x] Services listen on internal port 80
+  - [x] Update health check URLs to include base paths
+  - [x] Update internal service URLs (TTS servers, OPDS)
+- [x] Remove services from frontend network (only backend)
+- [x] Committed and pushed to feature branch
 
-#### Phase 7: Documentation & Testing
+#### Phase 7: Documentation & Testing ⏳
 - [ ] Update README.md with new URL structure
 - [ ] Update service-specific Specification.md files
 - [ ] Test all services with path-based routing
