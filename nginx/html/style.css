@@ -166,6 +166,20 @@ section h2 {
     color: var(--error);
 }
 
+/* Admin card styling */
+.admin-card {
+    border-color: #8b5cf6;
+}
+
+.admin-card:hover {
+    border-color: #a78bfa;
+    box-shadow: 0 8px 30px rgba(139, 92, 246, 0.2);
+}
+
+.admin-card .service-icon {
+    filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.3));
+}
+
 /* Quick Links */
 .links-grid {
     display: grid;
