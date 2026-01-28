@@ -377,100 +377,157 @@ Implement a reverse proxy architecture where:
 
 ---
 
-## ✅ Fixed: Static Asset Loading (Completed 2026-01-27)
+## ✅ Fixed: Path-Based Routing Implementation (Completed 2026-01-28)
 
 ### Problem Description
 
-After implementing path-based routing, static assets (CSS, JS, images) were not loading correctly for services behind the nginx reverse proxy. Browser showed 404 errors or HTML content instead of CSS/JS files.
+After implementing path-based routing, static assets (CSS, JS) and API routes were not working correctly. The initial approach had services register routes without the base path prefix, expecting nginx to strip it. However, this created conflicts when multiple services had the same route paths (e.g., `/assets/`, `/api/*`).
 
-### Root Cause Analysis
+### Architecture Decision: Base Path Preservation
 
-**Key Discovery:** Nginx strips the base path before forwarding requests to backend services.
+**New Approach:** Services register routes **WITH** the base path prefix, and nginx **preserves** the full path when forwarding.
 
 When nginx configuration has:
 ```nginx
 location /abb-tts/ {
-    proxy_pass http://abb-tts:80/;  # trailing slash = strip prefix
+    proxy_pass http://abb-tts:80;  # NO trailing slash = preserve prefix
 }
 ```
 
 Request flow:
 1. Browser → Nginx: `GET /abb-tts/assets/style.css`
-2. Nginx → Backend: `GET /assets/style.css` (base path stripped!)
-3. Backend must serve at `/assets/style.css`, NOT `/abb-tts/assets/style.css`
+2. Nginx → Backend: `GET /abb-tts/assets/style.css` (base path preserved!)
+3. Backend serves at `/abb-tts/assets/style.css`
 
-**Implication:** Services should register routes WITHOUT the base path prefix, since nginx already strips it before forwarding.
+**Rationale:** This approach allows multiple services to coexist with the same route patterns (e.g., all services can have `/assets/`, `/api/*`) without conflicts, since each service's routes are namespaced by its base path.
 
 ### Solution Implemented
 
-#### ✅ ABB-TTS Server (Go/http.ServeMux)
-**Fixed Issues:**
-- ✅ Routes registered without base path prefix (e.g., `/assets/`, `/api/jobs`)
-- ✅ Static assets served correctly using `fs.Sub(assetsFS, "assets")`
-- ✅ Environment variable `ABB_TTS_BASE_PATH` now properly read and applied to config
-- ✅ Template variable `{{.BasePath}}` correctly injected for URL generation
-- ✅ HTML template renders full paths: `/abb-tts/assets/style.css`
+#### ✅ ABB-TTS Server (Go/http.ServeMux) - Completed 2026-01-28
 
-**Fix Applied:**
-Added missing environment variable override in `main.go`:
-```go
-if envBasePath := os.Getenv("ABB_TTS_BASE_PATH"); envBasePath != "" {
-    cfg.BasePath = envBasePath
-}
-```
+**Changes Made:**
 
-#### ✅ OPDS Server (Go/chi router)
-**Fixed Issues:**
-- ✅ Routes correctly registered using `chi.Route()` (nginx strips base path)
-- ✅ Static file handler properly strips `/static` prefix after nginx stripping
-- ✅ Template already injects `BasePath` variable correctly
-- ✅ Added `window.APP_BASE_PATH` JavaScript global for dynamic URL construction
-- ✅ Fixed OPDS URL generation in JavaScript to include base path
+1. **Backend Route Registration (server.go):**
+   - Routes now registered **WITH** base path prefix
+   - Example: `/abb-tts/`, `/abb-tts/assets/`, `/abb-tts/api/providers`, etc.
+   ```go
+   basePath := s.cfg.BasePath
+   mux.Handle(basePath+"/assets/", http.StripPrefix(basePath+"/assets", http.FileServer(http.FS(assetsSubFS))))
+   mux.HandleFunc(basePath+"/api/providers", s.handleProviders)
+   mux.HandleFunc(basePath+"/health", s.handleHealth)
+   ```
 
-**Fix Applied:**
-1. Added script tag in template to expose base path to JavaScript:
-```html
-<script>
-  window.APP_BASE_PATH = "{{.BasePath}}";
-</script>
-```
+2. **Frontend JavaScript (app.js):**
+   - Added `apiUrl()` helper function to prefix all API calls
+   - Updated all `fetch()` calls and WebSocket connections
+   ```javascript
+   function apiUrl(path) {
+       const basePath = window.APP_BASE_PATH || '';
+       return basePath + path;
+   }
+   // Usage: fetch(apiUrl('/api/providers'))
+   ```
 
-2. Updated JavaScript OPDS URL construction:
-```javascript
-${window.location.origin}${window.APP_BASE_PATH || ''}/opds/${lib.id}
-```
+3. **HTML Template (index.html):**
+   - Injected `window.APP_BASE_PATH` for JavaScript access
+   ```html
+   <script>
+       window.APP_BASE_PATH = "{{.BasePath}}";
+   </script>
+   ```
+
+4. **Health Check (stack.yaml):**
+   - Updated Docker health check to use base path endpoint
+   ```yaml
+   healthcheck:
+     test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/abb-tts/health"]
+   ```
+
+5. **Nginx Configuration (nginx.conf):**
+   - Removed trailing slash from `proxy_pass` to preserve base path
+   ```nginx
+   location /abb-tts/ {
+       proxy_pass http://abb-tts:80;  # No trailing slash
+   }
+   ```
+
+**Verification:**
+- ✅ HTML page loads at `http://localhost:9900/abb-tts/`
+- ✅ Static assets load with correct Content-Type
+- ✅ API routes work: `/abb-tts/api/providers`, `/abb-tts/api/jobs`, etc.
+- ✅ WebSocket connections work at `/abb-tts/api/ws`
+- ✅ Health check passes
+
+#### 🔄 Other Services - TO BE UPDATED
+
+**The following services must be updated using the same approach:**
+
+1. **OPDS Server** (`biblio-opds-server`)
+   - Update route registration to include `/opds` prefix
+   - Add JavaScript `apiUrl()` helper
+   - Update nginx config to preserve prefix
+   - Update health check endpoint
+
+2. **TTS Silero Server** (`biblio-tts-server-silero`)
+   - Update route registration to include `/tts-silero` prefix
+   - Add JavaScript `apiUrl()` helper (if applicable)
+   - Update nginx config to preserve prefix
+   - Update health check endpoint
+
+3. **TTS OpenVoice Server** (`biblio-tts-server-openvoice`)
+   - Update route registration to include `/tts-openvoice` prefix
+   - Add JavaScript `apiUrl()` helper (if applicable)
+   - Update nginx config to preserve prefix
+   - Update health check endpoint
 
 ### Key Principles
 
 **For Backend Services:**
-1. Register all routes WITHOUT base path prefix
-2. Nginx strips the prefix, so backend sees clean paths
-3. Example: Register `/assets/`, nginx forwards `/assets/style.css` → backend serves it
+1. Register all routes **WITH** the base path prefix
+2. Nginx preserves the full path when forwarding
+3. Example: Register `/abb-tts/assets/`, nginx forwards `/abb-tts/assets/style.css` → backend serves it
+4. Each service is isolated in its own namespace
 
 **For HTML Templates:**
 1. Inject `BasePath` variable from config (e.g., `/abb-tts`)
 2. Use in templates: `<link href="{{.BasePath}}/assets/style.css">`
 3. Browser requests full path: `/abb-tts/assets/style.css`
-4. Nginx strips prefix and forwards: `/assets/style.css`
-5. Backend serves from registered route: `/assets/`
+4. Nginx preserves prefix and forwards: `/abb-tts/assets/style.css`
+5. Backend serves from registered route: `/abb-tts/assets/`
 
-**Critical:** BasePath is ONLY for URL generation in HTML/JavaScript, NOT for route registration.
+**For JavaScript/Frontend:**
+1. Inject `window.APP_BASE_PATH` in HTML template
+2. Create helper function: `apiUrl(path)` that prefixes all API calls
+3. Update all `fetch()`, `XMLHttpRequest`, and `WebSocket` calls to use helper
+4. Example: `fetch(apiUrl('/api/providers'))` → `/abb-tts/api/providers`
+
+**For Nginx Configuration:**
+1. Remove trailing slash from `proxy_pass` URL
+2. Example: `proxy_pass http://service:80;` (not `http://service:80/`)
+3. This preserves the full request path including the base path prefix
+
+**For Health Checks:**
+1. Update health check endpoint to include base path
+2. Example: `/abb-tts/health` instead of `/health`
+
+**Critical:** BasePath is used for BOTH route registration AND URL generation. Services must be self-contained and work on their designated sub-path.
 
 ### Technical Details
 
-**Nginx Proxy Configuration:**
+**Nginx Proxy Configuration (Updated):**
 ```nginx
 location /abb-tts/ {
-    proxy_pass http://abb-tts:80/;
+    proxy_pass http://abb-tts:80;  # NO trailing slash - preserves base path
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Forwarded-Prefix /abb-tts;
     
     # WebSocket support
     proxy_http_version 1.1;
     proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection "upgrade";
+    proxy_set_header Connection $connection_upgrade;
 }
 ```
 
