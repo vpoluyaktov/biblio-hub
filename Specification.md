@@ -1199,9 +1199,88 @@ func (k *KeycloakAuthProvider) Authenticate(username, password string) (*User, e
 
 #### Phase 5: Frontend Updates ⏳
 - [ ] Add login/logout buttons to landing page
+- [ ] Add admin-only "User Management" tile linking to Keycloak Admin Console
 - [ ] Update service UIs with user info
 - [ ] Handle authentication errors gracefully
 - [ ] Test user experience
+
+### Landing Page: Admin-Only User Management Tile
+
+Add a "User Management" tile to the BiblioHub landing page that links to Keycloak's Admin Console, visible only to users with admin role.
+
+**Tile Configuration**:
+```html
+<!-- User Management tile - visible to admins only -->
+<div class="tile admin-only" id="user-management-tile" style="display: none;">
+    <a href="/auth/admin/biblio/console/" target="_blank">
+        <div class="tile-icon">👥</div>
+        <h3>User Management</h3>
+        <p>Manage users, groups, and roles</p>
+    </a>
+</div>
+```
+
+**JavaScript Role Check**:
+```javascript
+// Check user role and show admin tile if authorized
+async function checkUserRole() {
+    try {
+        const response = await fetch('/auth/realms/biblio/protocol/openid-connect/userinfo');
+        if (response.ok) {
+            const userInfo = await response.json();
+            const roles = userInfo.realm_access?.roles || [];
+            
+            if (roles.includes('admin') || roles.includes('realm-admin')) {
+                document.getElementById('user-management-tile').style.display = 'block';
+            }
+        }
+    } catch (error) {
+        console.log('User not authenticated or error fetching user info');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', checkUserRole);
+```
+
+**Keycloak Admin Console URLs**:
+| URL | Description |
+|-----|-------------|
+| `/auth/admin/` | Full Admin Console (all realms) |
+| `/auth/admin/biblio/console/` | Biblio realm console only |
+| `/auth/admin/biblio/console/#/biblio/users` | Direct link to user management |
+
+**Security Layers** (Defense in Depth):
+
+1. **Frontend (UX)**: Tile hidden for non-admins via JavaScript
+2. **Keycloak (Authorization)**: Admin Console requires `realm-admin` or `admin` role
+3. **Optional Nginx (Gateway)**: Can block `/auth/admin/*` for non-admin users
+
+```nginx
+# Optional: Block admin console at gateway level
+location /auth/admin/ {
+    # Check for admin role in session/token
+    auth_request /auth/check-admin;
+    auth_request_set $auth_status $upstream_status;
+    
+    proxy_pass http://keycloak:8080;
+    # ... proxy headers
+}
+```
+
+**Role Mapping**:
+| Keycloak Role | Access Level |
+|---------------|--------------|
+| `realm-admin` | Full Keycloak Admin Console access |
+| `admin` | BiblioHub admin (can be mapped to realm-admin) |
+| `user` | Regular user (no admin console access) |
+
+**Benefits**:
+- ✅ Centralized user management via Keycloak UI
+- ✅ No custom admin UI development needed
+- ✅ Full-featured user/group/role management
+- ✅ Audit logging built into Keycloak
+- ✅ Self-service password reset for users
+- ✅ MFA configuration per user
 
 #### Phase 6: Documentation & Testing ⏳
 - [ ] Write setup documentation
