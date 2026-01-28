@@ -458,27 +458,67 @@ Request flow:
 - ✅ WebSocket connections work at `/abb-tts/api/ws`
 - ✅ Health check passes
 
-#### 🔄 Other Services - TO BE UPDATED
+#### ✅ OPDS Server (Go/chi) - Completed 2026-01-28
 
-**The following services must be updated using the same approach:**
+**Changes Made:**
 
-1. **OPDS Server** (`biblio-opds-server`)
-   - Update route registration to include `/opds` prefix
-   - Add JavaScript `apiUrl()` helper
-   - Update nginx config to preserve prefix
-   - Update health check endpoint
+1. **Backend Route Registration:**
+   - Routes already registered with base path support via chi router
+   - BasePath configured in `config.go` and used in `server.go`
+   - Example: Routes mounted under `basePath` prefix
 
-2. **TTS Silero Server** (`biblio-tts-server-silero`)
-   - Update route registration to include `/tts-silero` prefix
-   - Add JavaScript `apiUrl()` helper (if applicable)
-   - Update nginx config to preserve prefix
-   - Update health check endpoint
+2. **Frontend JavaScript (app.js):**
+   - Added `apiUrl()` helper function to prefix all API calls
+   - Updated all `fetch()` calls to use `apiUrl()`
+   - Updated all OPDS feed URLs to use base path
 
-3. **TTS OpenVoice Server** (`biblio-tts-server-openvoice`)
-   - Update route registration to include `/tts-openvoice` prefix
-   - Add JavaScript `apiUrl()` helper (if applicable)
-   - Update nginx config to preserve prefix
-   - Update health check endpoint
+3. **HTML Template (index.html):**
+   - Already injected `window.APP_BASE_PATH` for JavaScript access
+   - Static assets already use `{{.BasePath}}` template variable
+
+**Verification:**
+- ✅ Backend routes support base path via chi router
+- ✅ Frontend `apiUrl()` helper added
+- ✅ All fetch calls updated
+- ✅ OPDS feeds work with base path
+
+#### ✅ TTS Silero Server (Python/FastAPI) - Completed 2026-01-28
+
+**Changes Made:**
+
+1. **Backend Configuration:**
+   - `base_path` already configured in `config.py`
+   - FastAPI app already uses `root_path=settings.base_path`
+   - Routes automatically namespaced by FastAPI
+
+2. **Frontend HTML (index.html):**
+   - Added `BASE_PATH` constant and `apiUrl()` helper function
+   - Updated all `fetch()` calls to use `apiUrl()`
+   - API calls: `/api/languages`, `/api/models`, `/api/voices`, `/api/tts`
+
+**Verification:**
+- ✅ FastAPI `root_path` configured
+- ✅ Frontend `apiUrl()` helper added
+- ✅ All fetch calls updated
+
+#### ✅ TTS OpenVoice Server (Python/FastAPI) - Completed 2026-01-28
+
+**Changes Made:**
+
+1. **Backend Configuration:**
+   - `base_path` already configured in `config.py`
+   - FastAPI app already uses `root_path=settings.base_path`
+   - Routes automatically namespaced by FastAPI
+
+2. **Frontend HTML (index.html):**
+   - Added `BASE_PATH` constant and `apiUrl()` helper function
+   - Updated all `fetch()` calls to use `apiUrl()`
+   - API calls: `/api/languages`, `/api/voices`, `/api/tts`
+
+**Verification:**
+- ✅ FastAPI `root_path` configured
+- ✅ Frontend `apiUrl()` helper added
+- ✅ All fetch calls updated
 
 ### Key Principles
 
@@ -591,4 +631,4 @@ app = FastAPI(root_path=base_path)
 
 ---
 
-*Last updated: 2026-01-27*
+*Last updated: 2026-01-28*
