@@ -37,12 +37,12 @@
                         </div>
                     </a>
 
-                    <a href="/opds/" data-path="/opds/" class="service-card" target="bibliohub-opds">
+                    <a href="/catalog/" data-path="/catalog/" class="service-card" target="bibliohub-opds">
                         <div class="service-icon">📖</div>
                         <h3>Biblio OPDS Server</h3>
                         <p>Browse and manage your e-book library via OPDS protocol. Import FB2 collections, search by author, series, or genre, and download books to your favorite reading app.</p>
                         <div class="service-meta">
-                            <span class="port">Path: /opds/</span>
+                            <span class="port">Path: /catalog/</span>
                             <span class="status" id="status-opds">Checking...</span>
                         </div>
                     </a>
@@ -127,7 +127,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Check service health using path-based routing
             checkServiceHealth('/abb-tts', 'status-abb-tts', '/health');
-            checkServiceHealth('/opds', 'status-opds', '/api/setup/check');
+            checkServiceHealth('/catalog', 'status-opds', '/api/setup/check');
             checkServiceHealth('/tts-silero', 'status-tts-silero', '/health');
             checkServiceHealth('/tts-openvoice', 'status-tts-openvoice', '/health');
         });
