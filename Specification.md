@@ -963,6 +963,61 @@ func NewAuthProvider(mode string, config *Config) AuthProvider {
 - ✅ Easy to test both modes
 - ✅ Clear separation of concerns
 
+**OPDS Client Basic Auth Compatibility (Keycloak Mode)**:
+
+Most OPDS readers (Calibre, FBReader, Moon+ Reader, KOReader, etc.) only support HTTP Basic Auth - they cannot perform OAuth 2.0 redirects or handle token-based authentication. When `AUTH_MODE=keycloak`, we need a **Basic Auth to Keycloak bridge**.
+
+**Solution**: Use Keycloak's **Resource Owner Password Credentials (ROPC)** grant to validate Basic Auth credentials directly against Keycloak's user database:
+
+```go
+// KeycloakAuthProvider - Basic Auth validation via ROPC grant
+func (k *KeycloakAuthProvider) Authenticate(username, password string) (*User, error) {
+    // Exchange username/password for token via Keycloak's token endpoint
+    // POST /realms/{realm}/protocol/openid-connect/token
+    resp, err := http.PostForm(
+        k.keycloakURL+"/realms/"+k.realm+"/protocol/openid-connect/token",
+        url.Values{
+            "grant_type": {"password"},
+            "client_id":  {k.clientID},
+            "username":   {username},
+            "password":   {password},
+        })
+    
+    if err != nil || resp.StatusCode != 200 {
+        return nil, ErrInvalidCredentials
+    }
+    
+    // Parse access token, extract user info and roles from JWT claims
+    var tokenResp struct {
+        AccessToken string `json:"access_token"`
+    }
+    json.NewDecoder(resp.Body).Decode(&tokenResp)
+    
+    // Decode JWT to get user info (sub, preferred_username, roles)
+    user := extractUserFromToken(tokenResp.AccessToken)
+    return user, nil
+}
+```
+
+**Authentication Flow by Client Type**:
+
+| Auth Mode | Browser/Web UI | OPDS Readers (Calibre, etc.) |
+|-----------|---------------|------------------------------|
+| `internal` | Session cookie → SQLite | Basic Auth → SQLite |
+| `keycloak` | Keycloak OAuth redirect | Basic Auth → Keycloak ROPC |
+
+**Key Points**:
+- OPDS readers continue using Basic Auth credentials as before
+- Credentials are validated against Keycloak instead of SQLite
+- Users are managed in Keycloak (single source of truth)
+- Roles from Keycloak are mapped to OPDS roles (`admin`, `readonly`)
+- No changes required on OPDS client side
+
+**Keycloak Configuration for ROPC**:
+- Enable "Direct Access Grants" on the OPDS client in Keycloak
+- This allows the password grant type for Basic Auth validation
+- Note: ROPC is considered less secure than authorization code flow, but necessary for legacy clients
+
 **Applies to Other Services**:
 - ABB-TTS currently has no authentication - only needs Keycloak mode
 - TTS servers are internal-only - no authentication needed
