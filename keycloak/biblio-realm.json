@@ -120,7 +120,7 @@
       "name": "OPDS Server",
       "description": "OPDS Server frontend",
       "enabled": true,
-      "publicClient": true,
+      "publicClient": false,
       "bearerOnly": false,
       "standardFlowEnabled": true,
       "implicitFlowEnabled": false,
@@ -129,8 +129,14 @@
       "protocol": "openid-connect",
       "rootUrl": "http://localhost:9900/catalog",
       "baseUrl": "/",
-      "redirectUris": ["http://localhost:9900/catalog/*"],
-      "webOrigins": ["http://localhost:9900"],
+      "redirectUris": [
+        "http://10.100.0.4:9900/catalog/api/auth/keycloak/callback",
+        "http://localhost:9900/catalog/api/auth/keycloak/callback"
+      ],
+      "webOrigins": [
+        "http://10.100.0.4:9900",
+        "http://localhost:9900"
+      ],
       "attributes": {
         "pkce.code.challenge.method": "S256"
       }
