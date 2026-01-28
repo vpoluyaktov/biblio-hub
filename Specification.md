@@ -1205,22 +1205,52 @@ func (k *KeycloakAuthProvider) Authenticate(username, password string) (*User, e
   - All clients, roles, and users created
   - OpenID Connect endpoints accessible
 
-#### Phase 3: Nginx Gateway Integration ⏳
-- [ ] Implement auth_request endpoint
-- [ ] Configure authentication redirects
-- [ ] Set up session cookie handling
-- [ ] Add login/logout endpoints
-- [ ] Test authentication flow
+#### Phase 3: Service-Level Authentication Documentation ✅ COMPLETED
+- [x] Evaluate authentication approaches (gateway vs service-level)
+  - Attempted OAuth2 Proxy for gateway-level auth
+  - Encountered OIDC issuer URL mismatch issues (internal vs external URLs)
+  - Decided on service-level authentication for simplicity
+- [x] Document service-level Keycloak integration patterns
+  - Created keycloak/SERVICE_INTEGRATION.md
+  - Pattern 1: Public clients (ABB-TTS, OPDS frontend)
+  - Pattern 2: Bearer-only clients (TTS services)
+  - Pattern 3: HTTP Basic Auth (OPDS for e-readers)
+- [x] Document OAuth2/OIDC flows for each service type
+  - Authorization Code flow for frontends
+  - Bearer token validation for internal services
+  - Resource Owner Password Credentials for Basic Auth
+- [x] Provide implementation examples in Go
+  - Session management
+  - Token refresh
+  - Single Sign-On (SSO)
+  - Logout flows
+- [x] Document security best practices
+  - Token validation
+  - Cookie security
+  - CSRF protection
+  - Error handling
 
-#### Phase 4: Service Integration (Optional) ⏳
-- [ ] Implement authentication provider interface pattern
-- [ ] Add Keycloak auth provider for OPDS server
-- [ ] Add `AUTH_MODE` environment variable support
-- [ ] Add OAuth 2.0 middleware to ABB-TTS
-- [ ] Implement token validation
-- [ ] Add user context extraction
-- [ ] Test both internal and Keycloak auth modes
-- [ ] Test service-level authorization
+**Architecture Decision**: Service-level authentication chosen over gateway-level because:
+- ✅ Simpler - no OAuth2 Proxy complexity
+- ✅ More flexible - services can have different auth requirements
+- ✅ Better compatibility - works with existing service auth (OPDS Basic Auth)
+- ✅ Easier troubleshooting - services control their own auth flow
+
+#### Phase 4: Service Integration (Future) ⏳
+- [ ] Implement Keycloak integration in ABB-TTS
+  - Add OAuth 2.0 middleware
+  - Implement authorization code flow
+  - Add session management
+  - Add login/logout endpoints
+- [ ] Implement Keycloak integration in OPDS Server
+  - Add OAuth 2.0 support alongside existing Basic Auth
+  - Implement dual auth mode (Keycloak + internal)
+  - Add `AUTH_MODE` environment variable
+  - Maintain backward compatibility
+- [ ] Update TTS services for bearer token validation
+  - Add token verification middleware
+  - Extract user context from tokens
+  - Pass user info to downstream services
 
 #### Phase 5: Frontend Updates ⏳
 - [ ] Add login/logout buttons to landing page
