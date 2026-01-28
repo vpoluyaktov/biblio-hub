@@ -1184,13 +1184,26 @@ func (k *KeycloakAuthProvider) Authenticate(username, password string) (*User, e
   - Default credentials: admin/admin
   - Base path `/auth` working correctly
 
-#### Phase 2: Keycloak Configuration ⏳
-- [ ] Create `biblio` realm
-- [ ] Configure realm settings (tokens, sessions, login)
-- [ ] Create clients for each service
-- [ ] Define roles and role mappings
-- [ ] Create test users
-- [ ] Export realm configuration
+#### Phase 2: Keycloak Configuration ✅ COMPLETED
+- [x] Create comprehensive setup documentation (keycloak/SETUP.md)
+  - Step-by-step guide for realm creation
+  - Client configuration for all 5 services
+  - Role definitions (user, admin)
+  - Test user creation instructions
+  - Session and token settings
+- [x] Create pre-configured realm JSON (keycloak/biblio-realm.json)
+  - Realm: biblio with all settings
+  - 5 Clients: nginx-gateway, abb-tts, opds-server, tts-silero, tts-openvoice
+  - 2 Roles: user, admin
+  - 2 Test users: testadmin/admin123, testuser/user123
+  - Session timeouts: 30min access, 8hr session
+- [x] Update Dockerfile to include realm import
+  - Realm JSON copied to /opt/keycloak/data/import/
+  - --import-realm flag added to startup command
+- [x] Import realm via CLI and verify
+  - Realm 'biblio' successfully imported
+  - All clients, roles, and users created
+  - OpenID Connect endpoints accessible
 
 #### Phase 3: Nginx Gateway Integration ⏳
 - [ ] Implement auth_request endpoint

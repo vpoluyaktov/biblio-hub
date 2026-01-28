@@ -21,12 +21,15 @@ FROM quay.io/keycloak/keycloak:23.0
 # Copy the optimized build from builder stage
 COPY --from=builder /opt/keycloak/ /opt/keycloak/
 
+# Copy realm configuration for import
+COPY biblio-realm.json /opt/keycloak/data/import/biblio-realm.json
+
 # Set working directory
 WORKDIR /opt/keycloak
 
 # Expose port 8080
 EXPOSE 8080
 
-# Use optimized startup
+# Use optimized startup with realm import
 ENTRYPOINT ["/opt/keycloak/bin/kc.sh"]
-CMD ["start", "--optimized"]
+CMD ["start", "--optimized", "--import-realm"]
