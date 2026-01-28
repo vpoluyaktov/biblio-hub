@@ -161,10 +161,10 @@ services:
   # Admin Console: http://host:9900/auth/admin/
   # =============================================================================
   keycloak:
-    image: quay.io/keycloak/keycloak:23.0
+    image: vpoluyaktov/bibliohub-keycloak:dev-latest
     command:
       - start
-      - --http-relative-path=/auth
+      - --optimized
     environment:
       - KC_DB=postgres
       - KC_DB_URL=jdbc:postgresql://keycloak-db:5432/keycloak

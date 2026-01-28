@@ -1171,12 +1171,18 @@ func (k *KeycloakAuthProvider) Authenticate(username, password string) (*User, e
 - [x] Configure environment variables in `.env.example`
 - [x] Create data volumes in `start_stack.sh`
 - [x] Add nginx proxy configuration for `/auth/`
+- [x] Create custom Keycloak Dockerfile with `/auth` base path
+  - Multi-stage build using official Keycloak 23.0 image
+  - Pre-configured with `--http-relative-path=/auth` at build time
+  - No source code forking required
+  - Added to `rebuild_stack.sh` build and push steps
 - [x] Deploy and verify Keycloak is accessible
-  - Keycloak 23.0 running successfully (1/1 replicas)
+  - Custom Keycloak image running successfully (1/1 replicas)
   - PostgreSQL 16-alpine running (1/1 replicas)
   - Accessible via http://localhost:9900/auth/
   - Admin console at http://localhost:9900/auth/admin/
   - Default credentials: admin/admin
+  - Base path `/auth` working correctly
 
 #### Phase 2: Keycloak Configuration ⏳
 - [ ] Create `biblio` realm
