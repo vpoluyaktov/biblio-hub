@@ -165,6 +165,7 @@ services:
     command:
       - start
       - --optimized
+      - --import-realm
     environment:
       - KC_DB=postgres
       - KC_DB_URL=jdbc:postgresql://keycloak-db:5432/keycloak

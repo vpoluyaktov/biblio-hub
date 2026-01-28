@@ -99,7 +99,9 @@ Then rebuild:
 
 ### Importing Realm Configuration
 
-The `biblio-realm.json` file is included in the Docker image at `/opt/keycloak/data/import/`.
+The `biblio-realm.json` file is included in the Docker image at `/opt/keycloak/data/import/` as a template.
+
+**IMPORTANT**: Realm import should be done **once** after initial deployment. The import is NOT automatic to prevent overwriting manual configuration changes on every container restart.
 
 **Option 1: Import via Admin Console (Recommended)**
 1. Login to Admin Console: http://localhost:9900/auth/admin/
@@ -112,12 +114,15 @@ The `biblio-realm.json` file is included in the Docker image at `/opt/keycloak/d
 # Get container ID
 CONTAINER_ID=$(docker ps -q -f name=bibliohub_keycloak | head -1)
 
-# Import realm using Keycloak CLI
+# Import realm using Keycloak CLI (one-time operation)
 docker exec $CONTAINER_ID /opt/keycloak/bin/kc.sh import \
   --file /opt/keycloak/data/import/biblio-realm.json
 ```
 
-**Note**: The `--import-realm` flag in the Dockerfile only works on **first startup** with an empty database. If you've already started Keycloak once, you'll need to use one of the manual import methods above.
+**After Import**:
+- The realm configuration is stored in the PostgreSQL database
+- Manual changes via Admin Console will persist across container restarts
+- To update the realm template, export the current configuration and commit to repository
 
 ## Security Notes
 

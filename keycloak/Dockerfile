@@ -30,6 +30,8 @@ WORKDIR /opt/keycloak
 # Expose port 8080
 EXPOSE 8080
 
-# Use optimized startup with realm import
+# Use optimized startup with automatic realm import
+# The --import-realm flag imports realms from /opt/keycloak/data/import/ on first startup
+# It only imports if the realm doesn't already exist, so manual changes are preserved
 ENTRYPOINT ["/opt/keycloak/bin/kc.sh"]
 CMD ["start", "--optimized", "--import-realm"]
