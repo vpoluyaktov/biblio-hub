@@ -34,8 +34,8 @@ services:
       - ABB_TTS_HOST=0.0.0.0
       - ABB_TTS_PORT=80
       - ABB_TTS_BASE_PATH=/abb-tts
-      - ABB_TTS_SERVER_URL=http://tts-silero:80
-      - ABB_TTS_OPDS_SERVER_URL=http://opds-server:80
+      - ABB_TTS_SERVER_URL=http://tts-silero:80/tts-silero
+      - ABB_TTS_OPDS_SERVER_URL=http://opds-server:80/catalog
       - ABB_TTS_TEMP_DIR=/data
       - ABB_TTS_LOG_FILE=/logs/abb_tts.log
       - TZ=UTC
