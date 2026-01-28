@@ -164,7 +164,6 @@ services:
     image: quay.io/keycloak/keycloak:23.0
     command:
       - start
-      - --optimized
       - --http-relative-path=/auth
     environment:
       - KC_DB=postgres
@@ -190,7 +189,7 @@ services:
         condition: any
         delay: 5s
     healthcheck:
-      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/9000 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200 OK'"]
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 && echo -e 'GET /auth/health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200 OK'"]
       interval: 30s
       timeout: 5s
       start_period: 120s
