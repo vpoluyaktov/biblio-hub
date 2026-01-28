@@ -375,6 +375,105 @@ Implement a reverse proxy architecture where:
 - [ ] Verify WebSocket connections work through proxy
 - [ ] Test file downloads through proxy
 
+---
+
+## 🔧 Current Issue: Static Asset Loading (In Progress)
+
+### Problem Description
+
+After implementing path-based routing, static assets (CSS, JS, images) are not loading correctly for services behind the nginx reverse proxy. Browser shows 404 errors or HTML content instead of CSS/JS files.
+
+**Symptoms:**
+- Browser requests: `http://10.100.0.4:9900/abb-tts/assets/style.css`
+- Response: HTML content (404 page) instead of CSS
+- Similar issue for OPDS server at `/opds/static/css/style.css`
+
+### Root Cause Analysis
+
+**Key Discovery:** Nginx strips the base path before forwarding requests to backend services.
+
+When nginx configuration has:
+```nginx
+location /abb-tts/ {
+    proxy_pass http://abb-tts:80/;  # trailing slash = strip prefix
+}
+```
+
+Request flow:
+1. Browser → Nginx: `GET /abb-tts/assets/style.css`
+2. Nginx → Backend: `GET /assets/style.css` (base path stripped!)
+3. Backend must serve at `/assets/style.css`, NOT `/abb-tts/assets/style.css`
+
+**Implication:** Services should register routes WITHOUT the base path prefix, since nginx already strips it before forwarding.
+
+### Current Status
+
+#### ✅ ABB-TTS Server (Go/http.ServeMux)
+**Fixed:**
+- ✅ Routes registered without base path prefix (e.g., `/assets/`, `/api/jobs`)
+- ✅ Static assets served correctly using `fs.Sub(assetsFS, "assets")`
+- ✅ Internal test confirms: `wget http://localhost:80/assets/style.css` returns CSS
+- ✅ Nginx proxy working: Recent logs show 200 responses with correct file sizes
+
+**Remaining Issue:**
+- ❌ HTML template still renders `/assets/style.css` instead of `/abb-tts/assets/style.css`
+- ❌ Environment variable `ABB_TTS_BASE_PATH=/abb-tts` is set but not being used in template
+- ❌ Template variable `{{.BasePath}}` appears to be empty when rendering
+
+**Diagnosis:**
+- Viper config has `SetEnvPrefix("ABB_TTS")` and `AutomaticEnv()`
+- Environment variable exists in container: `ABB_TTS_BASE_PATH=/abb-tts`
+- Config field: `BasePath string` with mapstructure tag `base_path`
+- Template rendering logic may have issue with empty/root path handling
+
+#### ❌ OPDS Server (Go/chi router)
+**Status:** Not yet fixed
+- Routes still registered WITH base path prefix (needs same fix as ABB-TTS)
+- Static file handler needs update for nginx path stripping
+- Template needs BasePath variable injection
+
+**Required Changes:**
+1. Remove base path from route registration (chi.Route already handled by nginx)
+2. Fix static file handler to work with stripped paths
+3. Update template to inject BasePath variable
+4. Ensure template uses `{{.BasePath}}/static/...` for asset URLs
+
+### Solution Approach
+
+**For Backend Services:**
+1. Register all routes WITHOUT base path prefix
+2. Nginx strips the prefix, so backend sees clean paths
+3. Example: Register `/assets/`, nginx forwards `/assets/style.css` → backend serves it
+
+**For HTML Templates:**
+1. Inject `BasePath` variable from config (e.g., `/abb-tts`)
+2. Use in templates: `<link href="{{.BasePath}}/assets/style.css">`
+3. Browser requests full path: `/abb-tts/assets/style.css`
+4. Nginx strips prefix and forwards: `/assets/style.css`
+5. Backend serves from registered route: `/assets/`
+
+**Critical:** BasePath is ONLY for URL generation in HTML, NOT for route registration.
+
+### Next Steps
+
+1. **Debug ABB-TTS BasePath template variable**
+   - Add logging to verify config value
+   - Check viper environment variable binding
+   - Verify template data structure
+
+2. **Apply fixes to OPDS Server**
+   - Remove base path from chi router route registration
+   - Update static file handler
+   - Add BasePath to template data
+
+3. **Rebuild and test both services**
+   - Verify static assets load in browser
+   - Check browser network tab for correct responses
+   - Confirm CSS/JS files render correctly
+
+4. **Update health checks if needed**
+   - Ensure health check paths match new route structure
+
 ### Technical Considerations
 
 **Nginx Proxy Configuration:**
