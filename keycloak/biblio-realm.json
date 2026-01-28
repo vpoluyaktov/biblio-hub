@@ -136,10 +136,7 @@
       "webOrigins": [
         "http://10.100.0.4:9900",
         "http://localhost:9900"
-      ],
-      "attributes": {
-        "pkce.code.challenge.method": "S256"
-      }
+      ]
     },
     {
       "clientId": "tts-silero",
