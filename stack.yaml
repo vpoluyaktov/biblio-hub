@@ -127,14 +127,14 @@ services:
 
   # =============================================================================
   # Biblio OPDS Server - E-book library catalog
-  # Accessible via: http://host:9900/opds/
+  # Accessible via: http://host:9900/catalog/
   # =============================================================================
   opds-server:
     image: vpoluyaktov/bibliohub-opds-server:dev-latest
     environment:
       - OPDS_SERVER_HOST=0.0.0.0
       - OPDS_SERVER_PORT=80
-      - OPDS_BASE_PATH=/opds
+      - OPDS_BASE_PATH=/catalog
       - TZ=UTC
     volumes:
       - ./data/opds/db:/db
@@ -149,7 +149,7 @@ services:
         condition: any
         delay: 5s
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/opds/api/setup/check"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/catalog/api/setup/check"]
       interval: 30s
       timeout: 3s
       start_period: 10s
