@@ -742,7 +742,6 @@ Implement Keycloak as a centralized Identity and Access Management (IAM) solutio
 - ❌ **Backup/restore**: Need to backup Keycloak database
 - ❌ **Updates/patches**: Keep Keycloak updated for security
 - ❌ **Monitoring**: Additional service to monitor and maintain
-- ❌ **SSL/TLS**: Requires proper certificate management
 
 #### User Experience
 - ❌ **Extra login step**: Users must authenticate before accessing services
@@ -865,14 +864,15 @@ Implement Keycloak as a centralized Identity and Access Management (IAM) solutio
 **Recommendation**: Provide pre-configured realm JSON and automated setup script
 
 #### 8. SSL/TLS Requirements
-**Challenge**: OAuth 2.0 requires HTTPS in production.
+**Challenge**: OAuth 2.0 typically requires HTTPS in production for external access.
 
 **Solutions**:
-- Use Let's Encrypt with Traefik or Certbot
-- Self-signed certificates for development
-- Disable HTTPS requirement in Keycloak (dev only)
+- Internal Docker Swarm communication (backend network) does not require SSL/TLS
+- Only nginx gateway needs SSL/TLS for external internet access
+- Use Let's Encrypt with Traefik or Certbot for production
+- HTTP is acceptable for development and internal-only deployments
 
-**Recommendation**: Document both development (HTTP) and production (HTTPS) setups
+**Recommendation**: SSL/TLS only needed at nginx gateway level, not between internal services
 
 #### 9. Performance Impact
 **Challenge**: Token validation adds latency to every request.
@@ -893,6 +893,80 @@ Implement Keycloak as a centralized Identity and Access Management (IAM) solutio
 - Support gradual rollout (some services protected, others open)
 
 **Recommendation**: Add `AUTH_ENABLED=false` flag for backward compatibility
+
+#### 11. OPDS Server Dual Authentication Mode
+**Challenge**: OPDS server already has internal authentication (SQLite database with users, roles, sessions). Need to support both standalone deployment (internal auth) and BiblioHub deployment (Keycloak).
+
+**Current OPDS Authentication Features**:
+- SQLite-based user database with bcrypt password hashing
+- Two roles: `admin` and `readonly`
+- Session-based authentication (30-day sessions)
+- HTTP Basic Auth support for OPDS readers (Calibre, FBReader, etc.)
+- User management API (create, update, delete users)
+- CLI tool for user creation
+- Setup wizard for first-time configuration
+
+**Solutions**:
+- **Option A**: Authentication mode selection via environment variable
+  - `AUTH_MODE=internal` (default) - Use internal SQLite database
+  - `AUTH_MODE=keycloak` - Use Keycloak for authentication
+  - Implement authentication adapter pattern
+  
+- **Option B**: Dual authentication with fallback
+  - Try Keycloak first, fall back to internal database
+  - Allows gradual migration
+  - More complex to maintain
+  
+- **Option C**: Keycloak-only with user migration
+  - Migrate existing users to Keycloak
+  - Deprecate internal authentication
+  - Simplest long-term solution
+
+**Recommendation**: Option A (mode selection) for maximum flexibility
+
+**Implementation Details**:
+```go
+type AuthProvider interface {
+    Authenticate(username, password string) (*User, error)
+    ValidateSession(sessionID string) (*User, error)
+    CreateSession(userID int64) (*Session, error)
+    // ... other auth methods
+}
+
+type InternalAuthProvider struct {
+    db *db.DB
+    // existing auth.Auth implementation
+}
+
+type KeycloakAuthProvider struct {
+    keycloakURL string
+    realm       string
+    clientID    string
+    // Keycloak client
+}
+
+// Factory function
+func NewAuthProvider(mode string, config *Config) AuthProvider {
+    switch mode {
+    case "keycloak":
+        return &KeycloakAuthProvider{...}
+    default:
+        return &InternalAuthProvider{...}
+    }
+}
+```
+
+**Benefits**:
+- ✅ Standalone OPDS deployments continue using internal auth
+- ✅ BiblioHub deployments can use centralized Keycloak
+- ✅ No breaking changes for existing users
+- ✅ Easy to test both modes
+- ✅ Clear separation of concerns
+
+**Applies to Other Services**:
+- ABB-TTS currently has no authentication - only needs Keycloak mode
+- TTS servers are internal-only - no authentication needed
+- Same pattern can be applied if other services add standalone auth later
 
 ### Implementation Approach
 
@@ -931,7 +1005,8 @@ Implement Keycloak as a centralized Identity and Access Management (IAM) solutio
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `AUTH_ENABLED` | Enable/disable authentication | `false` |
+| `AUTH_ENABLED` | Enable/disable authentication at gateway | `false` |
+| `AUTH_MODE` | Authentication mode (internal/keycloak) | `internal` |
 | `KEYCLOAK_URL` | Keycloak base URL | `http://keycloak:8080` |
 | `KEYCLOAK_REALM` | Keycloak realm name | `biblio` |
 | `KEYCLOAK_CLIENT_ID` | Client ID for service | (service-specific) |
@@ -1058,10 +1133,13 @@ Implement Keycloak as a centralized Identity and Access Management (IAM) solutio
 - [ ] Test authentication flow
 
 #### Phase 4: Service Integration (Optional) ⏳
-- [ ] Add OAuth 2.0 middleware to Go services
-- [ ] Add OIDC middleware to Python services
+- [ ] Implement authentication provider interface pattern
+- [ ] Add Keycloak auth provider for OPDS server
+- [ ] Add `AUTH_MODE` environment variable support
+- [ ] Add OAuth 2.0 middleware to ABB-TTS
 - [ ] Implement token validation
 - [ ] Add user context extraction
+- [ ] Test both internal and Keycloak auth modes
 - [ ] Test service-level authorization
 
 #### Phase 5: Frontend Updates ⏳
