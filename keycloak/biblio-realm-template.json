@@ -48,36 +48,52 @@
   },
   "users": [
     {
-      "username": "admin",
+      "username": "hub_admin",
       "enabled": true,
       "emailVerified": true,
-      "firstName": "Admin",
-      "lastName": "User",
-      "email": "admin@bibliohub.local",
+      "firstName": "Hub",
+      "lastName": "Admin",
+      "email": "hub_admin@bibliohub.local",
       "credentials": [
         {
           "type": "password",
-          "value": "${BIBLIO_ADMIN_PASSWORD}",
+          "value": "${BIBLIO_HUB_ADMIN_PASSWORD}",
           "temporary": false
         }
       ],
-      "realmRoles": ["user", "admin", "opds_user"]
+      "realmRoles": ["user", "admin"]
     },
     {
-      "username": "user",
+      "username": "hub_user",
       "enabled": true,
       "emailVerified": true,
-      "firstName": "Regular",
+      "firstName": "Hub",
       "lastName": "User",
-      "email": "user@bibliohub.local",
+      "email": "hub_user@bibliohub.local",
       "credentials": [
         {
           "type": "password",
-          "value": "${BIBLIO_USER_PASSWORD}",
+          "value": "${BIBLIO_HUB_USER_PASSWORD}",
           "temporary": false
         }
       ],
-      "realmRoles": ["user", "opds_user"]
+      "realmRoles": ["user"]
+    },
+    {
+      "username": "opds_user",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "OPDS",
+      "lastName": "User",
+      "email": "opds_user@bibliohub.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${BIBLIO_OPDS_USER_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["opds_user"]
     }
   ],
   "clients": [
