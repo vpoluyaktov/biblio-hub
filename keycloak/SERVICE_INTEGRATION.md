@@ -33,7 +33,7 @@ Each service has a client configured in Keycloak:
 |-----------|------|-------------|---------|
 | `nginx-gateway` | Confidential | confidential | Reserved for future gateway auth |
 | `abb-tts` | Public | public | Audiobook Builder TTS frontend |
-| `opds-server` | Public | public | OPDS Server frontend |
+| `biblio-catalog` | Public | public | Biblio Catalog (E-book library with OPDS) |
 | `tts-silero` | Bearer-only | bearer-only | Internal TTS service |
 | `tts-openvoice` | Bearer-only | bearer-only | Internal TTS service |
 
@@ -201,7 +201,7 @@ func authenticateBasicAuth(username, password string) (*User, error) {
     // Use Keycloak token endpoint with password grant
     data := url.Values{
         "grant_type": {"password"},
-        "client_id":  {"opds-server"},
+        "client_id":  {"biblio-catalog"},
         "username":   {username},
         "password":   {password},
         "scope":      {"openid"},

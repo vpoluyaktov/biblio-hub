@@ -101,13 +101,13 @@ For Audiobook Builder frontend
    - Valid post logout redirect URIs: `http://localhost:9900/abb-tts/*`
    - Web origins: `http://localhost:9900`
 
-### Client 3: opds-server (Public)
-For OPDS Server frontend
+### Client 3: biblio-catalog (Public)
+For Biblio Catalog (E-book library with OPDS support)
 
 1. Navigate to **Clients** → **Create client**
 2. **General Settings**:
    - Client type: `OpenID Connect`
-   - Client ID: `opds-server`
+   - Client ID: `biblio-catalog`
 3. **Capability config**:
    - Client authentication: OFF (public)
    - Authorization: OFF
@@ -249,7 +249,7 @@ Navigate to **Client scopes** → **Create client scope**
 
 - [ ] Realm 'biblio' created
 - [ ] Session timeouts configured (30min access, 8hr session)
-- [ ] 5 clients created (nginx-gateway, abb-tts, opds-server, tts-silero, tts-openvoice)
+- [ ] 5 clients created (nginx-gateway, abb-tts, biblio-catalog, tts-silero, tts-openvoice)
 - [ ] 2 roles created (user, admin)
 - [ ] 2 test users created (testadmin, testuser)
 - [ ] Realm configuration exported

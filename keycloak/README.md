@@ -50,7 +50,7 @@ Follow the detailed instructions in [SETUP.md](./SETUP.md) to:
 |-----------|------|---------|
 | nginx-gateway | Confidential | Nginx auth_request integration |
 | abb-tts | Public | Audiobook Builder frontend |
-| opds-server | Public | OPDS Server frontend |
+| biblio-catalog | Public | Biblio Catalog (E-book library with OPDS) |
 | tts-silero | Bearer-only | Internal TTS service |
 | tts-openvoice | Bearer-only | Internal TTS service |
 

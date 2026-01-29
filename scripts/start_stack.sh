@@ -58,7 +58,7 @@ cd "$HUB_DIR"
 docker stack deploy -c stack.yaml --resolve-image always "$STACK_NAME"
 
 # All services to monitor
-ALL_SERVICES="keycloak-db keycloak nginx-gateway opds-server abb-tts tts-silero tts-openvoice"
+ALL_SERVICES="keycloak-db keycloak nginx-gateway biblio-catalog abb-tts tts-silero tts-openvoice"
 MAX_WAIT=180  # Maximum wait time in seconds
 POLL_INTERVAL=3
 

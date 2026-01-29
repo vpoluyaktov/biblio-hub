@@ -138,12 +138,12 @@
       }
     },
     {
-      "clientId": "opds-server",
-      "name": "OPDS Server",
-      "description": "OPDS Server frontend",
+      "clientId": "biblio-catalog",
+      "name": "Biblio Catalog",
+      "description": "Biblio Catalog (E-book library with OPDS support)",
       "enabled": true,
       "publicClient": false,
-      "secret": "${OPDS_OIDC_CLIENT_SECRET}",
+      "secret": "${CATALOG_OIDC_CLIENT_SECRET}",
       "bearerOnly": false,
       "standardFlowEnabled": true,
       "implicitFlowEnabled": false,

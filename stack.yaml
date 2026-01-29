@@ -35,7 +35,7 @@ services:
       - ABB_TTS_PORT=80
       - ABB_TTS_BASE_PATH=/abb-tts
       - ABB_TTS_SERVER_URL=http://tts-silero:80/tts-silero
-      - ABB_TTS_OPDS_SERVER_URL=http://opds-server:80/catalog
+      - ABB_TTS_OPDS_SERVER_URL=http://biblio-catalog:80/catalog
       - ABB_TTS_TEMP_DIR=/data
       - ABB_TTS_LOG_FILE=/logs/abb_tts.log
       - TZ=UTC
@@ -48,7 +48,7 @@ services:
       - bibliohub-frontend
     depends_on:
       - tts-silero
-      - opds-server
+      - biblio-catalog
     deploy:
       replicas: 1
       restart_policy:
@@ -126,11 +126,11 @@ services:
       retries: 5
 
   # =============================================================================
-  # Biblio OPDS Server - E-book library catalog
+  # Biblio Catalog - E-book library catalog with OPDS support
   # Accessible via: http://host:9900/catalog/
   # =============================================================================
-  opds-server:
-    image: vpoluyaktov/bibliohub-opds-server:dev-latest
+  biblio-catalog:
+    image: vpoluyaktov/bibliohub-catalog:dev-latest
     environment:
       - OPDS_SERVER_HOST=0.0.0.0
       - OPDS_SERVER_PORT=80
@@ -141,8 +141,8 @@ services:
       # OIDC configuration (used when AUTH_MODE=oidc)
       - OIDC_URL=http://${BIBLIO_HUB_HOSTNAME:-localhost}:${BIBLIO_HUB_PORT:-9900}/auth
       - OIDC_REALM=biblio
-      - OIDC_CLIENT_ID=opds-server
-      - OIDC_CLIENT_SECRET=${OPDS_OIDC_CLIENT_SECRET}
+      - OIDC_CLIENT_ID=biblio-catalog
+      - OIDC_CLIENT_SECRET=${CATALOG_OIDC_CLIENT_SECRET}
       - OIDC_REDIRECT_URL=http://${BIBLIO_HUB_HOSTNAME:-localhost}:${BIBLIO_HUB_PORT:-9900}/catalog/api/auth/oidc/callback
     volumes:
       - ./data/opds/db:/db
@@ -189,7 +189,7 @@ services:
       - KC_METRICS_ENABLED=true
       - BIBLIO_HUB_HOSTNAME=${BIBLIO_HUB_HOSTNAME:-localhost}
       - BIBLIO_HUB_PORT=${BIBLIO_HUB_PORT:-9900}
-      - OPDS_OIDC_CLIENT_SECRET=${OPDS_OIDC_CLIENT_SECRET:-opds-server-secret-key-2026}
+      - CATALOG_OIDC_CLIENT_SECRET=${CATALOG_OIDC_CLIENT_SECRET:-biblio-catalog-secret-key-2026}
       - BIBLIO_HUB_ADMIN_PASSWORD=${BIBLIO_HUB_ADMIN_PASSWORD:-hub_admin}
       - BIBLIO_HUB_USER_PASSWORD=${BIBLIO_HUB_USER_PASSWORD:-hub_user}
       - BIBLIO_OPDS_USER_PASSWORD=${BIBLIO_OPDS_USER_PASSWORD:-opds_user}

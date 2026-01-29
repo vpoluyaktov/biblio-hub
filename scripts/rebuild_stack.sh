@@ -54,11 +54,11 @@ echo "[5/6] Building biblio-tts-server-openvoice..."
 echo "----------------------------------------------"
 docker build -t "$DOCKER_USER/bibliohub-tts-server-openvoice:$TAG" -f "$HUB_DIR/../biblio-tts-server-openvoice/docker/Dockerfile" "$HUB_DIR/../biblio-tts-server-openvoice"
 
-# Build OPDS Server
+# Build Biblio Catalog
 echo ""
-echo "[6/6] Building biblio-opds-server..."
+echo "[6/6] Building biblio-catalog..."
 echo "----------------------------------------------"
-docker build -t "$DOCKER_USER/bibliohub-opds-server:$TAG" -f "$HUB_DIR/../biblio-opds-server/docker/Dockerfile" "$HUB_DIR/../biblio-opds-server"
+docker build -t "$DOCKER_USER/bibliohub-catalog:$TAG" -f "$HUB_DIR/../biblio-ebooks-catalog/docker/Dockerfile" "$HUB_DIR/../biblio-ebooks-catalog"
 
 echo ""
 echo "=========================================="
@@ -92,8 +92,8 @@ echo "[5/6] Pushing bibliohub-tts-server-openvoice..."
 docker push "$DOCKER_USER/bibliohub-tts-server-openvoice:$TAG"
 
 echo ""
-echo "[6/6] Pushing bibliohub-opds-server..."
-docker push "$DOCKER_USER/bibliohub-opds-server:$TAG"
+echo "[6/6] Pushing bibliohub-catalog..."
+docker push "$DOCKER_USER/bibliohub-catalog:$TAG"
 
 echo ""
 echo "=========================================="
@@ -105,7 +105,7 @@ echo "=========================================="
 #   https://hub.docker.com/r/vpoluyaktov/bibliohub-audiobook-builder-tts
 #   https://hub.docker.com/r/vpoluyaktov/bibliohub-tts-server-silero
 #   https://hub.docker.com/r/vpoluyaktov/bibliohub-tts-server-openvoice
-#   https://hub.docker.com/r/vpoluyaktov/bibliohub-opds-server
+#   https://hub.docker.com/r/vpoluyaktov/bibliohub-catalog
 
 echo ""
 echo "Images available:"
@@ -114,4 +114,4 @@ echo "  - $DOCKER_USER/bibliohub-keycloak:$TAG"
 echo "  - $DOCKER_USER/bibliohub-audiobook-builder-tts:$TAG"
 echo "  - $DOCKER_USER/bibliohub-tts-server-silero:$TAG"
 echo "  - $DOCKER_USER/bibliohub-tts-server-openvoice:$TAG"
-echo "  - $DOCKER_USER/bibliohub-opds-server:$TAG"
+echo "  - $DOCKER_USER/bibliohub-catalog:$TAG"

@@ -13,7 +13,7 @@ BiblioHub is the central deployment and orchestration platform for the Biblio ap
 | **Landing Page** | Central hub with links to all services | 9900 | This document |
 | **Audiobook Builder TTS** | Converts e-books to audiobooks using TTS | 9901 | [Specification.md](https://github.com/vpoluyaktov/biblio-audiobook-builder-tts/blob/main/Specification.md) |
 | **TTS Server (Silero)** | REST API for Silero TTS models | 9902 | [Specification.md](https://github.com/vpoluyaktov/biblio-tts-server-silero/blob/main/Specification.md) |
-| **OPDS Server** | OPDS catalog server for e-book libraries | 9903 | [Specification.md](https://github.com/vpoluyaktov/biblio-opds-server/blob/main/Specification.md) |
+| **Biblio Catalog** | E-book library catalog with OPDS support | 9903 | [Specification.md](https://github.com/vpoluyaktov/biblio-ebooks-catalog/blob/main/Specification.md) |
 | **TTS Server (OpenVoice)** | REST API for MeloTTS models | 9904 | [Specification.md](https://github.com/vpoluyaktov/biblio-tts-server-openvoice/blob/main/Specification.md) |
 
 ### Component Repositories
@@ -22,7 +22,7 @@ BiblioHub is the central deployment and orchestration platform for the Biblio ap
 - **biblio-audiobook-builder-tts**: [github.com/vpoluyaktov/biblio-audiobook-builder-tts](https://github.com/vpoluyaktov/biblio-audiobook-builder-tts)
 - **biblio-tts-server-silero**: [github.com/vpoluyaktov/biblio-tts-server-silero](https://github.com/vpoluyaktov/biblio-tts-server-silero)
 - **biblio-tts-server-openvoice**: [github.com/vpoluyaktov/biblio-tts-server-openvoice](https://github.com/vpoluyaktov/biblio-tts-server-openvoice)
-- **biblio-opds-server**: [github.com/vpoluyaktov/biblio-opds-server](https://github.com/vpoluyaktov/biblio-opds-server)
+- **biblio-ebooks-catalog**: [github.com/vpoluyaktov/biblio-ebooks-catalog](https://github.com/vpoluyaktov/biblio-ebooks-catalog)
 
 ## Architecture
 
@@ -52,7 +52,7 @@ BiblioHub is the central deployment and orchestration platform for the Biblio ap
 ### Service Communication
 
 - **ABB-TTS → TTS-Silero**: Internal Docker network (`http://tts-silero:9902`)
-- **ABB-TTS → OPDS Server**: Internal Docker network (`http://opds-server:9903`)
+- **ABB-TTS → Biblio Catalog**: Internal Docker network (`http://biblio-catalog:80/catalog`)
 - **Users → All Services**: Direct port access (9900-9903)
 
 ## Project Structure
@@ -96,7 +96,7 @@ biblio-hub/
    ├── biblio-hub/
    ├── biblio-audiobook-builder-tts/
    ├── biblio-tts-server-silero/
-   └── biblio-opds-server/
+   └── biblio-ebooks-catalog/
    ```
 
 ### Environment Configuration
@@ -181,7 +181,7 @@ docker stack services bibliohub
 docker service logs bibliohub_abb-tts --tail 100 -f
 docker service logs bibliohub_tts-silero --tail 100 -f
 docker service logs bibliohub_tts-openvoice --tail 100 -f
-docker service logs bibliohub_opds-server --tail 100 -f
+docker service logs bibliohub_biblio-catalog --tail 100 -f
 ```
 
 ### Scaling Services
@@ -212,7 +212,7 @@ echo "TTS_SILERO_REPLICAS=5" >> .env
 - **Environment**:
   - `ABB_TTS_TEMP_DIR=/data` - Working directory for all files
   - `ABB_TTS_LOG_FILE=/logs/abb_tts.log` - Log file path
-- **Dependencies**: tts-silero, opds-server
+- **Dependencies**: tts-silero, biblio-catalog
 
 ### tts-silero (TTS Server Silero)
 - **Image**: `vpoluyaktov/bibliohub-tts-server-silero:dev-latest`
@@ -228,8 +228,8 @@ echo "TTS_SILERO_REPLICAS=5" >> .env
 - **Replicas**: Configurable via `TTS_OPENVOICE_REPLICAS`
 - **Languages**: Configurable via `OPENVOICE_LANGUAGES` (EN, ES, FR, ZH, JP, KR)
 
-### opds-server (OPDS Catalog)
-- **Image**: `vpoluyaktov/bibliohub-opds-server:dev-latest`
+### biblio-catalog (E-book Catalog with OPDS)
+- **Image**: `vpoluyaktov/bibliohub-catalog:dev-latest`
 - **Port**: 9903
 - **Volumes**:
   - `./data/opds/db:/db` - SQLite database
@@ -251,7 +251,7 @@ All core services are deployed and functional:
 - ✅ Audiobook Builder TTS with per-provider chunk size configuration
 - ✅ TTS Server Silero with multiple models and scalable replicas
 - ✅ TTS Server OpenVoice with MeloTTS multi-language support
-- ✅ OPDS Server for e-book catalog
+- ✅ Biblio Catalog for e-book library with OPDS support
 
 **Future Enhancements**:
 - Traefik for automatic SSL/TLS
@@ -284,7 +284,7 @@ Implement a reverse proxy architecture where:
 |---------|-------------|---------|
 | Landing Page | `http://host:9900/` | `http://host:9900/` |
 | Audiobook Builder | `http://host:9901/` | `http://host:9900/abb-tts/` |
-| OPDS Server | `http://host:9903/` | `http://host:9900/opds/` |
+| Biblio Catalog | `http://host:9903/` | `http://host:9900/catalog/` |
 | TTS Silero | `http://host:9902/` | `http://host:9900/tts-silero/` (internal only) |
 | TTS OpenVoice | `http://host:9904/` | `http://host:9900/tts-openvoice/` (internal only) |
 
@@ -298,7 +298,7 @@ Implement a reverse proxy architecture where:
         │           │   │   Nginx Gateway (:9900)             │               │
         │           │   │   - Landing page (/)                │               │
         │           │   │   - Proxy /abb-tts/* → abb-tts:80  │               │
-        │           │   │   - Proxy /opds/* → opds-server:80 │               │
+        │           │   │   - Proxy /catalog/* → biblio-catalog:80│               │
         ▼           │   │   - Proxy /tts-silero/* (internal) │               │
     ┌───────┐       │   │   - Proxy /tts-openvoice/* (int)   │               │
     │ Users │◄─────►│   └─────────────────────────────────────┘               │
@@ -334,7 +334,7 @@ Implement a reverse proxy architecture where:
 - [x] Update API endpoint URLs in frontend
 - [x] Committed and pushed to feature branch
 
-#### Phase 3: OPDS Server (Go) ✅
+#### Phase 3: Biblio Catalog (Go) ✅
 - [x] Create feature branch `feature/path-based-routing`
 - [x] Add `BASE_PATH` environment variable (default: `/`)
 - [x] Update chi router to use base path prefix
@@ -458,7 +458,7 @@ Request flow:
 - ✅ WebSocket connections work at `/abb-tts/api/ws`
 - ✅ Health check passes
 
-#### ✅ OPDS Server (Go/chi) - Completed 2026-01-28
+#### ✅ Biblio Catalog (Go/chi) - Completed 2026-01-28
 
 **Changes Made:**
 
@@ -599,7 +599,7 @@ app = FastAPI(root_path=base_path)
 | Service | Variable | Default | Example |
 |---------|----------|---------|---------|
 | ABB-TTS | `BASE_PATH` | `/` | `/abb-tts` |
-| OPDS Server | `BASE_PATH` | `/` | `/opds` |
+| Biblio Catalog | `BASE_PATH` | `/` | `/catalog` |
 | TTS Silero | `BASE_PATH` | `/` | `/tts-silero` |
 | TTS OpenVoice | `BASE_PATH` | `/` | `/tts-openvoice` |
 
@@ -610,13 +610,13 @@ app = FastAPI(root_path=base_path)
 - [ ] ABB-TTS WebSocket connects successfully
 - [ ] ABB-TTS can upload and process books
 - [ ] ABB-TTS can download completed audiobooks
-- [ ] OPDS Server UI loads at `http://host:9900/opds/`
-- [ ] OPDS feeds work at `http://host:9900/opds/opds/{lib_id}`
-- [ ] OPDS Server can download books
+- [ ] Biblio Catalog UI loads at `http://host:9900/catalog/`
+- [ ] OPDS feeds work at `http://host:9900/catalog/opds/{lib_id}`
+- [ ] Biblio Catalog can download books
 - [ ] TTS Silero API accessible internally
 - [ ] TTS OpenVoice API accessible internally
 - [ ] ABB-TTS can communicate with TTS servers
-- [ ] ABB-TTS can communicate with OPDS server
+- [ ] ABB-TTS can communicate with Biblio Catalog
 - [ ] All static assets (CSS, JS, images) load correctly
 - [ ] No mixed content warnings
 - [ ] No CORS errors
@@ -664,7 +664,7 @@ Implement Keycloak as a centralized Identity and Access Management (IAM) solutio
         │           │   │   - Auth check via auth_request     │               │
         │           │   │   - Proxy /auth/* → Keycloak:8080  │               │
         ▼           │   │   - Proxy /abb-tts/* → abb-tts:80  │               │
-    ┌───────┐       │   │   - Proxy /opds/* → opds-server:80 │               │
+    ┌───────┐       │   │   - Proxy /catalog/* → biblio-catalog:80│               │
     │ Users │◄─────►│   └─────────────────────────────────────┘               │
     └───────┘       │                      │                                  │
                     │          ┌───────────┼───────────────┐                  │
@@ -894,10 +894,10 @@ Implement Keycloak as a centralized Identity and Access Management (IAM) solutio
 
 **Recommendation**: Add `AUTH_ENABLED=false` flag for backward compatibility
 
-#### 11. OPDS Server Dual Authentication Mode
-**Challenge**: OPDS server already has internal authentication (SQLite database with users, roles, sessions). Need to support both standalone deployment (internal auth) and BiblioHub deployment (Keycloak).
+#### 11. Biblio Catalog Dual Authentication Mode
+**Challenge**: Biblio Catalog already has internal authentication (SQLite database with users, roles, sessions). Need to support both standalone deployment (internal auth) and BiblioHub deployment (Keycloak).
 
-**Current OPDS Authentication Features**:
+**Current Biblio Catalog Authentication Features**:
 - SQLite-based user database with bcrypt password hashing
 - Two roles: `admin` and `readonly`
 - Session-based authentication (30-day sessions)
@@ -957,7 +957,7 @@ func NewAuthProvider(mode string, config *Config) AuthProvider {
 ```
 
 **Benefits**:
-- ✅ Standalone OPDS deployments continue using internal auth
+- ✅ Standalone Biblio Catalog deployments continue using internal auth
 - ✅ BiblioHub deployments can use centralized Keycloak
 - ✅ No breaking changes for existing users
 - ✅ Easy to test both modes
@@ -1048,7 +1048,7 @@ func (k *KeycloakAuthProvider) Authenticate(username, password string) (*User, e
 - **Clients**:
   - `nginx-gateway` (confidential, for nginx auth_request)
   - `abb-tts` (public, for frontend)
-  - `opds-server` (public, for frontend)
+  - `biblio-catalog` (public, for frontend)
   - `tts-silero` (bearer-only, internal)
   - `tts-openvoice` (bearer-only, internal)
 - **Roles**:
@@ -1193,7 +1193,7 @@ func (k *KeycloakAuthProvider) Authenticate(username, password string) (*User, e
   - Session and token settings
 - [x] Create pre-configured realm JSON (keycloak/biblio-realm.json)
   - Realm: biblio with all settings
-  - 5 Clients: nginx-gateway, abb-tts, opds-server, tts-silero, tts-openvoice
+  - 5 Clients: nginx-gateway, abb-tts, biblio-catalog, tts-silero, tts-openvoice
   - 2 Roles: user, admin
   - 2 Test users: testadmin/admin123, testuser/user123
   - Session timeouts: 30min access, 8hr session
@@ -1242,7 +1242,7 @@ func (k *KeycloakAuthProvider) Authenticate(username, password string) (*User, e
   - Implement authorization code flow
   - Add session management
   - Add login/logout endpoints
-- [ ] Implement Keycloak integration in OPDS Server
+- [ ] Implement Keycloak integration in Biblio Catalog
   - Add OAuth 2.0 support alongside existing Basic Auth
   - Implement dual auth mode (Keycloak + internal)
   - Add `AUTH_MODE` environment variable
