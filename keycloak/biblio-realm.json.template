@@ -93,10 +93,10 @@
       "directAccessGrantsEnabled": true,
       "serviceAccountsEnabled": false,
       "protocol": "openid-connect",
-      "rootUrl": "http://localhost:9900",
+      "rootUrl": "http://${BIBLIO_HUB_HOSTNAME}:${BIBLIO_HUB_PORT}",
       "baseUrl": "/",
-      "redirectUris": ["http://localhost:9900/*"],
-      "webOrigins": ["http://localhost:9900"],
+      "redirectUris": ["http://${BIBLIO_HUB_HOSTNAME}:${BIBLIO_HUB_PORT}/*"],
+      "webOrigins": ["http://${BIBLIO_HUB_HOSTNAME}:${BIBLIO_HUB_PORT}"],
       "attributes": {
         "pkce.code.challenge.method": "S256"
       }
@@ -113,10 +113,10 @@
       "directAccessGrantsEnabled": true,
       "serviceAccountsEnabled": false,
       "protocol": "openid-connect",
-      "rootUrl": "http://localhost:9900/abb-tts",
+      "rootUrl": "http://${BIBLIO_HUB_HOSTNAME}:${BIBLIO_HUB_PORT}/abb-tts",
       "baseUrl": "/",
-      "redirectUris": ["http://localhost:9900/abb-tts/*"],
-      "webOrigins": ["http://localhost:9900"],
+      "redirectUris": ["http://${BIBLIO_HUB_HOSTNAME}:${BIBLIO_HUB_PORT}/abb-tts/*"],
+      "webOrigins": ["http://${BIBLIO_HUB_HOSTNAME}:${BIBLIO_HUB_PORT}"],
       "attributes": {
         "pkce.code.challenge.method": "S256"
       }
@@ -134,15 +134,13 @@
       "directAccessGrantsEnabled": true,
       "serviceAccountsEnabled": false,
       "protocol": "openid-connect",
-      "rootUrl": "http://localhost:9900/catalog",
+      "rootUrl": "http://${BIBLIO_HUB_HOSTNAME}:${BIBLIO_HUB_PORT}/catalog",
       "baseUrl": "/",
       "redirectUris": [
-        "http://10.100.0.4:9900/catalog/api/auth/oidc/callback",
-        "http://localhost:9900/catalog/api/auth/oidc/callback"
+        "http://${BIBLIO_HUB_HOSTNAME}:${BIBLIO_HUB_PORT}/catalog/api/auth/oidc/callback"
       ],
       "webOrigins": [
-        "http://10.100.0.4:9900",
-        "http://localhost:9900"
+        "http://${BIBLIO_HUB_HOSTNAME}:${BIBLIO_HUB_PORT}"
       ],
       "protocolMappers": [
         {
