@@ -48,32 +48,32 @@
   },
   "users": [
     {
-      "username": "testadmin",
+      "username": "admin",
       "enabled": true,
       "emailVerified": true,
-      "firstName": "Test",
-      "lastName": "Admin",
+      "firstName": "Admin",
+      "lastName": "User",
       "email": "admin@bibliohub.local",
       "credentials": [
         {
           "type": "password",
-          "value": "admin123",
+          "value": "${BIBLIO_ADMIN_PASSWORD}",
           "temporary": false
         }
       ],
       "realmRoles": ["user", "admin", "opds_user"]
     },
     {
-      "username": "testuser",
+      "username": "user",
       "enabled": true,
       "emailVerified": true,
-      "firstName": "Test",
+      "firstName": "Regular",
       "lastName": "User",
       "email": "user@bibliohub.local",
       "credentials": [
         {
           "type": "password",
-          "value": "user123",
+          "value": "${BIBLIO_USER_PASSWORD}",
           "temporary": false
         }
       ],
