@@ -187,6 +187,9 @@ services:
       - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD:-admin}
       - KC_HEALTH_ENABLED=true
       - KC_METRICS_ENABLED=true
+      - BIBLIO_HUB_HOSTNAME=${BIBLIO_HUB_HOSTNAME:-localhost}
+      - BIBLIO_HUB_PORT=${BIBLIO_HUB_PORT:-9900}
+      - OPDS_OIDC_CLIENT_SECRET=${OPDS_OIDC_CLIENT_SECRET:-opds-server-secret-key-2026}
     networks:
       - bibliohub-backend
     depends_on:
