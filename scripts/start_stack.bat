@@ -20,6 +20,11 @@ if exist "%HUB_DIR%\.env" (
     )
 )
 
+REM Set defaults for hub URL
+if not defined BIBLIO_HUB_HOSTNAME set "BIBLIO_HUB_HOSTNAME=localhost"
+if not defined BIBLIO_HUB_PORT set "BIBLIO_HUB_PORT=9900"
+set "HUB_URL=http://!BIBLIO_HUB_HOSTNAME!:!BIBLIO_HUB_PORT!"
+
 echo ==========================================
 echo   BiblioHub - Starting Stack
 echo ==========================================
@@ -123,7 +128,7 @@ if "!all_ready!"=="true" (
     echo   BiblioHub is ready!
     echo ==========================================
     echo.
-    echo   Access the hub at: http://localhost:9900
+    echo   Access the hub at: !HUB_URL!
     echo.
     echo   Use 'scripts\stop_stack.bat' to stop the stack
     goto :end
