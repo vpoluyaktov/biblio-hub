@@ -22,7 +22,7 @@ FROM quay.io/keycloak/keycloak:23.0
 COPY --from=builder /opt/keycloak/ /opt/keycloak/
 
 # Copy realm template and entrypoint script
-COPY biblio-realm.json.template /opt/keycloak/data/import/biblio-realm.json.template
+COPY biblio-realm-template.json /opt/keycloak/data/import/biblio-realm-template.json
 COPY docker-entrypoint.sh /opt/keycloak/docker-entrypoint.sh
 
 # Switch to root to set permissions
