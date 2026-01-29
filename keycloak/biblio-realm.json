@@ -130,8 +130,8 @@
       "rootUrl": "http://localhost:9900/catalog",
       "baseUrl": "/",
       "redirectUris": [
-        "http://10.100.0.4:9900/catalog/api/auth/keycloak/callback",
-        "http://localhost:9900/catalog/api/auth/keycloak/callback"
+        "http://10.100.0.4:9900/catalog/api/auth/oidc/callback",
+        "http://localhost:9900/catalog/api/auth/oidc/callback"
       ],
       "webOrigins": [
         "http://10.100.0.4:9900",
