@@ -52,26 +52,76 @@ echo "Deploying stack '$STACK_NAME'..."
 cd "$HUB_DIR"
 docker stack deploy -c stack.yaml --resolve-image always "$STACK_NAME"
 
-echo ""
-echo "Waiting for services to start..."
-sleep 5
+# Define services to monitor (excluding replicated GPU services that scale dynamically)
+CORE_SERVICES="keycloak-db keycloak nginx-gateway opds-server abb-tts"
+MAX_WAIT=180  # Maximum wait time in seconds
+POLL_INTERVAL=5
 
 echo ""
 echo "=========================================="
-echo "  Stack Status"
+echo "  Waiting for services to start..."
 echo "=========================================="
-docker stack services "$STACK_NAME"
+echo ""
+
+start_time=$(date +%s)
+all_ready=false
+
+while [ "$all_ready" = false ]; do
+    current_time=$(date +%s)
+    elapsed=$((current_time - start_time))
+    
+    if [ $elapsed -ge $MAX_WAIT ]; then
+        echo ""
+        echo "⚠️  Timeout waiting for services (${MAX_WAIT}s). Some services may still be starting."
+        echo "    Check status with: docker stack services $STACK_NAME"
+        break
+    fi
+    
+    all_ready=true
+    status_line=""
+    
+    for service in $CORE_SERVICES; do
+        full_name="${STACK_NAME}_${service}"
+        # Get replicas in format "current/desired"
+        replicas=$(docker service ls --filter "name=${full_name}" --format "{{.Replicas}}" 2>/dev/null | head -1)
+        
+        if [ -z "$replicas" ]; then
+            status_line="${status_line}${service}: ⏳  "
+            all_ready=false
+        else
+            current=$(echo "$replicas" | cut -d'/' -f1)
+            desired=$(echo "$replicas" | cut -d'/' -f2)
+            
+            if [ "$current" = "$desired" ] && [ "$current" != "0" ]; then
+                status_line="${status_line}${service}: ✓  "
+            else
+                status_line="${status_line}${service}: ${current}/${desired}  "
+                all_ready=false
+            fi
+        fi
+    done
+    
+    # Print status on same line (overwrite)
+    printf "\r%-100s" "$status_line"
+    
+    if [ "$all_ready" = false ]; then
+        sleep $POLL_INTERVAL
+    fi
+done
 
 echo ""
-echo "=========================================="
-echo "  BiblioHub is starting!"
-echo "=========================================="
 echo ""
-echo "Access points:"
-echo "  - Landing Page:    http://localhost:9900"
-echo "  - ABB_TTS:         http://localhost:9901"
-echo "  - TTS_SILERO:      http://localhost:9902"
-echo "  - OPDS Server:     http://localhost:9903"
-echo "  - TTS_OPENVOICE:   http://localhost:9904"
-echo ""
-echo "Use './scripts/stop_stack.sh' to stop the stack"
+
+if [ "$all_ready" = true ]; then
+    echo "=========================================="
+    echo "  ✓ BiblioHub is ready!"
+    echo "=========================================="
+    echo ""
+    echo "  Access the hub at: http://localhost:9900"
+    echo ""
+    echo "  Use './scripts/stop_stack.sh' to stop the stack"
+else
+    echo ""
+    echo "  Partial startup - access the hub at: http://localhost:9900"
+    echo "  Use './scripts/stop_stack.sh' to stop the stack"
+fi

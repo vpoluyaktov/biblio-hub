@@ -37,6 +37,12 @@
         "description": "BiblioHub administrator - full access including user management",
         "composite": false,
         "clientRole": false
+      },
+      {
+        "name": "opds_user",
+        "description": "OPDS feed access - allows Basic Auth access to OPDS feeds",
+        "composite": false,
+        "clientRole": false
       }
     ]
   },
@@ -55,7 +61,7 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["user", "admin"]
+      "realmRoles": ["user", "admin", "opds_user"]
     },
     {
       "username": "testuser",
@@ -71,7 +77,7 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["user"]
+      "realmRoles": ["user", "opds_user"]
     }
   ],
   "clients": [
@@ -121,6 +127,7 @@
       "description": "OPDS Server frontend",
       "enabled": true,
       "publicClient": false,
+      "secret": "opds-server-secret-key-2026",
       "bearerOnly": false,
       "standardFlowEnabled": true,
       "implicitFlowEnabled": false,
