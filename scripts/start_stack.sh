@@ -52,76 +52,136 @@ echo "Deploying stack '$STACK_NAME'..."
 cd "$HUB_DIR"
 docker stack deploy -c stack.yaml --resolve-image always "$STACK_NAME"
 
-# Define services to monitor (excluding replicated GPU services that scale dynamically)
-CORE_SERVICES="keycloak-db keycloak nginx-gateway opds-server abb-tts"
+# All services to monitor
+ALL_SERVICES="keycloak-db keycloak nginx-gateway opds-server abb-tts tts-silero tts-openvoice"
 MAX_WAIT=180  # Maximum wait time in seconds
-POLL_INTERVAL=5
+POLL_INTERVAL=3
+
+# Function to get service status
+get_service_status() {
+    local service=$1
+    local full_name="${STACK_NAME}_${service}"
+    
+    # Get replicas in format "current/desired"
+    local replicas=$(docker service ls --filter "name=${full_name}" --format "{{.Replicas}}" 2>/dev/null | head -1)
+    
+    if [ -z "$replicas" ]; then
+        echo "Pending"
+        return
+    fi
+    
+    local current=$(echo "$replicas" | cut -d'/' -f1)
+    local desired=$(echo "$replicas" | cut -d'/' -f2)
+    
+    if [ "$current" = "$desired" ] && [ "$current" != "0" ]; then
+        echo "Ready"
+    else
+        # Check for failed tasks (more than 3 failed attempts)
+        local failed=$(docker service ps "${full_name}" --filter "desired-state=shutdown" --format "{{.Error}}" 2>/dev/null | wc -l)
+        if [ "${failed:-0}" -gt 3 ]; then
+            echo "Failed"
+        else
+            echo "Starting"
+        fi
+    fi
+}
+
+# Function to print service status table
+print_status_table() {
+    local has_failed=false
+    local all_ready=true
+    
+    # Clear screen and move cursor to top
+    printf "\033[H\033[J"
+    
+    echo "=========================================="
+    echo "  BiblioHub - Service Status"
+    echo "=========================================="
+    echo ""
+    printf "  %-20s %s\n" "SERVICE" "STATUS"
+    echo "  ----------------------------------------"
+    
+    for service in $ALL_SERVICES; do
+        local status=$(get_service_status "$service")
+        local status_icon=""
+        
+        case "$status" in
+            "Ready")
+                status_icon="\033[32m✓ Ready\033[0m"      # Green
+                ;;
+            "Starting")
+                status_icon="\033[33m◐ Starting...\033[0m" # Yellow
+                all_ready=false
+                ;;
+            "Failed")
+                status_icon="\033[31m✗ Failed\033[0m"      # Red
+                has_failed=true
+                ;;
+            "Pending")
+                status_icon="\033[90m○ Pending\033[0m"     # Gray
+                all_ready=false
+                ;;
+        esac
+        
+        printf "  %-20s %b\n" "$service" "$status_icon"
+    done
+    
+    echo ""
+    
+    # Return status: 0=all ready, 1=still starting, 2=has failures
+    if [ "$has_failed" = true ]; then
+        return 2
+    elif [ "$all_ready" = true ]; then
+        return 0
+    else
+        return 1
+    fi
+}
 
 echo ""
-echo "=========================================="
-echo "  Waiting for services to start..."
-echo "=========================================="
-echo ""
-
 start_time=$(date +%s)
-all_ready=false
 
-while [ "$all_ready" = false ]; do
+while true; do
     current_time=$(date +%s)
     elapsed=$((current_time - start_time))
     
-    if [ $elapsed -ge $MAX_WAIT ]; then
+    # Capture status code without triggering set -e
+    print_status_table && status_code=0 || status_code=$?
+    
+    if [ $status_code -eq 0 ]; then
+        # All services ready
+        echo "=========================================="
+        echo "  ✓ BiblioHub is ready!"
+        echo "=========================================="
         echo ""
-        echo "⚠️  Timeout waiting for services (${MAX_WAIT}s). Some services may still be starting."
-        echo "    Check status with: docker stack services $STACK_NAME"
+        echo "  Access the hub at: http://localhost:9900"
+        echo ""
+        echo "  Use './scripts/stop_stack.sh' to stop the stack"
+        break
+    elif [ $status_code -eq 2 ]; then
+        # Has failures
+        echo "=========================================="
+        echo "  ⚠ Some services failed to start"
+        echo "=========================================="
+        echo ""
+        echo "  Check logs with: docker service logs <service_name>"
+        echo "  Access the hub at: http://localhost:9900"
+        echo ""
+        echo "  Use './scripts/stop_stack.sh' to stop the stack"
+        break
+    elif [ $elapsed -ge $MAX_WAIT ]; then
+        # Timeout
+        echo "=========================================="
+        echo "  ⚠ Timeout waiting for services (${MAX_WAIT}s)"
+        echo "=========================================="
+        echo ""
+        echo "  Some services may still be starting."
+        echo "  Check status with: docker stack services $STACK_NAME"
+        echo "  Access the hub at: http://localhost:9900"
+        echo ""
+        echo "  Use './scripts/stop_stack.sh' to stop the stack"
         break
     fi
     
-    all_ready=true
-    status_line=""
-    
-    for service in $CORE_SERVICES; do
-        full_name="${STACK_NAME}_${service}"
-        # Get replicas in format "current/desired"
-        replicas=$(docker service ls --filter "name=${full_name}" --format "{{.Replicas}}" 2>/dev/null | head -1)
-        
-        if [ -z "$replicas" ]; then
-            status_line="${status_line}${service}: ⏳  "
-            all_ready=false
-        else
-            current=$(echo "$replicas" | cut -d'/' -f1)
-            desired=$(echo "$replicas" | cut -d'/' -f2)
-            
-            if [ "$current" = "$desired" ] && [ "$current" != "0" ]; then
-                status_line="${status_line}${service}: ✓  "
-            else
-                status_line="${status_line}${service}: ${current}/${desired}  "
-                all_ready=false
-            fi
-        fi
-    done
-    
-    # Print status on same line (overwrite)
-    printf "\r%-100s" "$status_line"
-    
-    if [ "$all_ready" = false ]; then
-        sleep $POLL_INTERVAL
-    fi
+    sleep $POLL_INTERVAL
 done
-
-echo ""
-echo ""
-
-if [ "$all_ready" = true ]; then
-    echo "=========================================="
-    echo "  ✓ BiblioHub is ready!"
-    echo "=========================================="
-    echo ""
-    echo "  Access the hub at: http://localhost:9900"
-    echo ""
-    echo "  Use './scripts/stop_stack.sh' to stop the stack"
-else
-    echo ""
-    echo "  Partial startup - access the hub at: http://localhost:9900"
-    echo "  Use './scripts/stop_stack.sh' to stop the stack"
-fi

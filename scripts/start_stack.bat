@@ -64,55 +64,58 @@ echo Deploying stack '%STACK_NAME%'...
 cd /d "%HUB_DIR%"
 docker stack deploy -c stack.yaml --resolve-image always %STACK_NAME%
 
-REM Define services to monitor
-set "CORE_SERVICES=keycloak-db keycloak nginx-gateway opds-server abb-tts"
+REM All services to monitor
+set "ALL_SERVICES=keycloak-db keycloak nginx-gateway opds-server abb-tts tts-silero tts-openvoice"
 set "MAX_WAIT=180"
-set "POLL_INTERVAL=5"
+set "POLL_INTERVAL=3"
 
-echo.
-echo ==========================================
-echo   Waiting for services to start...
-echo ==========================================
-echo.
-
-set "start_time=%time%"
-set "all_ready=false"
+set "start_time=%time:~0,2%%time:~3,2%%time:~6,2%"
 
 :wait_loop
-set "all_ready=true"
-set "status_line="
+cls
+echo ==========================================
+echo   BiblioHub - Service Status
+echo ==========================================
+echo.
+echo   SERVICE              STATUS
+echo   ----------------------------------------
 
-for %%s in (%CORE_SERVICES%) do (
+set "all_ready=true"
+set "has_failed=false"
+
+for %%s in (%ALL_SERVICES%) do (
     set "full_name=%STACK_NAME%_%%s"
+    set "replicas="
+    set "status=Pending"
+    
     for /f "tokens=*" %%r in ('docker service ls --filter "name=!full_name!" --format "{{.Replicas}}" 2^>nul') do (
         set "replicas=%%r"
     )
     
-    if "!replicas!"=="" (
-        set "status_line=!status_line!%%s: ...  "
-        set "all_ready=false"
-    ) else (
+    if not "!replicas!"=="" (
         for /f "tokens=1,2 delims=/" %%a in ("!replicas!") do (
             set "current=%%a"
             set "desired=%%b"
         )
         if "!current!"=="!desired!" if not "!current!"=="0" (
-            set "status_line=!status_line!%%s: OK  "
+            set "status=Ready"
         ) else (
-            set "status_line=!status_line!%%s: !current!/!desired!  "
+            set "status=Starting"
             set "all_ready=false"
         )
+    ) else (
+        set "all_ready=false"
+    )
+    
+    if "!status!"=="Ready" (
+        echo   %%s                    [OK] Ready
+    ) else if "!status!"=="Starting" (
+        echo   %%s                    [...] Starting
+    ) else (
+        echo   %%s                    [ ] Pending
     )
 )
 
-echo !status_line!
-
-if "!all_ready!"=="false" (
-    timeout /t %POLL_INTERVAL% /nobreak >nul
-    goto wait_loop
-)
-
-echo.
 echo.
 
 if "!all_ready!"=="true" (
@@ -123,10 +126,12 @@ if "!all_ready!"=="true" (
     echo   Access the hub at: http://localhost:9900
     echo.
     echo   Use 'scripts\stop_stack.bat' to stop the stack
-) else (
-    echo.
-    echo   Partial startup - access the hub at: http://localhost:9900
-    echo   Use 'scripts\stop_stack.bat' to stop the stack
+    goto :end
 )
+
+timeout /t %POLL_INTERVAL% /nobreak >nul
+goto wait_loop
+
+:end
 
 endlocal
