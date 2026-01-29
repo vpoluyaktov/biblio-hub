@@ -631,4 +631,726 @@ app = FastAPI(root_path=base_path)
 
 ---
 
+## In Progress: Keycloak Authentication Integration (feature/keycloak-authentication)
+
+### Problem Statement
+
+Currently, all services in the BiblioHub suite are publicly accessible without authentication:
+- No user management or access control
+- Cannot restrict access to specific users or groups
+- No audit trail of who accessed what
+- Not suitable for multi-tenant or shared hosting environments
+- Cannot implement role-based access control (RBAC)
+
+### Solution: Centralized Authentication with Keycloak
+
+Implement Keycloak as a centralized Identity and Access Management (IAM) solution that provides:
+- **Single Sign-On (SSO)**: Users authenticate once and access all services
+- **OAuth 2.0 / OpenID Connect**: Industry-standard authentication protocols
+- **User Management**: Built-in user registration, password policies, MFA
+- **Role-Based Access Control**: Define roles and permissions per service
+- **Social Login**: Optional integration with Google, GitHub, etc.
+- **Session Management**: Centralized session handling and logout
+
+### Architecture Overview
+
+```
+                    ┌─────────────────────────────────────────────────────────┐
+                    │                    Docker Swarm                          │
+                    │                                                          │
+    Internet        │   ┌─────────────────────────────────────┐               │
+        │           │   │   Nginx Gateway (:9900)             │               │
+        │           │   │   - Landing page (/)                │               │
+        │           │   │   - Auth check via auth_request     │               │
+        │           │   │   - Proxy /auth/* → Keycloak:8080  │               │
+        ▼           │   │   - Proxy /abb-tts/* → abb-tts:80  │               │
+    ┌───────┐       │   │   - Proxy /opds/* → opds-server:80 │               │
+    │ Users │◄─────►│   └─────────────────────────────────────┘               │
+    └───────┘       │                      │                                  │
+                    │          ┌───────────┼───────────────┐                  │
+                    │          ▼           ▼               ▼                  │
+                    │   ┌──────────┐ ┌──────────┐  ┌─────────────┐           │
+                    │   │ Keycloak │ │ Services │  │  Services   │           │
+                    │   │  :8080   │ │  :80     │  │   :80       │           │
+                    │   │(internal)│ │(protected)│  │ (protected) │           │
+                    │   └──────────┘ └──────────┘  └─────────────┘           │
+                    │        │                                                │
+                    │        ▼                                                │
+                    │   ┌──────────┐                                          │
+                    │   │ Postgres │  (Keycloak DB)                          │
+                    │   │  :5432   │                                          │
+                    │   └──────────┘                                          │
+                    │                                                          │
+                    └─────────────────────────────────────────────────────────┘
+```
+
+### Authentication Flow
+
+1. **User accesses protected resource** (e.g., `/abb-tts/`)
+2. **Nginx auth_request** checks authentication with Keycloak
+3. **If not authenticated**: Redirect to Keycloak login page (`/auth/realms/biblio/protocol/openid-connect/auth`)
+4. **User logs in** via Keycloak UI
+5. **Keycloak issues tokens**: Access token, ID token, refresh token
+6. **Nginx sets session cookie** and allows access to protected resource
+7. **Subsequent requests**: Nginx validates session cookie, no redirect needed
+
+### Pros
+
+#### Security & Access Control
+- ✅ **Industry-standard security**: OAuth 2.0 / OpenID Connect protocols
+- ✅ **Centralized authentication**: Single point of control for all services
+- ✅ **Role-based access control**: Fine-grained permissions per service
+- ✅ **Multi-factor authentication**: Built-in support for TOTP, WebAuthn
+- ✅ **Password policies**: Enforce complexity, expiration, history
+- ✅ **Brute force protection**: Account lockout, CAPTCHA support
+
+#### User Management
+- ✅ **Self-service**: User registration, password reset, profile management
+- ✅ **Social login**: Optional Google, GitHub, Facebook, etc.
+- ✅ **User federation**: LDAP/Active Directory integration
+- ✅ **Session management**: View active sessions, force logout
+- ✅ **Audit logs**: Track authentication events and access
+
+#### Developer Experience
+- ✅ **Well-documented**: Extensive documentation and community support
+- ✅ **Standard protocols**: OAuth 2.0, OpenID Connect, SAML 2.0
+- ✅ **Client libraries**: Available for Go, Python, JavaScript, etc.
+- ✅ **Admin UI**: Web-based configuration and management
+- ✅ **REST API**: Programmatic configuration and user management
+
+#### Scalability
+- ✅ **Horizontal scaling**: Can run multiple Keycloak replicas
+- ✅ **Session clustering**: Shared sessions across replicas
+- ✅ **Database-backed**: Persistent user data and configuration
+- ✅ **Caching**: Built-in caching for performance
+
+### Cons
+
+#### Complexity
+- ❌ **Additional service**: Adds Keycloak + PostgreSQL to the stack
+- ❌ **Learning curve**: OAuth 2.0 / OpenID Connect concepts
+- ❌ **Configuration overhead**: Realm, clients, roles, mappers setup
+- ❌ **Debugging complexity**: More moving parts, token validation, etc.
+
+#### Resource Usage
+- ❌ **Memory footprint**: Keycloak requires ~512MB-1GB RAM minimum
+- ❌ **Database required**: PostgreSQL adds ~100-200MB RAM
+- ❌ **Storage**: Database persistence, session storage
+- ❌ **CPU overhead**: Token generation, validation, encryption
+
+#### Operational Overhead
+- ❌ **Backup/restore**: Need to backup Keycloak database
+- ❌ **Updates/patches**: Keep Keycloak updated for security
+- ❌ **Monitoring**: Additional service to monitor and maintain
+
+#### User Experience
+- ❌ **Extra login step**: Users must authenticate before accessing services
+- ❌ **Session timeouts**: Users may need to re-authenticate periodically
+- ❌ **Redirect flow**: Initial redirect to Keycloak login page
+- ❌ **Cookie requirements**: Browsers must accept cookies
+
+### Implementation Difficulty
+
+**Overall Difficulty**: ⭐⭐⭐⭐ (Moderate to High)
+
+#### Phase 1: Keycloak Setup (Easy) ⭐⭐
+- Add Keycloak and PostgreSQL to `stack.yaml`
+- Configure environment variables
+- Create initial realm and admin user
+- **Estimated effort**: 2-4 hours
+
+#### Phase 2: Nginx Integration (Moderate) ⭐⭐⭐
+- Configure `auth_request` directive in nginx
+- Implement token validation endpoint
+- Handle authentication redirects
+- Set up session cookies
+- **Estimated effort**: 4-8 hours
+
+#### Phase 3: Service Integration (Moderate to High) ⭐⭐⭐⭐
+- **Go services (ABB-TTS, OPDS)**: Add OAuth 2.0 middleware
+  - Token validation
+  - User context extraction
+  - Role-based authorization
+- **Python services (TTS Silero, TTS OpenVoice)**: Add OIDC middleware
+  - FastAPI security dependencies
+  - Token validation
+- **Estimated effort**: 8-16 hours
+
+#### Phase 4: Frontend Updates (Easy) ⭐⭐
+- Add login/logout buttons
+- Handle authentication redirects
+- Display user information
+- **Estimated effort**: 2-4 hours
+
+#### Phase 5: Testing & Documentation (Moderate) ⭐⭐⭐
+- Test authentication flows
+- Test role-based access
+- Update documentation
+- Create user guides
+- **Estimated effort**: 4-8 hours
+
+**Total Estimated Effort**: 20-40 hours
+
+### Potential Catches & Challenges
+
+#### 1. WebSocket Authentication
+**Challenge**: WebSocket connections don't support standard HTTP headers for authentication.
+
+**Solutions**:
+- Pass token as query parameter: `ws://host/api/ws?token=xxx`
+- Use cookie-based authentication (already set by nginx)
+- Implement token validation in WebSocket upgrade handler
+
+**Recommendation**: Use cookie-based authentication (simplest for browser clients)
+
+#### 2. API Client Authentication
+**Challenge**: Non-browser clients (CLI tools, scripts) need to authenticate.
+
+**Solutions**:
+- Service accounts with client credentials flow
+- API keys mapped to Keycloak users
+- Direct token endpoint access for programmatic clients
+
+**Recommendation**: Implement both service accounts and API key support
+
+#### 3. Internal Service Communication
+**Challenge**: Services communicate internally (ABB-TTS → TTS servers, OPDS).
+
+**Solutions**:
+- **Option A**: Bypass authentication for internal network traffic
+- **Option B**: Use service accounts with client credentials
+- **Option C**: Use mutual TLS for service-to-service auth
+
+**Recommendation**: Option A (simplest) - internal services on backend network don't require auth
+
+#### 4. Session Management
+**Challenge**: Managing session timeouts and refresh tokens.
+
+**Solutions**:
+- Configure appropriate session timeouts in Keycloak
+- Implement token refresh logic in frontend
+- Use refresh tokens for long-lived sessions
+
+**Recommendation**: 30-minute access token, 8-hour refresh token, 24-hour session
+
+#### 5. OPDS Client Compatibility
+**Challenge**: OPDS readers (Calibre, FBReader, etc.) may not support OAuth 2.0.
+
+**Solutions**:
+- Implement HTTP Basic Auth for OPDS endpoints
+- Map Basic Auth credentials to Keycloak users
+- Provide API keys for OPDS clients
+
+**Recommendation**: Implement Basic Auth proxy for OPDS compatibility
+
+#### 6. Database Persistence
+**Challenge**: Keycloak database must be backed up and persistent.
+
+**Solutions**:
+- Use Docker volume for PostgreSQL data
+- Implement regular backup strategy
+- Document restore procedures
+
+**Recommendation**: Add PostgreSQL volume to `stack.yaml`, document backup procedures
+
+#### 7. Initial Setup Complexity
+**Challenge**: First-time setup requires manual Keycloak configuration.
+
+**Solutions**:
+- Provide realm export/import JSON
+- Create setup script for initial configuration
+- Document step-by-step setup process
+
+**Recommendation**: Provide pre-configured realm JSON and automated setup script
+
+#### 8. SSL/TLS Requirements
+**Challenge**: OAuth 2.0 typically requires HTTPS in production for external access.
+
+**Solutions**:
+- Internal Docker Swarm communication (backend network) does not require SSL/TLS
+- Only nginx gateway needs SSL/TLS for external internet access
+- Use Let's Encrypt with Traefik or Certbot for production
+- HTTP is acceptable for development and internal-only deployments
+
+**Recommendation**: SSL/TLS only needed at nginx gateway level, not between internal services
+
+#### 9. Performance Impact
+**Challenge**: Token validation adds latency to every request.
+
+**Solutions**:
+- Cache validated tokens in nginx
+- Use short-lived tokens with refresh
+- Optimize token validation endpoint
+
+**Recommendation**: Implement nginx token caching with 5-minute TTL
+
+#### 10. Migration Path
+**Challenge**: Existing deployments have no authentication.
+
+**Solutions**:
+- Make authentication optional via environment variable
+- Provide migration guide for existing users
+- Support gradual rollout (some services protected, others open)
+
+**Recommendation**: Add `AUTH_ENABLED=false` flag for backward compatibility
+
+#### 11. OPDS Server Dual Authentication Mode
+**Challenge**: OPDS server already has internal authentication (SQLite database with users, roles, sessions). Need to support both standalone deployment (internal auth) and BiblioHub deployment (Keycloak).
+
+**Current OPDS Authentication Features**:
+- SQLite-based user database with bcrypt password hashing
+- Two roles: `admin` and `readonly`
+- Session-based authentication (30-day sessions)
+- HTTP Basic Auth support for OPDS readers (Calibre, FBReader, etc.)
+- User management API (create, update, delete users)
+- CLI tool for user creation
+- Setup wizard for first-time configuration
+
+**Solutions**:
+- **Option A**: Authentication mode selection via environment variable
+  - `AUTH_MODE=internal` (default) - Use internal SQLite database
+  - `AUTH_MODE=keycloak` - Use Keycloak for authentication
+  - Implement authentication adapter pattern
+  
+- **Option B**: Dual authentication with fallback
+  - Try Keycloak first, fall back to internal database
+  - Allows gradual migration
+  - More complex to maintain
+  
+- **Option C**: Keycloak-only with user migration
+  - Migrate existing users to Keycloak
+  - Deprecate internal authentication
+  - Simplest long-term solution
+
+**Recommendation**: Option A (mode selection) for maximum flexibility
+
+**Implementation Details**:
+```go
+type AuthProvider interface {
+    Authenticate(username, password string) (*User, error)
+    ValidateSession(sessionID string) (*User, error)
+    CreateSession(userID int64) (*Session, error)
+    // ... other auth methods
+}
+
+type InternalAuthProvider struct {
+    db *db.DB
+    // existing auth.Auth implementation
+}
+
+type KeycloakAuthProvider struct {
+    keycloakURL string
+    realm       string
+    clientID    string
+    // Keycloak client
+}
+
+// Factory function
+func NewAuthProvider(mode string, config *Config) AuthProvider {
+    switch mode {
+    case "keycloak":
+        return &KeycloakAuthProvider{...}
+    default:
+        return &InternalAuthProvider{...}
+    }
+}
+```
+
+**Benefits**:
+- ✅ Standalone OPDS deployments continue using internal auth
+- ✅ BiblioHub deployments can use centralized Keycloak
+- ✅ No breaking changes for existing users
+- ✅ Easy to test both modes
+- ✅ Clear separation of concerns
+
+**OPDS Client Basic Auth Compatibility (Keycloak Mode)**:
+
+Most OPDS readers (Calibre, FBReader, Moon+ Reader, KOReader, etc.) only support HTTP Basic Auth - they cannot perform OAuth 2.0 redirects or handle token-based authentication. When `AUTH_MODE=keycloak`, we need a **Basic Auth to Keycloak bridge**.
+
+**Solution**: Use Keycloak's **Resource Owner Password Credentials (ROPC)** grant to validate Basic Auth credentials directly against Keycloak's user database:
+
+```go
+// KeycloakAuthProvider - Basic Auth validation via ROPC grant
+func (k *KeycloakAuthProvider) Authenticate(username, password string) (*User, error) {
+    // Exchange username/password for token via Keycloak's token endpoint
+    // POST /realms/{realm}/protocol/openid-connect/token
+    resp, err := http.PostForm(
+        k.keycloakURL+"/realms/"+k.realm+"/protocol/openid-connect/token",
+        url.Values{
+            "grant_type": {"password"},
+            "client_id":  {k.clientID},
+            "username":   {username},
+            "password":   {password},
+        })
+    
+    if err != nil || resp.StatusCode != 200 {
+        return nil, ErrInvalidCredentials
+    }
+    
+    // Parse access token, extract user info and roles from JWT claims
+    var tokenResp struct {
+        AccessToken string `json:"access_token"`
+    }
+    json.NewDecoder(resp.Body).Decode(&tokenResp)
+    
+    // Decode JWT to get user info (sub, preferred_username, roles)
+    user := extractUserFromToken(tokenResp.AccessToken)
+    return user, nil
+}
+```
+
+**Authentication Flow by Client Type**:
+
+| Auth Mode | Browser/Web UI | OPDS Readers (Calibre, etc.) |
+|-----------|---------------|------------------------------|
+| `internal` | Session cookie → SQLite | Basic Auth → SQLite |
+| `keycloak` | Keycloak OAuth redirect | Basic Auth → Keycloak ROPC |
+
+**Key Points**:
+- OPDS readers continue using Basic Auth credentials as before
+- Credentials are validated against Keycloak instead of SQLite
+- Users are managed in Keycloak (single source of truth)
+- Roles from Keycloak are mapped to OPDS roles (`admin`, `readonly`)
+- No changes required on OPDS client side
+
+**Keycloak Configuration for ROPC**:
+- Enable "Direct Access Grants" on the OPDS client in Keycloak
+- This allows the password grant type for Basic Auth validation
+- Note: ROPC is considered less secure than authorization code flow, but necessary for legacy clients
+
+**Applies to Other Services**:
+- ABB-TTS currently has no authentication - only needs Keycloak mode
+- TTS servers are internal-only - no authentication needed
+- Same pattern can be applied if other services add standalone auth later
+
+### Implementation Approach
+
+#### Two-Tier Strategy
+
+**Tier 1: Gateway-Level Authentication (Recommended First)**
+- Nginx handles all authentication via `auth_request`
+- Services remain unchanged (no code modifications)
+- Simpler implementation, faster deployment
+- Good for protecting entire application
+
+**Tier 2: Service-Level Authentication (Optional Enhancement)**
+- Each service validates tokens independently
+- Enables fine-grained authorization
+- Required for API clients and service-to-service auth
+- More complex but more flexible
+
+**Recommendation**: Start with Tier 1, add Tier 2 as needed
+
+### Configuration Requirements
+
+#### Keycloak Configuration
+- **Realm**: `biblio`
+- **Clients**:
+  - `nginx-gateway` (confidential, for nginx auth_request)
+  - `abb-tts` (public, for frontend)
+  - `opds-server` (public, for frontend)
+  - `tts-silero` (bearer-only, internal)
+  - `tts-openvoice` (bearer-only, internal)
+- **Roles**:
+  - `user` (default, access to all services)
+  - `admin` (administrative access)
+  - Service-specific roles as needed
+
+#### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `AUTH_ENABLED` | Enable/disable authentication at gateway | `false` |
+| `AUTH_MODE` | Authentication mode (internal/keycloak) | `internal` |
+| `KEYCLOAK_URL` | Keycloak base URL | `http://keycloak:8080` |
+| `KEYCLOAK_REALM` | Keycloak realm name | `biblio` |
+| `KEYCLOAK_CLIENT_ID` | Client ID for service | (service-specific) |
+| `KEYCLOAK_CLIENT_SECRET` | Client secret | (generated) |
+
+### Stack Changes Required
+
+#### New Services
+- `keycloak`: Keycloak server (port 8080, internal)
+- `keycloak-db`: PostgreSQL database (port 5432, internal)
+
+#### Modified Services
+- `nginx-gateway`: Add auth_request configuration
+- All services: Add `AUTH_ENABLED` environment variable
+
+#### New Volumes
+- `keycloak-db-data`: PostgreSQL data persistence
+
+### Testing Strategy
+
+#### Manual Testing
+- [ ] User registration and login
+- [ ] Access protected services
+- [ ] Logout and session termination
+- [ ] Token refresh
+- [ ] Role-based access control
+- [ ] WebSocket authentication
+- [ ] OPDS client authentication
+- [ ] API client authentication
+
+#### Automated Testing
+- [ ] Integration tests for authentication flows
+- [ ] Token validation tests
+- [ ] Authorization tests
+- [ ] Session management tests
+
+### Documentation Requirements
+
+- [ ] Setup guide for Keycloak
+- [ ] User guide for authentication
+- [ ] Developer guide for token validation
+- [ ] API client authentication guide
+- [ ] OPDS client configuration guide
+- [ ] Troubleshooting guide
+- [ ] Security best practices
+
+### Migration Path
+
+1. **Phase 1**: Deploy Keycloak alongside existing services (auth disabled)
+2. **Phase 2**: Test authentication with `AUTH_ENABLED=true` on staging
+3. **Phase 3**: Enable authentication on production with user notification
+4. **Phase 4**: Migrate existing users (if any user data exists)
+5. **Phase 5**: Remove `AUTH_ENABLED` flag after stable period
+
+### Alternative Solutions Considered
+
+#### 1. OAuth2 Proxy
+- **Pros**: Simpler, lightweight, nginx-focused
+- **Cons**: No user management UI, limited features
+- **Verdict**: Good for simple use cases, but Keycloak offers more features
+
+#### 2. Authelia
+- **Pros**: Lightweight, Docker-native, good documentation
+- **Cons**: Less mature, smaller community, fewer features
+- **Verdict**: Good alternative, but Keycloak is more established
+
+#### 3. Custom Authentication Service
+- **Pros**: Full control, minimal dependencies
+- **Cons**: High development effort, security risks, maintenance burden
+- **Verdict**: Not recommended unless very specific requirements
+
+#### 4. Basic HTTP Authentication
+- **Pros**: Simple, built-in nginx support
+- **Cons**: No user management, no SSO, credentials in every request
+- **Verdict**: Too basic for multi-service suite
+
+### Recommendation
+
+**Proceed with Keycloak integration** using the two-tier approach:
+
+1. **Start with Tier 1** (Gateway-level authentication)
+   - Faster implementation
+   - Protects all services immediately
+   - No service code changes required
+   - Good for initial rollout
+
+2. **Add Tier 2 later** (Service-level authentication)
+   - When fine-grained authorization is needed
+   - For API client support
+   - For service-to-service authentication
+
+3. **Make authentication optional** via `AUTH_ENABLED` flag
+   - Backward compatibility
+   - Easier testing and development
+   - Gradual migration path
+
+4. **Provide comprehensive documentation**
+   - Setup guides for different scenarios
+   - User guides for authentication
+   - Troubleshooting guides
+
+### Implementation Steps
+
+#### Phase 1: Infrastructure Setup ✅ COMPLETED
+- [x] Create feature branch `feature/keycloak-authentication`
+- [x] Add Keycloak and PostgreSQL to `stack.yaml`
+- [x] Configure environment variables in `.env.example`
+- [x] Create data volumes in `start_stack.sh`
+- [x] Add nginx proxy configuration for `/auth/`
+- [x] Create custom Keycloak Dockerfile with `/auth` base path
+  - Multi-stage build using official Keycloak 23.0 image
+  - Pre-configured with `--http-relative-path=/auth` at build time
+  - No source code forking required
+  - Added to `rebuild_stack.sh` build and push steps
+- [x] Deploy and verify Keycloak is accessible
+  - Custom Keycloak image running successfully (1/1 replicas)
+  - PostgreSQL 16-alpine running (1/1 replicas)
+  - Accessible via http://localhost:9900/auth/
+  - Admin console at http://localhost:9900/auth/admin/
+  - Default credentials: admin/admin
+  - Base path `/auth` working correctly
+
+#### Phase 2: Keycloak Configuration ✅ COMPLETED
+- [x] Create comprehensive setup documentation (keycloak/SETUP.md)
+  - Step-by-step guide for realm creation
+  - Client configuration for all 5 services
+  - Role definitions (user, admin)
+  - Test user creation instructions
+  - Session and token settings
+- [x] Create pre-configured realm JSON (keycloak/biblio-realm.json)
+  - Realm: biblio with all settings
+  - 5 Clients: nginx-gateway, abb-tts, opds-server, tts-silero, tts-openvoice
+  - 2 Roles: user, admin
+  - 2 Test users: testadmin/admin123, testuser/user123
+  - Session timeouts: 30min access, 8hr session
+- [x] Update Dockerfile to include realm import
+  - Realm JSON copied to /opt/keycloak/data/import/
+  - --import-realm flag added to startup command
+- [x] Import realm via CLI and verify
+  - Realm 'biblio' successfully imported
+  - All clients, roles, and users created
+  - OpenID Connect endpoints accessible
+
+#### Phase 3: Service-Level Authentication Documentation ✅ COMPLETED
+- [x] Evaluate authentication approaches (gateway vs service-level)
+  - Attempted OAuth2 Proxy for gateway-level auth
+  - Encountered OIDC issuer URL mismatch issues (internal vs external URLs)
+  - Decided on service-level authentication for simplicity
+- [x] Document service-level Keycloak integration patterns
+  - Created keycloak/SERVICE_INTEGRATION.md
+  - Pattern 1: Public clients (ABB-TTS, OPDS frontend)
+  - Pattern 2: Bearer-only clients (TTS services)
+  - Pattern 3: HTTP Basic Auth (OPDS for e-readers)
+- [x] Document OAuth2/OIDC flows for each service type
+  - Authorization Code flow for frontends
+  - Bearer token validation for internal services
+  - Resource Owner Password Credentials for Basic Auth
+- [x] Provide implementation examples in Go
+  - Session management
+  - Token refresh
+  - Single Sign-On (SSO)
+  - Logout flows
+- [x] Document security best practices
+  - Token validation
+  - Cookie security
+  - CSRF protection
+  - Error handling
+
+**Architecture Decision**: Service-level authentication chosen over gateway-level because:
+- ✅ Simpler - no OAuth2 Proxy complexity
+- ✅ More flexible - services can have different auth requirements
+- ✅ Better compatibility - works with existing service auth (OPDS Basic Auth)
+- ✅ Easier troubleshooting - services control their own auth flow
+
+#### Phase 4: Service Integration (Future) ⏳
+- [ ] Implement Keycloak integration in ABB-TTS
+  - Add OAuth 2.0 middleware
+  - Implement authorization code flow
+  - Add session management
+  - Add login/logout endpoints
+- [ ] Implement Keycloak integration in OPDS Server
+  - Add OAuth 2.0 support alongside existing Basic Auth
+  - Implement dual auth mode (Keycloak + internal)
+  - Add `AUTH_MODE` environment variable
+  - Maintain backward compatibility
+- [ ] Update TTS services for bearer token validation
+  - Add token verification middleware
+  - Extract user context from tokens
+  - Pass user info to downstream services
+
+#### Phase 5: Frontend Updates ⏳
+- [ ] Add login/logout buttons to landing page
+- [ ] Add admin-only "User Management" tile linking to Keycloak Admin Console
+- [ ] Update service UIs with user info
+- [ ] Handle authentication errors gracefully
+- [ ] Test user experience
+
+### Landing Page: Admin-Only User Management Tile
+
+Add a "User Management" tile to the BiblioHub landing page that links to Keycloak's Admin Console, visible only to users with admin role.
+
+**Tile Configuration**:
+```html
+<!-- User Management tile - visible to admins only -->
+<div class="tile admin-only" id="user-management-tile" style="display: none;">
+    <a href="/auth/admin/biblio/console/" target="_blank">
+        <div class="tile-icon">👥</div>
+        <h3>User Management</h3>
+        <p>Manage users, groups, and roles</p>
+    </a>
+</div>
+```
+
+**JavaScript Role Check**:
+```javascript
+// Check user role and show admin tile if authorized
+async function checkUserRole() {
+    try {
+        const response = await fetch('/auth/realms/biblio/protocol/openid-connect/userinfo');
+        if (response.ok) {
+            const userInfo = await response.json();
+            const roles = userInfo.realm_access?.roles || [];
+            
+            if (roles.includes('admin') || roles.includes('realm-admin')) {
+                document.getElementById('user-management-tile').style.display = 'block';
+            }
+        }
+    } catch (error) {
+        console.log('User not authenticated or error fetching user info');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', checkUserRole);
+```
+
+**Keycloak Admin Console URLs**:
+| URL | Description |
+|-----|-------------|
+| `/auth/admin/` | Full Admin Console (all realms) |
+| `/auth/admin/biblio/console/` | Biblio realm console only |
+| `/auth/admin/biblio/console/#/biblio/users` | Direct link to user management |
+
+**Security Layers** (Defense in Depth):
+
+1. **Frontend (UX)**: Tile hidden for non-admins via JavaScript
+2. **Keycloak (Authorization)**: Admin Console requires `realm-admin` or `admin` role
+3. **Optional Nginx (Gateway)**: Can block `/auth/admin/*` for non-admin users
+
+```nginx
+# Optional: Block admin console at gateway level
+location /auth/admin/ {
+    # Check for admin role in session/token
+    auth_request /auth/check-admin;
+    auth_request_set $auth_status $upstream_status;
+    
+    proxy_pass http://keycloak:8080;
+    # ... proxy headers
+}
+```
+
+**Role Mapping**:
+| Keycloak Role | Access Level |
+|---------------|--------------|
+| `realm-admin` | Full Keycloak Admin Console access |
+| `admin` | BiblioHub admin (can be mapped to realm-admin) |
+| `user` | Regular user (no admin console access) |
+
+**Benefits**:
+- ✅ Centralized user management via Keycloak UI
+- ✅ No custom admin UI development needed
+- ✅ Full-featured user/group/role management
+- ✅ Audit logging built into Keycloak
+- ✅ Self-service password reset for users
+- ✅ MFA configuration per user
+
+#### Phase 6: Documentation & Testing ⏳
+- [ ] Write setup documentation
+- [ ] Write user guides
+- [ ] Create troubleshooting guide
+- [ ] Perform integration testing
+- [ ] Update README.md
+
+#### Phase 7: Deployment & Migration ⏳
+- [ ] Test on staging environment
+- [ ] Create migration guide
+- [ ] Deploy to production
+- [ ] Monitor and fix issues
+- [ ] Gather user feedback
+
+---
+
 *Last updated: 2026-01-28*

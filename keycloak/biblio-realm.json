@@ -37,21 +37,9 @@
         "description": "BiblioHub administrator - full access including user management",
         "composite": false,
         "clientRole": false
-      },
-      {
-        "name": "opds_user",
-        "description": "OPDS feed access - for e-readers and service-to-service Basic Auth",
-        "composite": false,
-        "clientRole": false
       }
     ]
   },
-  "groups": [
-    {
-      "name": "opds_users",
-      "realmRoles": ["opds_user"]
-    }
-  ],
   "users": [
     {
       "username": "testadmin",
@@ -67,8 +55,7 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["user", "admin", "opds_user"],
-      "groups": ["opds_users"]
+      "realmRoles": ["user", "admin"]
     },
     {
       "username": "testuser",
@@ -84,8 +71,7 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["user", "opds_user"],
-      "groups": ["opds_users"]
+      "realmRoles": ["user"]
     }
   ],
   "clients": [

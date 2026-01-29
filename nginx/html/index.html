@@ -58,12 +58,22 @@
                     </a>
 
                     <a href="/tts-openvoice/" data-path="/tts-openvoice/" class="service-card" target="bibliohub-tts-openvoice">
-                        <div class="service-icon">�️</div>
+                        <div class="service-icon">🎙️</div>
                         <h3>TTS Server OpenVoice</h3>
                         <p>Multi-lingual text-to-speech powered by MeloTTS. Supports English (multiple accents), Spanish, French, Chinese, Japanese, and Korean.</p>
                         <div class="service-meta">
                             <span class="port">Path: /tts-openvoice/</span>
                             <span class="status" id="status-tts-openvoice">Checking...</span>
+                        </div>
+                    </a>
+
+                    <a href="/auth/admin/" class="service-card admin-card" target="bibliohub-keycloak">
+                        <div class="service-icon">👥</div>
+                        <h3>User Management</h3>
+                        <p>Manage users, roles, and authentication settings via Keycloak Admin Console. Configure clients, realms, and security policies.</p>
+                        <div class="service-meta">
+                            <span class="port">Path: /auth/admin/</span>
+                            <span class="status" id="status-keycloak">Checking...</span>
                         </div>
                     </a>
 
@@ -130,6 +140,7 @@
             checkServiceHealth('/catalog', 'status-opds', '/api/setup/check');
             checkServiceHealth('/tts-silero', 'status-tts-silero', '/health');
             checkServiceHealth('/tts-openvoice', 'status-tts-openvoice', '/health');
+            checkServiceHealth('/auth', 'status-keycloak', '/health');
         });
     </script>
 </body>
