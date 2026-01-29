@@ -296,6 +296,21 @@ BiblioHub uses Keycloak for centralized authentication:
 
 **OPDS Clients** (Calibre, FBReader, etc.) use HTTP Basic Auth, which is validated against Keycloak via Resource Owner Password Credentials (ROPC) grant.
 
+### OIDC Client Secret Configuration
+
+The `CATALOG_OIDC_CLIENT_SECRET` must match between Keycloak and Biblio Catalog:
+
+1. **Keycloak side**: The secret is defined in `keycloak/biblio-realm-template.json` and processed at container startup by `docker-entrypoint.sh`. If the env var is not set, it defaults to `biblio-catalog-secret-key-2026`.
+
+2. **Biblio Catalog side**: The secret is passed via `stack.yaml` from the `.env` file's `CATALOG_OIDC_CLIENT_SECRET` variable.
+
+**Important**: Both sides must use the same secret value. If you change the secret:
+- Update `.env` with the new `CATALOG_OIDC_CLIENT_SECRET` value
+- Delete `data/keycloak/db/*` to force realm reimport with new secret
+- Restart the stack with `./scripts/start_stack.sh`
+
+The Keycloak realm is only imported on first startup when the database is empty. Subsequent restarts use the existing database configuration.
+
 For detailed Keycloak setup and service integration patterns, see:
 - `keycloak/SETUP.md` - Manual configuration guide
 - `keycloak/SERVICE_INTEGRATION.md` - Integration patterns for each service type

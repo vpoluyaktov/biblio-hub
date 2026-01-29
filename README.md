@@ -84,7 +84,10 @@ TTS_OPENVOICE_REPLICAS=1
 
 # Authentication
 AUTH_MODE=oidc  # or 'internal' for standalone Biblio Catalog
+CATALOG_OIDC_CLIENT_SECRET=biblio-catalog-secret-key-2026
 ```
+
+**Note**: The `CATALOG_OIDC_CLIENT_SECRET` must match between Keycloak and Biblio Catalog. If you change it, delete `data/keycloak/db/*` to force realm reimport.
 
 See `.env.example` for all available options.
 
