@@ -16,6 +16,11 @@ if [ -f "$HUB_DIR/.env" ]; then
     set +a
 fi
 
+# Set defaults for hub URL
+BIBLIO_HUB_HOSTNAME="${BIBLIO_HUB_HOSTNAME:-localhost}"
+BIBLIO_HUB_PORT="${BIBLIO_HUB_PORT:-9900}"
+HUB_URL="http://${BIBLIO_HUB_HOSTNAME}:${BIBLIO_HUB_PORT}"
+
 echo "=========================================="
 echo "  BiblioHub - Starting Stack"
 echo "=========================================="
@@ -154,7 +159,7 @@ while true; do
         echo "  ✓ BiblioHub is ready!"
         echo "=========================================="
         echo ""
-        echo "  Access the hub at: http://localhost:9900"
+        echo "  Access the hub at: $HUB_URL"
         echo ""
         echo "  Use './scripts/stop_stack.sh' to stop the stack"
         break
@@ -165,7 +170,7 @@ while true; do
         echo "=========================================="
         echo ""
         echo "  Check logs with: docker service logs <service_name>"
-        echo "  Access the hub at: http://localhost:9900"
+        echo "  Access the hub at: $HUB_URL"
         echo ""
         echo "  Use './scripts/stop_stack.sh' to stop the stack"
         break
@@ -177,7 +182,7 @@ while true; do
         echo ""
         echo "  Some services may still be starting."
         echo "  Check status with: docker stack services $STACK_NAME"
-        echo "  Access the hub at: http://localhost:9900"
+        echo "  Access the hub at: $HUB_URL"
         echo ""
         echo "  Use './scripts/stop_stack.sh' to stop the stack"
         break
