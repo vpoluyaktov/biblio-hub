@@ -1,51 +1,39 @@
 # Service-Level Keycloak Integration Guide
 
-This guide explains how BiblioHub services integrate with Keycloak for authentication using service-level authentication rather than gateway-level authentication.
+This guide explains how BiblioHub services integrate with Keycloak for authentication.
 
 ## Architecture Overview
 
-**Service-Level Authentication** means each service handles its own authentication flow:
-- Each service checks if the user is authenticated
-- If not, the service redirects to Keycloak for login
-- After login, Keycloak redirects back to the service with an auth token
-- The service validates the token and creates a session
+Each service handles its own authentication flow:
+1. Service checks if user is authenticated
+2. If not, redirects to Keycloak for login
+3. Keycloak redirects back with auth token
+4. Service validates token and creates session
 
-**Benefits:**
-- ✅ Simpler architecture - no OAuth2 Proxy complexity
-- ✅ More flexible - services can have different auth requirements
-- ✅ Better error handling - services control the auth flow
-- ✅ Works with existing service auth implementations
+## Keycloak Endpoints
 
-## Keycloak Configuration
+| Endpoint | URL |
+|----------|-----|
+| **Issuer URL** | `http://${BIBLIO_HUB_HOSTNAME}:${BIBLIO_HUB_PORT}/auth/realms/biblio` |
+| **Authorization** | `{issuer}/protocol/openid-connect/auth` |
+| **Token** | `{issuer}/protocol/openid-connect/token` |
+| **Logout** | `{issuer}/protocol/openid-connect/logout` |
+| **UserInfo** | `{issuer}/protocol/openid-connect/userinfo` |
 
-### Realm: `biblio`
-- **Issuer URL**: `http://${BIBLIO_HUB_HOSTNAME}:${BIBLIO_HUB_PORT}/auth/realms/biblio`
-- **Admin Console**: `http://${BIBLIO_HUB_HOSTNAME}:${BIBLIO_HUB_PORT}/auth/admin/`
-- **Environment Variables**:
-  - `BIBLIO_HUB_HOSTNAME` - Hostname or IP where BiblioHub is accessible (default: `localhost`, dev: `10.100.0.4`)
-  - `BIBLIO_HUB_PORT` - Port where BiblioHub is accessible (default: `9900`)
+## Clients
 
-### Clients
+| Client ID | Type | Purpose |
+|-----------|------|---------|
+| `biblio-catalog` | Confidential | Biblio Catalog (OIDC + OPDS Basic Auth) |
+| `abb-tts` | Public | Audiobook Builder frontend |
+| `tts-silero` | Bearer-only | Internal TTS service |
+| `tts-openvoice` | Bearer-only | Internal TTS service |
 
-Each service has a client configured in Keycloak:
+## Roles
 
-| Client ID | Type | Access Type | Purpose |
-|-----------|------|-------------|---------|
-| `nginx-gateway` | Confidential | confidential | Reserved for future gateway auth |
-| `abb-tts` | Public | public | Audiobook Builder TTS frontend |
-| `biblio-catalog` | Public | public | Biblio Catalog (E-book library with OPDS) |
-| `tts-silero` | Bearer-only | bearer-only | Internal TTS service |
-| `tts-openvoice` | Bearer-only | bearer-only | Internal TTS service |
-
-### Roles
-
-- `user` - Regular BiblioHub user (default)
+- `user` - Regular BiblioHub user
 - `admin` - Administrator with full access
-
-### Test Users
-
-- **testadmin** / `admin123` - Has both `admin` and `user` roles
-- **testuser** / `user123` - Has `user` role only
+- `opds_user` - Required for OPDS feed access (e-readers)
 
 ## Integration Patterns
 
@@ -330,26 +318,34 @@ func handleLogout(w http.ResponseWriter, r *http.Request) {
 
 ### Manual Testing
 
-1. Access service: `http://localhost:9900/abb-tts/`
+1. Access service: `http://localhost:9900/catalog/`
 2. Should redirect to Keycloak login
-3. Login with `testuser` / `user123`
+3. Login with `hub_user` / (password from `.env`)
 4. Should redirect back to service
-5. Access another service: `http://localhost:9900/catalog/`
+5. Access another service: `http://localhost:9900/abb-tts/`
 6. Should auto-login (SSO)
 
-### API Testing
+### API Testing (OPDS Basic Auth)
 
 ```bash
-# Get access token
+# Test OPDS feed with Basic Auth
+curl -u opds_user:opds_user http://localhost:9900/catalog/opds/1
+```
+
+### API Testing (Bearer Token)
+
+```bash
+# Get access token via ROPC
 TOKEN=$(curl -s -X POST http://localhost:9900/auth/realms/biblio/protocol/openid-connect/token \
   -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "username=testuser" \
-  -d "password=user123" \
+  -d "username=hub_user" \
+  -d "password=hub_user" \
   -d "grant_type=password" \
-  -d "client_id=abb-tts" | jq -r '.access_token')
+  -d "client_id=biblio-catalog" \
+  -d "client_secret=biblio-catalog-secret-key-2026" | jq -r '.access_token')
 
 # Use token to access protected API
-curl -H "Authorization: Bearer $TOKEN" http://localhost:9900/abb-tts/api/books
+curl -H "Authorization: Bearer $TOKEN" http://localhost:9900/catalog/api/libraries
 ```
 
 ## References
