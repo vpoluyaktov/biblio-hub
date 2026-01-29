@@ -8,9 +8,9 @@ set -e
 export BIBLIO_HUB_HOSTNAME="${BIBLIO_HUB_HOSTNAME:-localhost}"
 export BIBLIO_HUB_PORT="${BIBLIO_HUB_PORT:-9900}"
 export OPDS_OIDC_CLIENT_SECRET="${OPDS_OIDC_CLIENT_SECRET:-opds-server-secret-key-2026}"
-export BIBLIO_HUB_ADMIN_PASSWORD="${BIBLIO_HUB_ADMIN_PASSWORD:-admin}"
-export BIBLIO_HUB_USER_PASSWORD="${BIBLIO_HUB_USER_PASSWORD:-user}"
-export BIBLIO_OPDS_USER_PASSWORD="${BIBLIO_OPDS_USER_PASSWORD:-opds}"
+export BIBLIO_HUB_ADMIN_PASSWORD="${BIBLIO_HUB_ADMIN_PASSWORD:-hub_admin}"
+export BIBLIO_HUB_USER_PASSWORD="${BIBLIO_HUB_USER_PASSWORD:-hub_user}"
+export BIBLIO_OPDS_USER_PASSWORD="${BIBLIO_OPDS_USER_PASSWORD:-opds_user}"
 
 TEMPLATE_FILE="/opt/keycloak/data/import/biblio-realm-template.json"
 OUTPUT_FILE="/opt/keycloak/data/import/biblio-realm.json"
