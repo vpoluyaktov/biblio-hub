@@ -5,78 +5,118 @@ This directory contains the custom Keycloak build and configuration files for Bi
 ## Files
 
 - **Dockerfile** - Custom Keycloak image with `/auth` base path
-- **SETUP.md** - Step-by-step guide for configuring Keycloak
-- **biblio-realm.json** - Exported realm configuration (created after setup)
+- **docker-entrypoint.sh** - Processes realm template with environment variables
+- **biblio-realm-template.json** - Pre-configured realm (auto-imported on first startup)
+- **SERVICE_INTEGRATION.md** - Integration patterns for developers
 
-## Quick Start
+## Overview
 
-### 1. Build Custom Keycloak Image
+The `biblio` realm is **automatically created** on first startup with:
+- Pre-configured clients for all services
+- Default roles (`user`, `admin`, `opds_user`)
+- Default users (configurable via `.env`)
 
-The custom image is built automatically by `scripts/rebuild_stack.sh`, or manually:
+No manual setup is required for basic operation.
 
-```bash
-docker build -t vpoluyaktov/bibliohub-keycloak:dev-latest .
-docker push vpoluyaktov/bibliohub-keycloak:dev-latest
-```
+## Access Points
 
-### 2. Deploy Stack
+| URL | Description |
+|-----|-------------|
+| http://localhost:9900/auth/ | Keycloak Welcome Page |
+| http://localhost:9900/auth/admin/ | Admin Console |
 
-```bash
-cd /home/ubuntu/git/biblio-hub
-./scripts/start_stack.sh
-```
+**Default Admin Credentials**: `admin` / `admin` (configurable via `KEYCLOAK_ADMIN_PASSWORD`)
 
-### 3. Configure Keycloak
+## Admin Console Guide
 
-Follow the detailed instructions in [SETUP.md](./SETUP.md) to:
-- Create the 'biblio' realm
-- Configure session and token settings
-- Create clients for each service
-- Define roles (user, admin)
-- Create test users
-- Export realm configuration
+### Logging In
 
-### 4. Access Points
+1. Go to http://localhost:9900/auth/admin/
+2. Login with admin credentials
+3. You'll be in the **Master** realm by default
 
-- **Keycloak Welcome**: http://localhost:9900/auth/
-- **Admin Console**: http://localhost:9900/auth/admin/
-- **Default Credentials**: admin/admin
+### Switching to Biblio Realm
 
-## Realm Configuration
+1. Click the dropdown in the top-left (shows "Master")
+2. Select **biblio**
+3. All BiblioHub configuration is in this realm
 
-### Clients
+### Adding a New User
+
+1. Switch to **biblio** realm
+2. Navigate to **Users** in the left menu
+3. Click **Add user**
+4. Fill in:
+   - **Username**: (required)
+   - **Email**: (optional)
+   - **First name** / **Last name**: (optional)
+   - **Email verified**: ON (skip email verification)
+   - **Enabled**: ON
+5. Click **Create**
+6. Go to **Credentials** tab:
+   - Click **Set password**
+   - Enter password
+   - **Temporary**: OFF (user won't be forced to change)
+   - Click **Save**
+
+### Assigning Roles to a User
+
+1. Go to **Users** → select user
+2. Click **Role mapping** tab
+3. Click **Assign role**
+4. Select roles:
+   - `user` - Regular access to all services
+   - `admin` - Full access including user management
+   - `opds_user` - Required for OPDS feed access (e-readers)
+5. Click **Assign**
+
+### Pre-configured Users
+
+| Username | Default Password | Roles | Purpose |
+|----------|------------------|-------|---------|
+| `hub_admin` | `${BIBLIO_HUB_ADMIN_PASSWORD}` | admin, user, opds_user | Administrator |
+| `hub_user` | `${BIBLIO_HUB_USER_PASSWORD}` | user, opds_user | Regular user |
+| `opds_user` | `${BIBLIO_OPDS_USER_PASSWORD}` | opds_user | E-reader OPDS access only |
+
+Passwords are set from `.env` file variables.
+
+## Pre-configured Clients
 
 | Client ID | Type | Purpose |
 |-----------|------|---------|
-| nginx-gateway | Confidential | Nginx auth_request integration |
-| abb-tts | Public | Audiobook Builder frontend |
-| biblio-catalog | Public | Biblio Catalog (E-book library with OPDS) |
-| tts-silero | Bearer-only | Internal TTS service |
-| tts-openvoice | Bearer-only | Internal TTS service |
+| `biblio-catalog` | Confidential | Biblio Catalog (OIDC + OPDS Basic Auth) |
+| `abb-tts` | Public | Audiobook Builder frontend |
+| `tts-silero` | Bearer-only | Internal TTS service |
+| `tts-openvoice` | Bearer-only | Internal TTS service |
 
-### Roles
-
-| Role | Description |
-|------|-------------|
-| user | Regular user - access to all services |
-| admin | Administrator - full access + user management |
-
-### Test Users
-
-| Username | Password | Roles | Purpose |
-|----------|----------|-------|---------|
-| testadmin | admin123 | admin, user | Testing admin features |
-| testuser | user123 | user | Testing regular user access |
-
-## Session Configuration
+## Session Settings
 
 - **Access Token**: 30 minutes
 - **SSO Session Idle**: 30 minutes
 - **SSO Session Max**: 8 hours
-- **Refresh Token**: 8 hours
 - **Offline Session**: 30 days
 
 ## Maintenance
+
+### Resetting Keycloak (Fresh Start)
+
+To reimport the realm with updated configuration:
+
+```bash
+./scripts/stop_stack.sh
+rm -rf data/keycloak/db/*
+./scripts/start_stack.sh
+```
+
+**Warning**: This deletes all users and configuration changes made via Admin Console.
+
+### Backing Up Configuration
+
+1. Login to Admin Console
+2. Switch to **biblio** realm
+3. Navigate to **Realm settings** → **Action** → **Partial export**
+4. Select options and click **Export**
+5. Save to `biblio-realm-template.json`
 
 ### Updating Keycloak Version
 
@@ -88,47 +128,13 @@ FROM quay.io/keycloak/keycloak:24.0 as builder
 Then rebuild:
 ```bash
 ./scripts/rebuild_stack.sh
+./scripts/start_stack.sh
 ```
-
-### Backing Up Realm Configuration
-
-1. Login to Admin Console
-2. Navigate to **Realm settings** → **Action** → **Partial export**
-3. Export and save to `biblio-realm.json`
-4. Commit to repository
-
-### Importing Realm Configuration
-
-The `biblio-realm.json` file is included in the Docker image at `/opt/keycloak/data/import/` as a template.
-
-**IMPORTANT**: Realm import should be done **once** after initial deployment. The import is NOT automatic to prevent overwriting manual configuration changes on every container restart.
-
-**Option 1: Import via Admin Console (Recommended)**
-1. Login to Admin Console: http://localhost:9900/auth/admin/
-2. Click **Master** dropdown → **Create Realm**
-3. Click **Browse** and select the `biblio-realm.json` file from your local copy
-4. Click **Create**
-
-**Option 2: Import via CLI (Inside Container)**
-```bash
-# Get container ID
-CONTAINER_ID=$(docker ps -q -f name=bibliohub_keycloak | head -1)
-
-# Import realm using Keycloak CLI (one-time operation)
-docker exec $CONTAINER_ID /opt/keycloak/bin/kc.sh import \
-  --file /opt/keycloak/data/import/biblio-realm.json
-```
-
-**After Import**:
-- The realm configuration is stored in the PostgreSQL database
-- Manual changes via Admin Console will persist across container restarts
-- To update the realm template, export the current configuration and commit to repository
 
 ## Security Notes
 
-- Change default admin password in production
+- Change default admin password in production (`KEYCLOAK_ADMIN_PASSWORD`)
+- Use strong passwords for all users
 - Enable SSL/TLS for production deployments
-- Use strong passwords for test users
-- Enable email verification for production
 - Configure SMTP for password reset emails
-- Regular backup of Keycloak database
+- Regular backup of Keycloak database (`data/keycloak/db/`)

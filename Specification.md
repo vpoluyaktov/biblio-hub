@@ -311,9 +311,9 @@ The `CATALOG_OIDC_CLIENT_SECRET` must match between Keycloak and Biblio Catalog:
 
 The Keycloak realm is only imported on first startup when the database is empty. Subsequent restarts use the existing database configuration.
 
-For detailed Keycloak setup and service integration patterns, see:
-- `keycloak/SETUP.md` - Manual configuration guide
-- `keycloak/SERVICE_INTEGRATION.md` - Integration patterns for each service type
+For detailed Keycloak documentation, see:
+- `keycloak/README.md` - Admin console guide (login, add users, assign roles)
+- `keycloak/SERVICE_INTEGRATION.md` - Integration patterns for developers
 
 ## Development Status
 
