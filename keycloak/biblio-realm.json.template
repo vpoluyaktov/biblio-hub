@@ -127,7 +127,7 @@
       "description": "OPDS Server frontend",
       "enabled": true,
       "publicClient": false,
-      "secret": "opds-server-secret-key-2026",
+      "secret": "${OPDS_OIDC_CLIENT_SECRET}",
       "bearerOnly": false,
       "standardFlowEnabled": true,
       "implicitFlowEnabled": false,
