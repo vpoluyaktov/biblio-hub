@@ -756,6 +756,28 @@ Store minimal user info in the session cookie:
 
 ---
 
+## Single Sign-On (SSO) Behavior
+
+BiblioHub services use Keycloak's SSO session for seamless authentication across all services:
+
+### How It Works
+
+1. User accesses any service (e.g., `/catalog`) → redirected to Keycloak → enters credentials once
+2. Keycloak creates an SSO session (stored in its own cookie on `/auth` path)
+3. User accesses another service (e.g., `/abb-tts`) → redirected to Keycloak
+4. Keycloak sees existing SSO session → **no login prompt** → immediately redirects back
+5. Each service creates its own session cookie, but users never re-enter credentials
+
+### Key Points
+
+- **Users enter credentials only once** per browser session
+- Each service maintains its own session cookie (different paths: `/catalog`, `/abb-tts`, etc.)
+- Keycloak's SSO session is what enables the "no re-login" experience
+- When accessing a new service, there's a brief redirect through Keycloak (transparent to user)
+- SSO session expires based on Keycloak settings (default: 8 hours idle, 10 hours max)
+
+---
+
 ## Logout Implementation
 
 ### Complete Logout Flow
