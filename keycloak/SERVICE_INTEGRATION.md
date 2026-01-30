@@ -118,6 +118,10 @@ To add a new service, update `keycloak/biblio-realm-template.json`:
 }
 ```
 
+**IMPORTANT**: Use wildcard (`/*`) in `redirectUris` to allow both:
+- Login callback: `/your-service/api/auth/oidc/callback`
+- Logout redirect: `/your-service/`
+
 ---
 
 ## Step-by-Step Integration Guide
@@ -331,10 +335,16 @@ func (kp *OIDCProvider) HandleCallback(code, state string) (*User, string, error
 
 // GetLogoutURL returns the Keycloak logout URL
 func (kp *OIDCProvider) GetLogoutURL(redirectURL string) string {
-    // Remove "/auth" suffix from AuthURL to get base realm URL
+    // AuthURL is like: http://keycloak:8080/auth/realms/biblio/protocol/openid-connect/auth
+    // We need:         http://keycloak:8080/auth/realms/biblio/protocol/openid-connect/logout
+    // So we replace the trailing "/auth" with "/logout"
     authURL := kp.oauth2Config.Endpoint.AuthURL
-    realmURL := authURL[:len(authURL)-5]
-    return fmt.Sprintf("%s/protocol/openid-connect/logout?redirect_uri=%s", realmURL, redirectURL)
+    logoutURL := authURL[:len(authURL)-5] + "/logout"
+    
+    // IMPORTANT: Keycloak 18+ requires post_logout_redirect_uri instead of redirect_uri
+    // Also include client_id as required by OIDC RP-Initiated Logout spec
+    return fmt.Sprintf("%s?post_logout_redirect_uri=%s&client_id=%s", 
+        logoutURL, redirectURL, kp.oauth2Config.ClientID)
 }
 
 // AuthenticateWithPassword for Basic Auth (ROPC grant)
@@ -538,21 +548,29 @@ func (s *Server) handleOIDCCallback(w http.ResponseWriter, r *http.Request) {
 
 // POST /api/auth/oidc/logout - Returns Keycloak logout URL
 func (s *Server) handleOIDCLogout(w http.ResponseWriter, r *http.Request) {
-    // Clear session cookie
+    // Get basePath for cookie and redirect URL
+    basePath := s.basePath
+    if basePath == "" {
+        basePath = "/"
+    }
+
+    // IMPORTANT: Cookie path must match the path used when SETTING the cookie
+    // If you set the cookie with Path: basePath, you must clear it with the same path
     http.SetCookie(w, &http.Cookie{
         Name:     "oidc_session",
         Value:    "",
-        Path:     "/",
+        Path:     basePath,  // Must match the path used in callback handler!
         MaxAge:   -1,
         HttpOnly: true,
     })
 
     // Build redirect URL with proper scheme
+    // r.Host should include the port (set by nginx: proxy_set_header Host $host:9900)
     scheme := "http"
     if proto := r.Header.Get("X-Forwarded-Proto"); proto != "" {
         scheme = proto
     }
-    redirectURL := fmt.Sprintf("%s://%s%s/", scheme, r.Host, s.basePath)
+    redirectURL := fmt.Sprintf("%s://%s%s/", scheme, r.Host, basePath)
     logoutURL := s.oidcProvider.GetLogoutURL(redirectURL)
 
     json.NewEncoder(w).Encode(map[string]interface{}{
@@ -881,16 +899,74 @@ fetch('/api/auth/oidc/login')
 
 ### 6. Cookie Path Issues
 
-**Problem**: Session cookie not sent with requests.
+**Problem**: Session cookie not sent with requests, or cookie not cleared on logout.
 
-**Solution**: Set cookie path to match your service base path:
+**Solution**: Cookie path must be **identical** when setting AND clearing:
 
 ```go
+// When SETTING the cookie (in callback handler)
 http.SetCookie(w, &http.Cookie{
     Name:  "oidc_session",
-    Path:  "/catalog",  // Must match your service path
+    Path:  basePath,  // e.g., "/catalog"
     // ...
 })
+
+// When CLEARING the cookie (in logout handler)
+// MUST use the same path, or the cookie won't be deleted!
+http.SetCookie(w, &http.Cookie{
+    Name:   "oidc_session",
+    Value:  "",
+    Path:   basePath,  // Same path as when setting!
+    MaxAge: -1,
+})
+```
+
+### 7. Keycloak "Invalid redirect_uri" Error
+
+**Problem**: Keycloak rejects logout with "Invalid parameter: redirect_uri".
+
+**Causes**:
+1. Using `redirect_uri` instead of `post_logout_redirect_uri` (Keycloak 18+)
+2. Redirect URI not registered in client configuration
+3. Missing port in redirect URI
+
+**Solution**:
+
+1. Use `post_logout_redirect_uri` with `client_id`:
+```go
+// WRONG (Keycloak 17 and earlier)
+fmt.Sprintf("%s?redirect_uri=%s", logoutURL, redirectURL)
+
+// CORRECT (Keycloak 18+)
+fmt.Sprintf("%s?post_logout_redirect_uri=%s&client_id=%s", logoutURL, redirectURL, clientID)
+```
+
+2. Use wildcard in Keycloak client redirect URIs:
+```json
+"redirectUris": [
+  "http://${BIBLIO_HUB_HOSTNAME}:${BIBLIO_HUB_PORT}/catalog/*"
+]
+```
+
+3. Ensure nginx passes the port in Host header (see section 8).
+
+### 8. Missing Port in Redirect URLs
+
+**Problem**: Redirect URLs are missing the port (e.g., `http://10.100.0.4/catalog/` instead of `http://10.100.0.4:9900/catalog/`).
+
+**Cause**: Nginx `proxy_set_header Host $host` doesn't include the port.
+
+**Solution**: Update nginx configuration to include port:
+
+```nginx
+location /catalog/ {
+    proxy_pass http://biblio-catalog:80;
+    proxy_set_header Host $host:9900;              # Include port!
+    proxy_set_header X-Forwarded-Host $host:9900;  # Include port!
+    proxy_set_header X-Forwarded-Port 9900;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    # ...
+}
 ```
 
 ---
@@ -954,4 +1030,46 @@ curl -H "Authorization: Bearer $TOKEN" http://localhost:9900/catalog/api/librari
 
 ---
 
-*Last updated: 2026-01-29*
+## Nginx Configuration for OIDC
+
+Proper nginx configuration is critical for OIDC to work correctly:
+
+```nginx
+# Service location block
+location /catalog/ {
+    set $upstream_catalog biblio-catalog:80;
+    proxy_pass http://$upstream_catalog;
+    
+    # IMPORTANT: Include port in Host header for correct redirect URLs
+    proxy_set_header Host $host:9900;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Forwarded-Prefix /catalog;
+    proxy_set_header X-Forwarded-Host $host:9900;
+    proxy_set_header X-Forwarded-Port 9900;
+    
+    # Larger buffers for Keycloak JWT session cookies
+    proxy_buffer_size 128k;
+    proxy_buffers 4 256k;
+    proxy_busy_buffers_size 256k;
+}
+
+# Keycloak location block
+location /auth/ {
+    set $upstream_keycloak keycloak:8080;
+    proxy_pass http://$upstream_keycloak;
+    
+    # IMPORTANT: Include port for Keycloak to generate correct redirect URLs
+    proxy_set_header Host $host:9900;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Forwarded-Host $host:9900;
+    proxy_set_header X-Forwarded-Port 9900;
+}
+```
+
+---
+
+*Last updated: 2026-01-30*
