@@ -332,6 +332,7 @@ All core services are deployed and functional:
 - Traefik for automatic SSL/TLS
 - Monitoring (Prometheus/Grafana)
 - Health check dashboard
+- **Simplified User Management UI**: The default Keycloak admin console is too sophisticated for BiblioHub end users. A custom, simplified user management interface should be built using Keycloak's REST Admin API (`/admin/realms/{realm}/users`). This would provide a friendly UI for common operations (list users, create/delete users, reset passwords, assign roles) while hiding Keycloak's complexity. The API supports all CRUD operations and requires admin access tokens for authentication.
 
 ---
 
