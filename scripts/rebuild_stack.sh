@@ -26,43 +26,37 @@ fi
 
 # Build Gateway (nginx with landing page)
 echo ""
-echo "[1/7] Building bibliohub-gateway..."
+echo "[1/6] Building bibliohub-gateway..."
 echo "----------------------------------------------"
 docker build -t "$DOCKER_USER/bibliohub-gateway:$TAG" "$HUB_DIR/nginx"
 
 # Build Biblio Auth
 echo ""
-echo "[2/7] Building bibliohub-auth..."
+echo "[2/6] Building bibliohub-auth..."
 echo "----------------------------------------------"
 docker build -t "$DOCKER_USER/bibliohub-auth:$TAG" -f "$HUB_DIR/../biblio-auth/docker/Dockerfile" "$HUB_DIR/../biblio-auth"
 
-# Build Keycloak (with /auth base path) - DEPRECATED
-echo ""
-echo "[3/7] Building bibliohub-keycloak..."
-echo "----------------------------------------------"
-docker build -t "$DOCKER_USER/bibliohub-keycloak:$TAG" "$HUB_DIR/keycloak"
-
 # Build Audiobook Builder TTS (ABB_TTS)
 echo ""
-echo "[4/7] Building biblio-audiobook-builder-tts..."
+echo "[3/6] Building biblio-audiobook-builder-tts..."
 echo "----------------------------------------------"
 docker build -t "$DOCKER_USER/bibliohub-audiobook-builder-tts:$TAG" "$HUB_DIR/../biblio-audiobook-builder-tts"
 
 # Build TTS Server Silero (TTS_SILERO)
 echo ""
-echo "[5/7] Building biblio-tts-server-silero..."
+echo "[4/6] Building biblio-tts-server-silero..."
 echo "----------------------------------------------"
 docker build -t "$DOCKER_USER/bibliohub-tts-server-silero:$TAG" -f "$HUB_DIR/../biblio-tts-server-silero/docker/Dockerfile" "$HUB_DIR/../biblio-tts-server-silero"
 
 # Build TTS Server OpenVoice (TTS_OPENVOICE)
 echo ""
-echo "[6/7] Building biblio-tts-server-openvoice..."
+echo "[5/6] Building biblio-tts-server-openvoice..."
 echo "----------------------------------------------"
 docker build -t "$DOCKER_USER/bibliohub-tts-server-openvoice:$TAG" -f "$HUB_DIR/../biblio-tts-server-openvoice/docker/Dockerfile" "$HUB_DIR/../biblio-tts-server-openvoice"
 
 # Build Biblio Catalog
 echo ""
-echo "[7/7] Building biblio-catalog..."
+echo "[6/6] Building biblio-catalog..."
 echo "----------------------------------------------"
 docker build -t "$DOCKER_USER/bibliohub-catalog:$TAG" -f "$HUB_DIR/../biblio-ebooks-catalog/docker/Dockerfile" "$HUB_DIR/../biblio-ebooks-catalog"
 
@@ -78,31 +72,27 @@ echo "  Pushing images to Docker Hub..."
 echo "=========================================="
 
 echo ""
-echo "[1/7] Pushing bibliohub-gateway..."
+echo "[1/6] Pushing bibliohub-gateway..."
 docker push "$DOCKER_USER/bibliohub-gateway:$TAG"
 
 echo ""
-echo "[2/7] Pushing bibliohub-auth..."
+echo "[2/6] Pushing bibliohub-auth..."
 docker push "$DOCKER_USER/bibliohub-auth:$TAG"
 
 echo ""
-echo "[3/7] Pushing bibliohub-keycloak..."
-docker push "$DOCKER_USER/bibliohub-keycloak:$TAG"
-
-echo ""
-echo "[4/7] Pushing bibliohub-audiobook-builder-tts..."
+echo "[3/6] Pushing bibliohub-audiobook-builder-tts..."
 docker push "$DOCKER_USER/bibliohub-audiobook-builder-tts:$TAG"
 
 echo ""
-echo "[5/7] Pushing bibliohub-tts-server-silero..."
+echo "[4/6] Pushing bibliohub-tts-server-silero..."
 docker push "$DOCKER_USER/bibliohub-tts-server-silero:$TAG"
 
 echo ""
-echo "[6/7] Pushing bibliohub-tts-server-openvoice..."
+echo "[5/6] Pushing bibliohub-tts-server-openvoice..."
 docker push "$DOCKER_USER/bibliohub-tts-server-openvoice:$TAG"
 
 echo ""
-echo "[7/7] Pushing bibliohub-catalog..."
+echo "[6/6] Pushing bibliohub-catalog..."
 docker push "$DOCKER_USER/bibliohub-catalog:$TAG"
 
 echo ""
@@ -121,7 +111,6 @@ echo ""
 echo "Images available:"
 echo "  - $DOCKER_USER/bibliohub-gateway:$TAG"
 echo "  - $DOCKER_USER/bibliohub-auth:$TAG"
-echo "  - $DOCKER_USER/bibliohub-keycloak:$TAG (deprecated)"
 echo "  - $DOCKER_USER/bibliohub-audiobook-builder-tts:$TAG"
 echo "  - $DOCKER_USER/bibliohub-tts-server-silero:$TAG"
 echo "  - $DOCKER_USER/bibliohub-tts-server-openvoice:$TAG"

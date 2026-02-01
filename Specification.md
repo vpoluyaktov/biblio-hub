@@ -4,7 +4,7 @@
 
 ## Overview
 
-BiblioHub is the central deployment and orchestration platform for the Biblio application suite. It provides a unified Docker Swarm stack with path-based routing through a single nginx gateway, Keycloak authentication, and a landing page for easy access to all services.
+BiblioHub is the central deployment and orchestration platform for the Biblio application suite. It provides a unified Docker Swarm stack with path-based routing through a single nginx gateway, Biblio Auth authentication, and a landing page for easy access to all services.
 
 ## Biblio Application Suite
 
@@ -15,13 +15,14 @@ BiblioHub is the central deployment and orchestration platform for the Biblio ap
 | **TTS Server (Silero)** | REST API for Silero TTS models | `/tts-silero/` | [Specification.md](https://github.com/vpoluyaktov/biblio-tts-server-silero/blob/main/Specification.md) |
 | **Biblio Catalog** | E-book library catalog with OPDS support | `/catalog/` | [Specification.md](https://github.com/vpoluyaktov/biblio-ebooks-catalog/blob/main/Specification.md) |
 | **TTS Server (OpenVoice)** | REST API for MeloTTS models | `/tts-openvoice/` | [Specification.md](https://github.com/vpoluyaktov/biblio-tts-server-openvoice/blob/main/Specification.md) |
-| **Keycloak** | Identity and Access Management | `/auth/` | [Keycloak Docs](https://www.keycloak.org/documentation) |
+| **Biblio Auth** | Authentication and User Management | `/auth/` | [Specification.md](https://github.com/vpoluyaktov/biblio-auth/blob/main/Specification.md) |
 
 All services are accessible through a single port (9900) via path-based routing.
 
 ### Component Repositories
 
 - **biblio-hub** (this repo): [github.com/vpoluyaktov/biblio-hub](https://github.com/vpoluyaktov/biblio-hub)
+- **biblio-auth**: [github.com/vpoluyaktov/biblio-auth](https://github.com/vpoluyaktov/biblio-auth)
 - **biblio-audiobook-builder-tts**: [github.com/vpoluyaktov/biblio-audiobook-builder-tts](https://github.com/vpoluyaktov/biblio-audiobook-builder-tts)
 - **biblio-tts-server-silero**: [github.com/vpoluyaktov/biblio-tts-server-silero](https://github.com/vpoluyaktov/biblio-tts-server-silero)
 - **biblio-tts-server-openvoice**: [github.com/vpoluyaktov/biblio-tts-server-openvoice](https://github.com/vpoluyaktov/biblio-tts-server-openvoice)
@@ -40,7 +41,7 @@ All services are accessible through a single port (9900) via path-based routing.
         │           │   │   - Proxy /catalog/* → biblio-catalog│              │
         ▼           │   │   - Proxy /tts-silero/* → tts-silero│               │
     ┌───────┐       │   │   - Proxy /tts-openvoice/* → tts-ov │               │
-    │ Users │◄─────►│   │   - Proxy /auth/* → keycloak       │               │
+    │ Users │◄─────►│   │   - Proxy /auth/* → biblio-auth    │               │
     └───────┘       │   └─────────────────────────────────────┘               │
                     │                      │                                  │
                     │          ┌───────────┼───────────────┐                  │
