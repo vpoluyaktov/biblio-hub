@@ -123,18 +123,35 @@ html, body, .login-pf, .login-pf-page {
 }
 
 /* Password visibility toggle */
-.pf-c-button.pf-m-control {
-    background: #334155;
-    border: 1px solid #475569;
-    border-left: none;
-    color: #94a3b8;
-    padding: 0.75rem;
-    cursor: pointer;
+.pf-c-button.pf-m-control,
+button.pf-c-button.pf-m-control,
+.pf-c-input-group__text {
+    background: #334155 !important;
+    border: 1px solid #475569 !important;
+    border-left: none !important;
+    color: #94a3b8 !important;
+    padding: 0.75rem !important;
+    cursor: pointer !important;
 }
 
-.pf-c-button.pf-m-control:hover {
-    background: #475569;
-    color: #f8fafc;
+.pf-c-button.pf-m-control:hover,
+button.pf-c-button.pf-m-control:hover {
+    background: #475569 !important;
+    color: #f8fafc !important;
+}
+
+/* Fix password field with toggle button */
+.pf-c-input-group {
+    display: flex !important;
+}
+
+.pf-c-input-group .pf-c-form-control {
+    border-radius: 6px 0 0 6px !important;
+    border-right: none !important;
+}
+
+.pf-c-input-group .pf-c-button {
+    border-radius: 0 6px 6px 0 !important;
 }
 
 /* Form actions row */

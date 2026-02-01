@@ -22,14 +22,20 @@ body,
 #kc-header-wrapper {
     font-size: 2rem !important;
     font-weight: 700 !important;
-    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    background-clip: text !important;
 }
 
 #kc-header-wrapper::before {
     content: "📚 " !important;
+    font-size: 2.5rem !important;
+    display: inline-block !important;
+    margin-right: 0.5rem !important;
+}
+
+#kc-header-wrapper b {
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
 }
 
 #kc-header-wrapper::after {
@@ -50,14 +56,20 @@ body,
     min-height: 100vh !important;
 }
 
-.container {
-    max-width: 400px !important;
-    margin: 0 auto !important;
+.login-pf-page > .container {
+    flex: 1 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    flex: 1 !important;
+    width: 100% !important;
+    max-width: none !important;
     padding: 2rem 1rem !important;
+}
+
+.login-pf-page > .container > .row {
+    width: 100% !important;
+    max-width: 400px !important;
+    margin: 0 auto !important;
 }
 
 /* ========== CARD ========== */
@@ -66,8 +78,8 @@ body,
     border: 1px solid #475569 !important;
     border-radius: 12px !important;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
-    margin: 2rem auto !important;
-    max-width: 400px !important;
+    margin: 0 !important;
+    width: 100% !important;
 }
 
 .login-pf-header {
