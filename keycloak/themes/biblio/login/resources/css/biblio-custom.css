@@ -29,10 +29,8 @@
     content: "📚 BiblioHub" !important;
     font-size: 2rem !important;
     display: block !important;
-    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    background-clip: text !important;
+    color: #3b82f6 !important;
+    font-weight: 700 !important;
 }
 
 #kc-header-wrapper b {
@@ -55,7 +53,7 @@
     min-height: 100vh !important;
 }
 
-.login-pf-page > .container {
+.login-pf body .container {
     flex: 1 !important;
     display: flex !important;
     align-items: center !important;
@@ -65,8 +63,13 @@
     padding: 2rem 1rem !important;
 }
 
-.login-pf-page > .container > .row {
+.login-pf body .container .row {
     width: 100% !important;
+    max-width: 400px !important;
+    margin: 0 auto !important;
+}
+
+.login-pf body #kc-content-wrapper {
     max-width: 400px !important;
     margin: 0 auto !important;
 }
