@@ -41,7 +41,7 @@ mkdir -p "$HUB_DIR/data/tts_silero/models"
 mkdir -p "$HUB_DIR/data/tts_openvoice/models"
 mkdir -p "$HUB_DIR/data/opds/db"
 mkdir -p "$HUB_DIR/data/opds/books"
-mkdir -p "$HUB_DIR/data/keycloak/db"
+mkdir -p "$HUB_DIR/data/biblio_auth/db"
 echo "  - data/abb_tts/db              (database)"
 echo "  - data/abb_tts/temp            (temp files and audiobooks)"
 echo "  - data/abb_tts/logs            (log files)"
@@ -49,7 +49,7 @@ echo "  - data/tts_silero/models       (Silero TTS models cache)"
 echo "  - data/tts_openvoice/models    (OpenVoice TTS models cache)"
 echo "  - data/opds/db                 (database)"
 echo "  - data/opds/books              (e-book library)"
-echo "  - data/keycloak/db             (Keycloak database)"
+echo "  - data/biblio_auth/db          (Biblio Auth database)"
 
 # Deploy the stack (--resolve-image always forces pulling latest images)
 echo ""
@@ -58,7 +58,7 @@ cd "$HUB_DIR"
 docker stack deploy -c stack.yaml --resolve-image always "$STACK_NAME"
 
 # All services to monitor
-ALL_SERVICES="keycloak-db keycloak nginx-gateway biblio-catalog abb-tts tts-silero tts-openvoice"
+ALL_SERVICES="biblio-auth nginx-gateway biblio-catalog abb-tts tts-silero tts-openvoice"
 MAX_WAIT=180  # Maximum wait time in seconds
 POLL_INTERVAL=3
 
