@@ -20,32 +20,30 @@ body,
 }
 
 #kc-header-wrapper {
-    font-size: 2rem !important;
+    font-size: 0 !important;
     font-weight: 700 !important;
 }
 
 #kc-header-wrapper::before {
-    content: "📚 " !important;
-    font-size: 2.5rem !important;
-    display: inline-block !important;
-    margin-right: 0.5rem !important;
-}
-
-#kc-header-wrapper b {
+    content: "📚 BiblioHub" !important;
+    font-size: 2rem !important;
+    display: block !important;
     background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
     -webkit-background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
     background-clip: text !important;
 }
 
+#kc-header-wrapper b {
+    display: none !important;
+}
+
 #kc-header-wrapper::after {
-    content: "\AYour Digital Library Suite" !important;
-    white-space: pre !important;
+    content: "Your Digital Library Suite" !important;
     display: block !important;
     font-size: 0.9rem !important;
     color: #94a3b8 !important;
     margin-top: 0.5rem !important;
-    -webkit-text-fill-color: #94a3b8 !important;
     background: none !important;
 }
 
