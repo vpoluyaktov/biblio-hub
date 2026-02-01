@@ -1,0 +1,365 @@
+/* BiblioHub Custom Keycloak Theme - Account Styles */
+/* Matches the Biblio suite dark theme design */
+
+:root {
+    --biblio-bg: #0f172a;
+    --biblio-bg-secondary: #1e293b;
+    --biblio-bg-tertiary: #334155;
+    --biblio-primary: #3b82f6;
+    --biblio-primary-dark: #2563eb;
+    --biblio-primary-light: #60a5fa;
+    --biblio-text: #f8fafc;
+    --biblio-text-secondary: #94a3b8;
+    --biblio-text-muted: #64748b;
+    --biblio-border: #475569;
+    --biblio-success: #22c55e;
+    --biblio-danger: #ef4444;
+    --biblio-warning: #f59e0b;
+    --biblio-radius: 6px;
+    --biblio-radius-lg: 12px;
+}
+
+/* Base styles */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--biblio-bg);
+    color: var(--biblio-text);
+    line-height: 1.6;
+}
+
+/* Override PatternFly colors */
+.pf-c-page {
+    --pf-c-page--BackgroundColor: var(--biblio-bg);
+}
+
+.pf-c-page__header {
+    --pf-c-page__header--BackgroundColor: var(--biblio-bg-secondary);
+    background: var(--biblio-bg-secondary);
+    border-bottom: 1px solid var(--biblio-border);
+}
+
+.pf-c-page__sidebar {
+    --pf-c-page__sidebar--BackgroundColor: var(--biblio-bg-secondary);
+    background: var(--biblio-bg-secondary);
+    border-right: 1px solid var(--biblio-border);
+}
+
+.pf-c-page__main {
+    background: var(--biblio-bg);
+}
+
+.pf-c-page__main-section {
+    --pf-c-page__main-section--BackgroundColor: var(--biblio-bg);
+    background: var(--biblio-bg);
+}
+
+/* Cards */
+.pf-c-card {
+    --pf-c-card--BackgroundColor: var(--biblio-bg-secondary);
+    background: var(--biblio-bg-secondary);
+    border: 1px solid var(--biblio-border);
+    border-radius: var(--biblio-radius-lg);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+.pf-c-card__header,
+.pf-c-card__title {
+    color: var(--biblio-text);
+}
+
+.pf-c-card__body {
+    color: var(--biblio-text-secondary);
+}
+
+/* Navigation */
+.pf-c-nav {
+    --pf-c-nav--BackgroundColor: transparent;
+}
+
+.pf-c-nav__link {
+    --pf-c-nav__link--Color: var(--biblio-text-secondary);
+    --pf-c-nav__link--hover--Color: var(--biblio-text);
+    --pf-c-nav__link--hover--BackgroundColor: var(--biblio-bg-tertiary);
+    color: var(--biblio-text-secondary);
+    border-radius: var(--biblio-radius);
+    margin: 0.125rem 0.5rem;
+}
+
+.pf-c-nav__link:hover {
+    color: var(--biblio-text);
+    background: var(--biblio-bg-tertiary);
+}
+
+.pf-c-nav__link.pf-m-current {
+    --pf-c-nav__link--m-current--Color: #fff;
+    --pf-c-nav__link--m-current--BackgroundColor: var(--biblio-primary);
+    color: #fff;
+    background: var(--biblio-primary);
+}
+
+/* Buttons */
+.pf-c-button {
+    border-radius: var(--biblio-radius);
+}
+
+.pf-c-button.pf-m-primary {
+    --pf-c-button--m-primary--BackgroundColor: var(--biblio-primary);
+    --pf-c-button--m-primary--hover--BackgroundColor: var(--biblio-primary-dark);
+    background: var(--biblio-primary);
+}
+
+.pf-c-button.pf-m-primary:hover {
+    background: var(--biblio-primary-dark);
+}
+
+.pf-c-button.pf-m-secondary {
+    --pf-c-button--m-secondary--BackgroundColor: var(--biblio-bg-tertiary);
+    --pf-c-button--m-secondary--Color: var(--biblio-text);
+    background: var(--biblio-bg-tertiary);
+    color: var(--biblio-text);
+    border: 1px solid var(--biblio-border);
+}
+
+.pf-c-button.pf-m-secondary:hover {
+    background: var(--biblio-border);
+}
+
+/* Form controls */
+.pf-c-form-control {
+    --pf-c-form-control--BackgroundColor: var(--biblio-bg-tertiary);
+    --pf-c-form-control--BorderColor: var(--biblio-border);
+    --pf-c-form-control--Color: var(--biblio-text);
+    background: var(--biblio-bg-tertiary);
+    border: 1px solid var(--biblio-border);
+    border-radius: var(--biblio-radius);
+    color: var(--biblio-text);
+}
+
+.pf-c-form-control:focus {
+    --pf-c-form-control--focus--BorderColor: var(--biblio-primary);
+    border-color: var(--biblio-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* Labels */
+.pf-c-form__label {
+    --pf-c-form__label--Color: var(--biblio-text-secondary);
+    color: var(--biblio-text-secondary);
+}
+
+/* Alerts */
+.pf-c-alert {
+    border-radius: var(--biblio-radius);
+}
+
+.pf-c-alert.pf-m-success {
+    --pf-c-alert--m-success--BackgroundColor: rgba(34, 197, 94, 0.15);
+    background: rgba(34, 197, 94, 0.15);
+    border-color: var(--biblio-success);
+}
+
+.pf-c-alert.pf-m-danger {
+    --pf-c-alert--m-danger--BackgroundColor: rgba(239, 68, 68, 0.15);
+    background: rgba(239, 68, 68, 0.15);
+    border-color: var(--biblio-danger);
+}
+
+.pf-c-alert.pf-m-warning {
+    --pf-c-alert--m-warning--BackgroundColor: rgba(245, 158, 11, 0.15);
+    background: rgba(245, 158, 11, 0.15);
+    border-color: var(--biblio-warning);
+}
+
+.pf-c-alert.pf-m-info {
+    --pf-c-alert--m-info--BackgroundColor: rgba(59, 130, 246, 0.15);
+    background: rgba(59, 130, 246, 0.15);
+    border-color: var(--biblio-primary);
+}
+
+/* Tables */
+.pf-c-table {
+    --pf-c-table--BackgroundColor: var(--biblio-bg-secondary);
+    --pf-c-table--BorderColor: var(--biblio-border);
+    background: var(--biblio-bg-secondary);
+}
+
+.pf-c-table thead th {
+    --pf-c-table--thead--cell--BackgroundColor: var(--biblio-bg-tertiary);
+    background: var(--biblio-bg-tertiary);
+    color: var(--biblio-text-secondary);
+}
+
+.pf-c-table tbody tr {
+    border-color: var(--biblio-border);
+}
+
+.pf-c-table tbody tr:hover {
+    --pf-c-table--tbody--tr--hover--BackgroundColor: var(--biblio-bg-tertiary);
+    background: var(--biblio-bg-tertiary);
+}
+
+/* Dropdown menus */
+.pf-c-dropdown__menu {
+    --pf-c-dropdown__menu--BackgroundColor: var(--biblio-bg-secondary);
+    background: var(--biblio-bg-secondary);
+    border: 1px solid var(--biblio-border);
+    border-radius: var(--biblio-radius);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+}
+
+.pf-c-dropdown__menu-item {
+    --pf-c-dropdown__menu-item--Color: var(--biblio-text);
+    color: var(--biblio-text);
+}
+
+.pf-c-dropdown__menu-item:hover {
+    --pf-c-dropdown__menu-item--hover--BackgroundColor: var(--biblio-bg-tertiary);
+    background: var(--biblio-bg-tertiary);
+}
+
+/* Modal */
+.pf-c-modal-box {
+    --pf-c-modal-box--BackgroundColor: var(--biblio-bg-secondary);
+    background: var(--biblio-bg-secondary);
+    border: 1px solid var(--biblio-border);
+    border-radius: var(--biblio-radius-lg);
+}
+
+.pf-c-modal-box__header {
+    border-bottom: 1px solid var(--biblio-border);
+}
+
+.pf-c-modal-box__footer {
+    border-top: 1px solid var(--biblio-border);
+}
+
+/* Title */
+.pf-c-title {
+    color: var(--biblio-text);
+}
+
+/* Content */
+.pf-c-content {
+    color: var(--biblio-text-secondary);
+}
+
+.pf-c-content a {
+    color: var(--biblio-primary);
+}
+
+.pf-c-content a:hover {
+    color: var(--biblio-primary-light);
+}
+
+/* Badges */
+.pf-c-badge {
+    border-radius: 9999px;
+}
+
+.pf-c-badge.pf-m-read {
+    --pf-c-badge--m-read--BackgroundColor: var(--biblio-bg-tertiary);
+    background: var(--biblio-bg-tertiary);
+    color: var(--biblio-text-secondary);
+}
+
+.pf-c-badge.pf-m-unread {
+    --pf-c-badge--m-unread--BackgroundColor: var(--biblio-primary);
+    background: var(--biblio-primary);
+    color: #fff;
+}
+
+/* Tabs */
+.pf-c-tabs__link {
+    --pf-c-tabs__link--Color: var(--biblio-text-secondary);
+    --pf-c-tabs__link--hover--Color: var(--biblio-text);
+    color: var(--biblio-text-secondary);
+}
+
+.pf-c-tabs__link:hover {
+    color: var(--biblio-text);
+}
+
+.pf-c-tabs__link::after {
+    --pf-c-tabs__link--after--BorderColor: var(--biblio-primary);
+}
+
+.pf-c-tabs__item.pf-m-current .pf-c-tabs__link {
+    --pf-c-tabs__item--m-current__link--Color: var(--biblio-primary);
+    color: var(--biblio-primary);
+}
+
+/* Switch/Toggle */
+.pf-c-switch__input:checked ~ .pf-c-switch__toggle {
+    --pf-c-switch__input--checked__toggle--BackgroundColor: var(--biblio-primary);
+    background: var(--biblio-primary);
+}
+
+/* Empty state */
+.pf-c-empty-state {
+    --pf-c-empty-state--BackgroundColor: transparent;
+}
+
+.pf-c-empty-state__icon {
+    color: var(--biblio-text-muted);
+}
+
+/* Spinner */
+.pf-c-spinner {
+    --pf-c-spinner--Color: var(--biblio-primary);
+}
+
+/* Divider */
+.pf-c-divider {
+    --pf-c-divider--BackgroundColor: var(--biblio-border);
+    background: var(--biblio-border);
+}
+
+/* Chip */
+.pf-c-chip {
+    --pf-c-chip--BackgroundColor: var(--biblio-bg-tertiary);
+    background: var(--biblio-bg-tertiary);
+    border: 1px solid var(--biblio-border);
+    border-radius: var(--biblio-radius);
+}
+
+/* Label */
+.pf-c-label {
+    border-radius: var(--biblio-radius);
+}
+
+.pf-c-label.pf-m-blue {
+    --pf-c-label--m-blue--BackgroundColor: rgba(59, 130, 246, 0.2);
+    background: rgba(59, 130, 246, 0.2);
+    color: var(--biblio-primary);
+}
+
+.pf-c-label.pf-m-green {
+    --pf-c-label--m-green--BackgroundColor: rgba(34, 197, 94, 0.2);
+    background: rgba(34, 197, 94, 0.2);
+    color: var(--biblio-success);
+}
+
+.pf-c-label.pf-m-red {
+    --pf-c-label--m-red--BackgroundColor: rgba(239, 68, 68, 0.2);
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--biblio-danger);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--biblio-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--biblio-border);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--biblio-text-muted);
+}

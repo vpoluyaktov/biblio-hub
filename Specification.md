@@ -334,6 +334,43 @@ All core services are deployed and functional:
 - Health check dashboard
 - **Simplified User Management UI**: The default Keycloak admin console is too sophisticated for BiblioHub end users. A custom, simplified user management interface should be built using Keycloak's REST Admin API (`/admin/realms/{realm}/users`). This would provide a friendly UI for common operations (list users, create/delete users, reset passwords, assign roles) while hiding Keycloak's complexity. The API supports all CRUD operations and requires admin access tokens for authentication.
 
+## Current Development
+
+### Custom Keycloak Login Theme (In Progress)
+
+**Task**: Customize the Keycloak login screen to match the Biblio suite look and feel.
+
+**Problem**: The default Keycloak login screen has a different visual style that doesn't match the rest of the Biblio applications (dark theme with blue accents, modern card-based design).
+
+**Solution**: Create a custom Keycloak theme called `biblio` that matches the styling used in:
+- BiblioHub landing page (`nginx/html/style.css`)
+- Biblio Catalog (`biblio-ebooks-catalog/web/static/css/style.css`)
+
+**Design Elements to Match**:
+- Dark background: `#0f172a` (--bg)
+- Card/surface color: `#1e293b` (--bg-secondary)
+- Primary accent: `#3b82f6` (--primary)
+- Primary hover: `#2563eb` (--primary-dark)
+- Text color: `#f8fafc` (--text)
+- Muted text: `#94a3b8` (--text-muted)
+- Border color: `#475569` (--border)
+- Border radius: `6px` (--radius), `12px` (--radius-lg)
+- Font family: system fonts (-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, etc.)
+
+**Implementation**:
+1. Create custom theme directory structure in `keycloak/themes/biblio/`
+2. Extend the base Keycloak login theme
+3. Override CSS styles to match Biblio design
+4. Add BiblioHub logo and branding
+5. Update Dockerfile to include the custom theme
+6. Configure the realm to use the custom theme
+
+**Files Created**:
+- `keycloak/themes/biblio/login/theme.properties` - Theme configuration
+- `keycloak/themes/biblio/login/resources/css/login.css` - Custom styles
+- `keycloak/themes/biblio/login/resources/css/styles.css` - Additional styles  
+- `keycloak/themes/biblio/login/resources/img/` - Logo and images
+
 ---
 
 *Last updated: 2026-01-29*

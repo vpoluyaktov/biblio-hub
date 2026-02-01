@@ -3,6 +3,8 @@
   "displayName": "BiblioHub",
   "displayNameHtml": "<b>BiblioHub</b> Authentication",
   "enabled": true,
+  "loginTheme": "biblio",
+  "accountTheme": "biblio",
   "sslRequired": "none",
   "registrationAllowed": false,
   "registrationEmailAsUsername": false,

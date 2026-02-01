@@ -21,6 +21,9 @@ FROM quay.io/keycloak/keycloak:23.0
 # Copy the optimized build from builder stage
 COPY --from=builder /opt/keycloak/ /opt/keycloak/
 
+# Copy custom BiblioHub theme
+COPY themes/biblio /opt/keycloak/themes/biblio
+
 # Copy realm template and entrypoint script
 COPY biblio-realm-template.json /opt/keycloak/data/import/biblio-realm-template.json
 COPY docker-entrypoint.sh /opt/keycloak/docker-entrypoint.sh
