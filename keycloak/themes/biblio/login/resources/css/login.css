@@ -1,132 +1,98 @@
 /* BiblioHub Custom Keycloak Theme - Login Styles */
-/* Matches the Biblio suite dark theme design */
+/* Minimal, targeted approach */
 
-:root {
-    --biblio-bg: #0f172a;
-    --biblio-bg-secondary: #1e293b;
-    --biblio-bg-tertiary: #334155;
-    --biblio-primary: #3b82f6;
-    --biblio-primary-dark: #2563eb;
-    --biblio-primary-light: #60a5fa;
-    --biblio-text: #f8fafc;
-    --biblio-text-secondary: #94a3b8;
-    --biblio-text-muted: #64748b;
-    --biblio-border: #475569;
-    --biblio-success: #22c55e;
-    --biblio-danger: #ef4444;
-    --biblio-warning: #f59e0b;
-    --biblio-radius: 6px;
-    --biblio-radius-lg: 12px;
-    --biblio-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-    --biblio-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+/* ========== PAGE BACKGROUND ========== */
+html,
+body,
+.login-pf,
+.login-pf-page {
+    background: #0f172a !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+    color: #f8fafc !important;
 }
 
-/* Reset and base styles */
-* {
-    box-sizing: border-box;
-}
-
-html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-}
-
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background: linear-gradient(135deg, var(--biblio-bg-secondary) 0%, var(--biblio-bg) 100%);
-    color: var(--biblio-text);
-    line-height: 1.6;
-    min-height: 100vh;
-}
-
-/* Hide default Keycloak header */
-#kc-header {
-    display: none;
+/* ========== HEADER ========== */
+.login-pf-page-header {
+    background: #1e293b !important;
+    border-bottom: 1px solid #475569 !important;
+    padding: 2rem 1rem !important;
+    text-align: center !important;
 }
 
 #kc-header-wrapper {
-    display: none;
+    font-size: 2rem !important;
+    font-weight: 700 !important;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
 }
 
-/* Main login container */
-.login-pf {
-    background: linear-gradient(135deg, var(--biblio-bg-secondary) 0%, var(--biblio-bg) 100%);
-    min-height: 100vh;
+#kc-header-wrapper::before {
+    content: "📚 " !important;
 }
 
-.login-pf body {
-    background: transparent;
+#kc-header-wrapper::after {
+    content: "\AYour Digital Library Suite" !important;
+    white-space: pre !important;
+    display: block !important;
+    font-size: 0.9rem !important;
+    color: #94a3b8 !important;
+    margin-top: 0.5rem !important;
+    -webkit-text-fill-color: #94a3b8 !important;
+    background: none !important;
 }
 
-#kc-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 2rem;
+/* ========== MAIN CONTAINER ========== */
+.login-pf-page {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 100vh !important;
 }
 
-#kc-container-wrapper {
-    width: 100%;
-    max-width: 420px;
+.container {
+    max-width: 400px !important;
+    margin: 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 1 !important;
+    padding: 2rem 1rem !important;
 }
 
-/* Login card */
-#kc-form-wrapper,
-#kc-content,
+/* ========== CARD ========== */
 .card-pf {
-    background: var(--biblio-bg-secondary);
-    border: 1px solid var(--biblio-border);
-    border-radius: var(--biblio-radius-lg);
-    box-shadow: var(--biblio-shadow-lg);
-    padding: 2.5rem;
+    background: #1e293b !important;
+    border: 1px solid #475569 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+    margin: 2rem auto !important;
+    max-width: 400px !important;
 }
 
-#kc-content-wrapper {
-    padding: 0;
+.login-pf-header {
+    padding: 0 !important;
+    margin-bottom: 1.5rem !important;
+    border: none !important;
 }
 
-/* Logo and branding */
-#kc-logo-wrapper {
-    text-align: center;
-    margin-bottom: 2rem;
-}
+/* ========== PAGE TITLE ========== */
 
-#kc-logo {
-    background: none;
-    height: auto;
-}
-
-/* Custom logo styling */
-.kc-logo-text {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.kc-logo-text::before {
-    content: "📚";
-    font-size: 3rem;
-}
-
-/* Page title */
 #kc-page-title {
-    text-align: center;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--biblio-text);
-    margin-bottom: 0.5rem;
+    text-align: center !important;
+    font-size: 1.25rem !important;
+    font-weight: 600 !important;
+    color: var(--biblio-text) !important;
+    margin-bottom: 1.5rem !important;
 }
 
 /* Subtitle/info text */
 #kc-info-message,
 .instruction {
-    text-align: center;
-    color: var(--biblio-text-muted);
-    margin-bottom: 2rem;
-    font-size: 0.95rem;
+    text-align: center !important;
+    color: var(--biblio-text-muted) !important;
+    margin-bottom: 1.5rem !important;
+    font-size: 0.9rem !important;
 }
 
 /* Form groups */
@@ -137,11 +103,11 @@ body {
 /* Labels */
 label,
 .control-label {
-    display: block;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--biblio-text-secondary);
-    margin-bottom: 0.5rem;
+    display: block !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    color: #94a3b8 !important;
+    margin-bottom: 0.5rem !important;
 }
 
 /* Input fields */
@@ -149,53 +115,53 @@ input[type="text"],
 input[type="password"],
 input[type="email"],
 .form-control {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-    background: var(--biblio-bg-tertiary);
-    border: 1px solid var(--biblio-border);
-    border-radius: var(--biblio-radius);
-    color: var(--biblio-text);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    width: 100% !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 1rem !important;
+    background: #334155 !important;
+    border: 1px solid #475569 !important;
+    border-radius: 6px !important;
+    color: #f8fafc !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
 }
 
 input[type="text"]:focus,
 input[type="password"]:focus,
 input[type="email"]:focus,
 .form-control:focus {
-    outline: none;
-    border-color: var(--biblio-primary);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    outline: none !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
 }
 
 input[type="text"]::placeholder,
 input[type="password"]::placeholder,
 input[type="email"]::placeholder,
 .form-control::placeholder {
-    color: var(--biblio-text-muted);
+    color: #64748b !important;
 }
 
 /* Primary button (Login) */
 .btn-primary,
 input[type="submit"].btn-primary,
 button.btn-primary {
-    width: 100%;
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    font-weight: 500;
-    background: var(--biblio-primary);
-    color: #fff;
-    border: none;
-    border-radius: var(--biblio-radius);
-    cursor: pointer;
-    transition: background 0.2s ease, transform 0.1s ease;
-    margin-top: 0.5rem;
+    width: 100% !important;
+    padding: 0.75rem 1.5rem !important;
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+    background: #3b82f6 !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    transition: background 0.2s ease, transform 0.1s ease !important;
+    margin-top: 0.5rem !important;
 }
 
 .btn-primary:hover,
 input[type="submit"].btn-primary:hover,
 button.btn-primary:hover {
-    background: var(--biblio-primary-dark);
+    background: #2563eb !important;
 }
 
 .btn-primary:active,
@@ -214,35 +180,35 @@ button.btn-primary:focus {
 /* Secondary/default button */
 .btn-default,
 .btn-secondary {
-    width: 100%;
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    font-weight: 500;
-    background: var(--biblio-bg-tertiary);
-    color: var(--biblio-text);
-    border: 1px solid var(--biblio-border);
-    border-radius: var(--biblio-radius);
-    cursor: pointer;
-    transition: background 0.2s ease;
-    margin-top: 0.5rem;
+    width: 100% !important;
+    padding: 0.75rem 1.5rem !important;
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+    background: #334155 !important;
+    color: #f8fafc !important;
+    border: 1px solid #475569 !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    transition: background 0.2s ease !important;
+    margin-top: 0.5rem !important;
 }
 
 .btn-default:hover,
 .btn-secondary:hover {
-    background: var(--biblio-border);
+    background: #475569 !important;
 }
 
 /* Links */
 a,
 .login-pf a {
-    color: var(--biblio-primary);
-    text-decoration: none;
-    transition: color 0.2s ease;
+    color: #3b82f6 !important;
+    text-decoration: none !important;
+    transition: color 0.2s ease !important;
 }
 
 a:hover,
 .login-pf a:hover {
-    color: var(--biblio-primary-light);
+    color: #60a5fa !important;
     text-decoration: underline;
 }
 

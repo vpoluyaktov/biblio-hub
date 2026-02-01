@@ -1,59 +1,107 @@
 /* BiblioHub Custom Keycloak Theme - Additional Styles */
-/* Overrides for specific Keycloak elements */
+/* Aggressive overrides for Keycloak PatternFly elements */
 
-/* PatternFly overrides */
-.login-pf .container {
-    padding: 0;
+/* ========== NUCLEAR RESET FOR ALL PATTERNFLY ELEMENTS ========== */
+
+/* Remove ALL borders from nested containers */
+.login-pf .container,
+.login-pf .container-fluid,
+.login-pf .row,
+.login-pf [class*="col-"],
+.login-pf-page,
+.login-pf-page-header,
+.login-pf-header,
+.login-pf-accounts,
+.card-pf,
+.card-pf-body,
+#kc-form-login,
+#kc-form {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
-.login-pf .login-pf-page {
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+/* Ensure the page background is solid */
+html, body, .login-pf, .login-pf-page {
+    background: #0f172a !important;
 }
 
-.login-pf .card-pf {
-    margin: 0 auto;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+/* ========== FORM WRAPPER - THE ONLY CARD ========== */
+
+#kc-form-wrapper {
+    background: #1e293b !important;
+    border: 1px solid #475569 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+    padding: 2rem !important;
+    max-width: 400px !important;
+    margin: 0 auto !important;
 }
 
-/* Header area with logo */
-.login-pf-header {
-    text-align: center;
-    padding-bottom: 1.5rem;
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid #475569;
+/* ========== HEADER STYLING ========== */
+
+#kc-header-wrapper {
+    display: block !important;
+    text-align: center !important;
+    padding: 1.5rem 1rem !important;
+    background: #1e293b !important;
+    border-bottom: 1px solid #475569 !important;
+    margin-bottom: 0 !important;
 }
 
-.login-pf-brand {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.75rem;
+/* Hide the default realm name text */
+#kc-header-wrapper > * {
+    display: none !important;
 }
 
-/* Custom BiblioHub branding */
-.login-pf-brand::before {
-    content: "📚";
-    font-size: 4rem;
-    line-height: 1;
+/* Add BiblioHub branding via pseudo-element */
+#kc-header-wrapper::before {
+    content: "📚 BiblioHub" !important;
+    display: block !important;
+    font-size: 1.75rem !important;
+    font-weight: 700 !important;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
 }
 
-.login-pf-brand-name {
-    font-size: 2rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+#kc-header-wrapper::after {
+    content: "Your Digital Library Suite" !important;
+    display: block !important;
+    font-size: 0.9rem !important;
+    color: #94a3b8 !important;
+    margin-top: 0.25rem !important;
+    -webkit-text-fill-color: #94a3b8 !important;
 }
 
-/* Form styling */
-.login-pf-page .login-pf-accounts {
-    background: #1e293b;
+/* ========== MAIN CONTAINER LAYOUT ========== */
+
+#kc-container {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 100vh !important;
 }
 
-.login-pf-page .card-pf {
-    background: #1e293b;
-    border: 1px solid #475569;
+#kc-container-wrapper {
+    flex: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 2rem !important;
+}
+
+/* ========== FORM CONTENT ========== */
+
+#kc-content {
+    width: 100% !important;
+    max-width: 400px !important;
+}
+
+#kc-content-wrapper {
+    padding: 0 !important;
 }
 
 /* Input group addons (icons) */
