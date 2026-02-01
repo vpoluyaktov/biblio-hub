@@ -67,13 +67,13 @@
                         </div>
                     </a>
 
-                    <a href="/auth/admin/" class="service-card admin-card" target="bibliohub-keycloak">
+                    <a href="/auth/admin" class="service-card admin-card" target="bibliohub-auth">
                         <div class="service-icon">👥</div>
                         <h3>User Management</h3>
-                        <p>Manage users, roles, and authentication settings via Keycloak Admin Console. Configure clients, realms, and security policies.</p>
+                        <p>Manage users, groups, and authentication settings via Biblio Auth. Simple and lightweight user management for BiblioHub services.</p>
                         <div class="service-meta">
-                            <span class="port">Path: /auth/admin/</span>
-                            <span class="status" id="status-keycloak">Checking...</span>
+                            <span class="port">Path: /auth/admin</span>
+                            <span class="status" id="status-auth">Checking...</span>
                         </div>
                     </a>
 
@@ -140,7 +140,7 @@
             checkServiceHealth('/catalog', 'status-opds', '/api/setup/check');
             checkServiceHealth('/tts-silero', 'status-tts-silero', '/health');
             checkServiceHealth('/tts-openvoice', 'status-tts-openvoice', '/health');
-            checkServiceHealth('/auth', 'status-keycloak', '/health');
+            checkServiceHealth('/auth', 'status-auth', '/api/validate');
         });
     </script>
 </body>
