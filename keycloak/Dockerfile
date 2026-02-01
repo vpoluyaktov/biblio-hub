@@ -44,4 +44,4 @@ EXPOSE 8080
 
 # Use custom entrypoint that processes the template before starting Keycloak
 ENTRYPOINT ["/opt/keycloak/docker-entrypoint.sh"]
-CMD ["start", "--optimized", "--import-realm"]
+CMD ["start", "--optimized", "--import-realm", "--spi-theme-static-max-age=-1", "--spi-theme-cache-themes=false"]
