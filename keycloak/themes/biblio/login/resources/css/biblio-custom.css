@@ -1,0 +1,389 @@
+/* BiblioHub Custom Keycloak Theme - Login Styles */
+/* Minimal, targeted approach */
+
+/* ========== PAGE BACKGROUND ========== */
+html,
+body,
+.login-pf,
+.login-pf-page {
+    background: #0f172a !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+    color: #f8fafc !important;
+}
+
+/* ========== HEADER ========== */
+.login-pf-page-header {
+    background: #1e293b !important;
+    border-bottom: 1px solid #475569 !important;
+    padding: 2rem 1rem !important;
+    text-align: center !important;
+}
+
+#kc-header-wrapper {
+    font-size: 0 !important;
+    font-weight: 700 !important;
+}
+
+#kc-header-wrapper::before {
+    content: "📚 BiblioHub" !important;
+    font-size: 2rem !important;
+    display: block !important;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+}
+
+#kc-header-wrapper b {
+    display: none !important;
+}
+
+#kc-header-wrapper::after {
+    content: "Your Digital Library Suite" !important;
+    display: block !important;
+    font-size: 0.9rem !important;
+    color: #94a3b8 !important;
+    margin-top: 0.5rem !important;
+    background: none !important;
+}
+
+/* ========== MAIN CONTAINER ========== */
+.login-pf-page {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 100vh !important;
+}
+
+.login-pf-page > .container {
+    flex: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 2rem 1rem !important;
+}
+
+.login-pf-page > .container > .row {
+    width: 100% !important;
+    max-width: 400px !important;
+    margin: 0 auto !important;
+}
+
+/* ========== CARD ========== */
+.card-pf {
+    background: #1e293b !important;
+    border: 1px solid #475569 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+    margin: 0 !important;
+    width: 100% !important;
+}
+
+.login-pf-header {
+    padding: 0 !important;
+    margin-bottom: 1.5rem !important;
+    border: none !important;
+}
+
+/* ========== PAGE TITLE ========== */
+
+#kc-page-title {
+    text-align: center !important;
+    font-size: 1.25rem !important;
+    font-weight: 600 !important;
+    color: var(--biblio-text) !important;
+    margin-bottom: 1.5rem !important;
+}
+
+/* Subtitle/info text */
+#kc-info-message,
+.instruction {
+    text-align: center !important;
+    color: var(--biblio-text-muted) !important;
+    margin-bottom: 1.5rem !important;
+    font-size: 0.9rem !important;
+}
+
+/* Form groups */
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+/* Labels */
+label,
+.control-label {
+    display: block !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    color: #94a3b8 !important;
+    margin-bottom: 0.5rem !important;
+}
+
+/* Input fields */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+.form-control {
+    width: 100% !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 1rem !important;
+    background: #334155 !important;
+    border: 1px solid #475569 !important;
+    border-radius: 6px !important;
+    color: #f8fafc !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+.form-control:focus {
+    outline: none !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+}
+
+input[type="text"]::placeholder,
+input[type="password"]::placeholder,
+input[type="email"]::placeholder,
+.form-control::placeholder {
+    color: #64748b !important;
+}
+
+/* Primary button (Login) */
+.btn-primary,
+input[type="submit"].btn-primary,
+button.btn-primary {
+    width: 100% !important;
+    padding: 0.75rem 1.5rem !important;
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+    background: #3b82f6 !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    transition: background 0.2s ease, transform 0.1s ease !important;
+    margin-top: 0.5rem !important;
+}
+
+.btn-primary:hover,
+input[type="submit"].btn-primary:hover,
+button.btn-primary:hover {
+    background: #2563eb !important;
+}
+
+.btn-primary:active,
+input[type="submit"].btn-primary:active,
+button.btn-primary:active {
+    transform: scale(0.98);
+}
+
+.btn-primary:focus,
+input[type="submit"].btn-primary:focus,
+button.btn-primary:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+/* Secondary/default button */
+.btn-default,
+.btn-secondary {
+    width: 100% !important;
+    padding: 0.75rem 1.5rem !important;
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+    background: #334155 !important;
+    color: #f8fafc !important;
+    border: 1px solid #475569 !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    transition: background 0.2s ease !important;
+    margin-top: 0.5rem !important;
+}
+
+.btn-default:hover,
+.btn-secondary:hover {
+    background: #475569 !important;
+}
+
+/* Links */
+a,
+.login-pf a {
+    color: #3b82f6 !important;
+    text-decoration: none !important;
+    transition: color 0.2s ease !important;
+}
+
+a:hover,
+.login-pf a:hover {
+    color: #60a5fa !important;
+    text-decoration: underline;
+}
+
+/* Remember me checkbox */
+.checkbox,
+.checkbox-inline {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--biblio-text-secondary);
+    font-size: 0.875rem;
+}
+
+.checkbox input[type="checkbox"],
+.checkbox-inline input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--biblio-primary);
+    cursor: pointer;
+}
+
+/* Forgot password and other links */
+#kc-form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    font-size: 0.875rem;
+}
+
+#kc-form-options span {
+    color: var(--biblio-text-secondary);
+}
+
+/* Registration link */
+#kc-registration {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--biblio-border);
+}
+
+#kc-registration span {
+    color: var(--biblio-text-muted);
+}
+
+/* Social login buttons */
+#kc-social-providers {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--biblio-border);
+}
+
+#kc-social-providers ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#kc-social-providers li {
+    margin-bottom: 0.75rem;
+}
+
+.zocial {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    background: var(--biblio-bg-tertiary);
+    border: 1px solid var(--biblio-border);
+    border-radius: var(--biblio-radius);
+    color: var(--biblio-text);
+    cursor: pointer;
+    transition: background 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.zocial:hover {
+    background: var(--biblio-border);
+}
+
+/* Error messages */
+.alert,
+.alert-error,
+.alert-danger,
+.kc-feedback-text {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid var(--biblio-danger);
+    border-radius: var(--biblio-radius);
+    color: var(--biblio-danger);
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+}
+
+/* Success messages */
+.alert-success {
+    background: rgba(34, 197, 94, 0.15);
+    border: 1px solid var(--biblio-success);
+    color: var(--biblio-success);
+}
+
+/* Warning messages */
+.alert-warning {
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid var(--biblio-warning);
+    color: var(--biblio-warning);
+}
+
+/* Info messages */
+.alert-info {
+    background: rgba(59, 130, 246, 0.15);
+    border: 1px solid var(--biblio-primary);
+    color: var(--biblio-primary-light);
+}
+
+/* Required field indicator */
+.required {
+    color: var(--biblio-danger);
+}
+
+/* Separator */
+#kc-form-buttons {
+    margin-top: 1.5rem;
+}
+
+/* Footer */
+#kc-info {
+    text-align: center;
+    margin-top: 2rem;
+    color: var(--biblio-text-muted);
+    font-size: 0.85rem;
+}
+
+/* Locale selector */
+#kc-locale {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+}
+
+#kc-locale-dropdown {
+    background: var(--biblio-bg-tertiary);
+    border: 1px solid var(--biblio-border);
+    border-radius: var(--biblio-radius);
+    padding: 0.5rem 1rem;
+    color: var(--biblio-text);
+    cursor: pointer;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    #kc-container {
+        padding: 1rem;
+    }
+    
+    #kc-form-wrapper,
+    #kc-content,
+    .card-pf {
+        padding: 1.5rem;
+    }
+    
+    #kc-page-title {
+        font-size: 1.25rem;
+    }
+}
