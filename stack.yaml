@@ -38,6 +38,8 @@ services:
       - ABB_TTS_OPDS_SERVER_URL=http://biblio-catalog:80/catalog
       - ABB_TTS_TEMP_DIR=/data
       - ABB_TTS_LOG_FILE=/logs/abb_tts.log
+      - ABB_TTS_AUTH_MODE=biblio-auth
+      - ABB_TTS_BIBLIO_AUTH_URL=http://biblio-auth:80/auth
       - TZ=UTC
     volumes:
       - ./data/abb_tts/db:/db
@@ -172,6 +174,7 @@ services:
       - BIBLIO_AUTH_TOKEN_EXPIRY=${BIBLIO_AUTH_TOKEN_EXPIRY:-86400}
       - BIBLIO_AUTH_ADMIN_PASSWORD=${BIBLIO_AUTH_ADMIN_PASSWORD:-admin}
       - BIBLIO_AUTH_USER_PASSWORD=${BIBLIO_AUTH_USER_PASSWORD:-user}
+      - BIBLIO_AUTH_SECURE_COOKIES=${BIBLIO_AUTH_SECURE_COOKIES:-true}
       - BIBLIO_AUTH_BASE_PATH=/auth
       - BIBLIO_AUTH_HOST=0.0.0.0
       - BIBLIO_AUTH_PORT=80
