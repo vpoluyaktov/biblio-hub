@@ -2,7 +2,7 @@
 
 > Central orchestration hub for the Biblio application suite
 
-BiblioHub provides unified deployment with path-based routing through a single nginx gateway, Keycloak authentication, and a landing page for all Biblio services using Docker Swarm.
+BiblioHub provides unified deployment with path-based routing through a single nginx gateway, Biblio Auth authentication, and a landing page for all Biblio services using Docker Swarm.
 
 ## Services
 
@@ -15,7 +15,7 @@ All services are accessible through a single port (9900) via path-based routing:
 | **Biblio Catalog** | E-book library catalog with OPDS support | `/catalog/` |
 | **TTS Server Silero** | Text-to-speech engine (Silero models) | `/tts-silero/` |
 | **TTS Server OpenVoice** | Text-to-speech engine (MeloTTS) | `/tts-openvoice/` |
-| **Keycloak** | Identity and Access Management | `/auth/` |
+| **Biblio Auth** | Authentication and User Management | `/auth/` |
 
 ## Quick Start
 
@@ -50,7 +50,7 @@ Once deployed, access all services at `http://localhost:9900`:
 | Biblio Catalog | http://localhost:9900/catalog/ |
 | TTS Server Silero | http://localhost:9900/tts-silero/ |
 | TTS Server OpenVoice | http://localhost:9900/tts-openvoice/ |
-| Keycloak Admin | http://localhost:9900/auth/admin/ |
+| Biblio Auth Admin | http://localhost:9900/auth/admin |
 
 ## Building Images
 
@@ -60,7 +60,7 @@ Build and push all service images to Docker Hub:
 ./scripts/rebuild_stack.sh
 ```
 
-This builds all 6 images (gateway, keycloak, abb-tts, tts-silero, tts-openvoice, catalog) from sibling repositories and pushes them with `dev-latest` tag.
+This builds all 6 images (gateway, biblio-auth, abb-tts, tts-silero, tts-openvoice, catalog) from sibling repositories and pushes them with `dev-latest` tag.
 
 ## Configuration
 
@@ -82,12 +82,11 @@ TTS_SILERO_REPLICAS=3
 OPENVOICE_LANGUAGES=EN,ES
 TTS_OPENVOICE_REPLICAS=1
 
-# Authentication
-AUTH_MODE=oidc  # or 'internal' for standalone Biblio Catalog
-CATALOG_OIDC_CLIENT_SECRET=biblio-catalog-secret-key-2026
+# Biblio Auth
+BIBLIO_AUTH_SECRET_KEY=  # Generate a random string for production
+BIBLIO_AUTH_ADMIN_PASSWORD=admin
+BIBLIO_AUTH_USER_PASSWORD=user
 ```
-
-**Note**: The `CATALOG_OIDC_CLIENT_SECRET` must match between Keycloak and Biblio Catalog. If you change it, delete `data/keycloak/db/*` to force realm reimport.
 
 See `.env.example` for all available options.
 
@@ -103,7 +102,7 @@ The stack uses bind mounts to `./data/` directory (created automatically):
 | `data/tts_silero/models/` | Silero TTS model cache |
 | `data/tts_openvoice/models/` | OpenVoice TTS model cache |
 | `data/opds/db/` | Biblio Catalog database |
-| `data/keycloak/db/` | Keycloak PostgreSQL database |
+| `data/biblio_auth/db/` | Biblio Auth SQLite database |
 
 ## Management
 
@@ -139,9 +138,6 @@ biblio-hub/
 │   ├── Dockerfile         # Gateway image
 │   ├── nginx.conf         # Path-based routing config
 │   └── html/              # Landing page
-├── keycloak/
-│   ├── Dockerfile         # Custom Keycloak image
-│   └── biblio-realm-template.json  # Pre-configured realm
 └── data/                  # Persistent data (auto-created)
 ```
 
@@ -152,6 +148,7 @@ All repositories should be cloned as siblings:
 ```
 ~/git/
 ├── biblio-hub/                      # This repo
+├── biblio-auth/                     # Authentication service
 ├── biblio-audiobook-builder-tts/    # Audiobook converter
 ├── biblio-ebooks-catalog/           # E-book catalog with OPDS
 ├── biblio-tts-server-silero/        # Silero TTS engine
@@ -159,6 +156,7 @@ All repositories should be cloned as siblings:
 ```
 
 - [biblio-hub](https://github.com/vpoluyaktov/biblio-hub) - This repository
+- [biblio-auth](https://github.com/vpoluyaktov/biblio-auth) - Authentication service
 - [biblio-audiobook-builder-tts](https://github.com/vpoluyaktov/biblio-audiobook-builder-tts) - Audiobook converter
 - [biblio-ebooks-catalog](https://github.com/vpoluyaktov/biblio-ebooks-catalog) - E-book catalog with OPDS
 - [biblio-tts-server-silero](https://github.com/vpoluyaktov/biblio-tts-server-silero) - Silero TTS engine

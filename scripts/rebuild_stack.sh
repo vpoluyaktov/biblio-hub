@@ -30,11 +30,11 @@ echo "[1/6] Building bibliohub-gateway..."
 echo "----------------------------------------------"
 docker build -t "$DOCKER_USER/bibliohub-gateway:$TAG" "$HUB_DIR/nginx"
 
-# Build Keycloak (with /auth base path)
+# Build Biblio Auth
 echo ""
-echo "[2/6] Building bibliohub-keycloak..."
+echo "[2/6] Building bibliohub-auth..."
 echo "----------------------------------------------"
-docker build -t "$DOCKER_USER/bibliohub-keycloak:$TAG" "$HUB_DIR/keycloak"
+docker build -t "$DOCKER_USER/bibliohub-auth:$TAG" -f "$HUB_DIR/../biblio-auth/docker/Dockerfile" "$HUB_DIR/../biblio-auth"
 
 # Build Audiobook Builder TTS (ABB_TTS)
 echo ""
@@ -76,8 +76,8 @@ echo "[1/6] Pushing bibliohub-gateway..."
 docker push "$DOCKER_USER/bibliohub-gateway:$TAG"
 
 echo ""
-echo "[2/6] Pushing bibliohub-keycloak..."
-docker push "$DOCKER_USER/bibliohub-keycloak:$TAG"
+echo "[2/6] Pushing bibliohub-auth..."
+docker push "$DOCKER_USER/bibliohub-auth:$TAG"
 
 echo ""
 echo "[3/6] Pushing bibliohub-audiobook-builder-tts..."
@@ -110,7 +110,7 @@ echo "=========================================="
 echo ""
 echo "Images available:"
 echo "  - $DOCKER_USER/bibliohub-gateway:$TAG"
-echo "  - $DOCKER_USER/bibliohub-keycloak:$TAG"
+echo "  - $DOCKER_USER/bibliohub-auth:$TAG"
 echo "  - $DOCKER_USER/bibliohub-audiobook-builder-tts:$TAG"
 echo "  - $DOCKER_USER/bibliohub-tts-server-silero:$TAG"
 echo "  - $DOCKER_USER/bibliohub-tts-server-openvoice:$TAG"
