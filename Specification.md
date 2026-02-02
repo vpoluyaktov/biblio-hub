@@ -50,12 +50,13 @@ All services are accessible through a single port (9900) via path-based routing.
                     │   │ ABB-TTS  │ │ Catalog  │  │ TTS Servers │           │
                     │   │  :80     │ │  :80     │  │   :80       │           │
                     │   └──────────┘ └──────────┘  └─────────────┘           │
-                    │          │                                              │
-                    │          ▼                                              │
-                    │   ┌──────────┐  ┌──────────┐                           │
-                    │   │ Keycloak │──│ Postgres │                           │
-                    │   │  :8080   │  │  :5432   │                           │
-                    │   └──────────┘  └──────────┘                           │
+                    │          │           │                                  │
+                    │          └─────┬─────┘                                  │
+                    │                ▼                                        │
+                    │         ┌─────────────┐                                │
+                    │         │ Biblio Auth │                                │
+                    │         │    :80      │                                │
+                    │         └─────────────┘                                │
                     │                                                          │
                     └─────────────────────────────────────────────────────────┘
 ```
@@ -64,7 +65,7 @@ All services are accessible through a single port (9900) via path-based routing.
 
 - **ABB-TTS → TTS-Silero**: Internal Docker network (`http://tts-silero:80/tts-silero`)
 - **ABB-TTS → Biblio Catalog**: Internal Docker network (`http://biblio-catalog:80/catalog`)
-- **Biblio Catalog → Keycloak**: Internal Docker network for OIDC authentication
+- **Biblio Catalog → Biblio Auth**: Internal Docker network for JWT authentication (`http://biblio-auth:80/auth`)
 - **Users → All Services**: Single port access (9900) via path-based routing
 
 ## Project Structure
@@ -88,13 +89,6 @@ biblio-hub/
 │   └── html/
 │       ├── index.html        # Landing page
 │       └── style.css         # Landing page styles
-├── keycloak/
-│   ├── Dockerfile            # Custom Keycloak image with /auth base path
-│   ├── docker-entrypoint.sh  # Entrypoint for realm template processing
-│   ├── biblio-realm-template.json  # Pre-configured realm template
-│   ├── README.md             # Keycloak overview
-│   ├── SETUP.md              # Manual setup guide
-│   └── SERVICE_INTEGRATION.md # Service integration patterns
 └── data/                     # Persistent data (auto-created)
     ├── abb_tts/db/           # Audiobook Builder database
     ├── abb_tts/temp/         # Working directory (ebook downloads, chapter files, audiobooks)
@@ -102,7 +96,7 @@ biblio-hub/
     ├── tts_silero/models/    # Silero TTS model cache
     ├── tts_openvoice/models/ # OpenVoice TTS model cache
     ├── opds/db/              # Biblio Catalog database
-    └── keycloak/db/          # Keycloak PostgreSQL database
+    └── biblio_auth/db/       # Biblio Auth SQLite database
 ```
 
 ## Operations
@@ -144,13 +138,9 @@ nano .env
 | `TTS_SILERO_REPLICAS` | Number of Silero TTS server replicas | `3` |
 | `OPENVOICE_LANGUAGES` | Comma-separated list of OpenVoice languages | `EN,ES` |
 | `TTS_OPENVOICE_REPLICAS` | Number of OpenVoice TTS server replicas | `1` |
-| `AUTH_MODE` | Authentication mode for Biblio Catalog (`internal`/`oidc`) | `oidc` |
-| `CATALOG_OIDC_CLIENT_SECRET` | OIDC client secret for Biblio Catalog | (generated) |
-| `KEYCLOAK_ADMIN_USER` | Keycloak admin username | `admin` |
-| `KEYCLOAK_ADMIN_PASSWORD` | Keycloak admin password | `admin` |
-| `BIBLIO_HUB_ADMIN_PASSWORD` | Hub admin user password | `hub_admin` |
-| `BIBLIO_HUB_USER_PASSWORD` | Hub regular user password | `hub_user` |
-| `BIBLIO_OPDS_USER_PASSWORD` | OPDS user password (Basic Auth) | `opds_user` |
+| `BIBLIO_AUTH_SECRET_KEY` | JWT secret key for Biblio Auth | (generated) |
+| `BIBLIO_AUTH_ADMIN_PASSWORD` | Biblio Auth admin password | `admin` |
+| `BIBLIO_AUTH_USER_PASSWORD` | Biblio Auth regular user password | `user` |
 | `TZ` | Timezone | `UTC` |
 
 ### Starting the Stack
@@ -181,7 +171,7 @@ This removes all services and networks but **preserves data volumes**.
 ```
 
 This will:
-1. Build all 6 Docker images from source (gateway, keycloak, abb-tts, tts-silero, tts-openvoice, catalog)
+1. Build all 6 Docker images from source (gateway, biblio-auth, abb-tts, tts-silero, tts-openvoice, catalog)
 2. Push them to Docker Hub with `dev-latest` tag
 3. Images are built from sibling repositories
 
@@ -208,7 +198,7 @@ docker service logs bibliohub_abb-tts --tail 100 -f
 docker service logs bibliohub_tts-silero --tail 100 -f
 docker service logs bibliohub_tts-openvoice --tail 100 -f
 docker service logs bibliohub_biblio-catalog --tail 100 -f
-docker service logs bibliohub_keycloak --tail 100 -f
+docker service logs bibliohub_biblio-auth --tail 100 -f
 ```
 
 ### Scaling Services
@@ -258,19 +248,14 @@ echo "TTS_SILERO_REPLICAS=5" >> .env
 - **Volumes**:
   - `./data/opds/db:/db` - SQLite database
   - `${EBOOKS_PATH}:/books:ro` - E-book library (read-only)
-- **Authentication**: Supports both internal auth and OIDC (Keycloak)
+- **Authentication**: Uses Biblio Auth for web UI, internal auth for OPDS Basic Auth
 
-### keycloak (Identity and Access Management)
-- **Image**: `vpoluyaktov/bibliohub-keycloak:dev-latest`
+### biblio-auth (Authentication Service)
+- **Image**: `vpoluyaktov/bibliohub-auth:dev-latest`
 - **Path**: `/auth/`
-- **Admin Console**: `/auth/admin/`
-- **Volumes**: `./data/keycloak/db` - PostgreSQL data (via keycloak-db service)
-- **Pre-configured**: Biblio realm with clients, roles, and test users
-
-### keycloak-db (PostgreSQL)
-- **Image**: `postgres:16-alpine`
-- **Purpose**: Keycloak database
-- **Volumes**: `./data/keycloak/db:/var/lib/postgresql/data`
+- **Admin Console**: `/auth/admin`
+- **Volumes**: `./data/biblio_auth/db:/db` - SQLite database
+- **Features**: User management, JWT sessions, group-based authorization
 
 ## Networks
 
@@ -281,40 +266,31 @@ echo "TTS_SILERO_REPLICAS=5" >> .env
 
 ## Authentication
 
-BiblioHub uses Keycloak for centralized authentication:
+BiblioHub uses **Biblio Auth** for centralized authentication:
 
-- **Realm**: `biblio`
-- **Pre-configured users**:
-  - `hub_admin` / `${BIBLIO_HUB_ADMIN_PASSWORD}` - Admin role
-  - `hub_user` / `${BIBLIO_HUB_USER_PASSWORD}` - User role
-  - `opds_user` / `${BIBLIO_OPDS_USER_PASSWORD}` - OPDS Basic Auth access
+- **Default users** (created on first startup):
+  - `admin` / `${BIBLIO_AUTH_ADMIN_PASSWORD}` - Admin group
+  - `user` / `${BIBLIO_AUTH_USER_PASSWORD}` - User group
 
-### Authentication Modes
+### Authentication Flow
 
-**Biblio Catalog** supports two authentication modes via `AUTH_MODE`:
-- `oidc` (default in swarm): Uses Keycloak for authentication
-- `internal`: Uses built-in SQLite user database (standalone deployment)
+**Web UI Authentication:**
+1. User accesses a protected service (e.g., Biblio Catalog)
+2. Service redirects to `/auth/login?returnUrl=<current_url>`
+3. User logs in at Biblio Auth
+4. Biblio Auth issues JWT token as `auth_token` cookie
+5. User is redirected back to the original service
+6. Service validates token via `/auth/api/validate`
 
-**OPDS Clients** (Calibre, FBReader, etc.) use HTTP Basic Auth, which is validated against Keycloak via Resource Owner Password Credentials (ROPC) grant.
+**OPDS/E-reader Authentication:**
+1. E-reader sends HTTP Basic Auth header
+2. Service validates credentials via Biblio Auth `/auth/api/login`
+3. User info stored in request context
 
-### OIDC Client Secret Configuration
+### Integration Guide
 
-The `CATALOG_OIDC_CLIENT_SECRET` must match between Keycloak and Biblio Catalog:
-
-1. **Keycloak side**: The secret is defined in `keycloak/biblio-realm-template.json` and processed at container startup by `docker-entrypoint.sh`. If the env var is not set, it defaults to `biblio-catalog-secret-key-2026`.
-
-2. **Biblio Catalog side**: The secret is passed via `stack.yaml` from the `.env` file's `CATALOG_OIDC_CLIENT_SECRET` variable.
-
-**Important**: Both sides must use the same secret value. If you change the secret:
-- Update `.env` with the new `CATALOG_OIDC_CLIENT_SECRET` value
-- Delete `data/keycloak/db/*` to force realm reimport with new secret
-- Restart the stack with `./scripts/start_stack.sh`
-
-The Keycloak realm is only imported on first startup when the database is empty. Subsequent restarts use the existing database configuration.
-
-For detailed Keycloak documentation, see:
-- `keycloak/README.md` - Admin console guide (login, add users, assign roles)
-- `keycloak/SERVICE_INTEGRATION.md` - Integration patterns for developers
+For detailed integration patterns and code examples, see:
+- [biblio-auth/INTEGRATION_GUIDE.md](https://github.com/vpoluyaktov/biblio-auth/blob/main/INTEGRATION_GUIDE.md)
 
 ## Development Status
 
@@ -326,52 +302,15 @@ All core services are deployed and functional:
 - ✅ Audiobook Builder TTS with per-provider chunk size configuration
 - ✅ TTS Server Silero with multiple models and scalable replicas
 - ✅ TTS Server OpenVoice with MeloTTS multi-language support
-- ✅ Biblio Catalog with OPDS support and OIDC authentication
-- ✅ Keycloak authentication with pre-configured realm
+- ✅ Biblio Catalog with OPDS support and Biblio Auth integration
+- ✅ Biblio Auth with user management and JWT authentication
 
-### Biblio Auth Integration
+### Future Enhancements
 
-**Status:** 95% Complete - One routing issue remaining  
-**Branch:** `feature/biblio-auth-integration`
-
-**Objective:** Replace Keycloak with a lightweight custom authentication service (Biblio Auth) for centralized user management across all Biblio services.
-
-**Completed:**
-- [x] Created new `biblio-auth` service repository
-- [x] Implemented Go backend with JWT authentication
-- [x] Created admin UI for user/group management
-- [x] Integrated into BiblioHub stack (stack.yaml, nginx, rebuild scripts)
-- [x] Removed Keycloak completely from BiblioHub
-- [x] Deployed and running at http://host:9900/auth/
-- [x] Catalog frontend redirects to Biblio Auth login
-- [x] Catalog backend validates auth_token cookies
-
-**Known Issue:**
-- Catalog calls `http://biblio-auth:80/api/validate` → 404 error
-- **Fix:** Update `BIBLIO_AUTH_URL` in stack.yaml to `http://nginx-gateway:80/auth`
-- See: `/home/ubuntu/git/biblio-ebooks-catalog/BIBLIO_AUTH_INTEGRATION.md`
-
-**Changes Made:**
-- Added `biblio-auth` service to `stack.yaml`
-- Updated `nginx.conf` to route `/auth/*` to biblio-auth with cookie forwarding
-- Removed Keycloak and keycloak-db services completely
-- Updated `rebuild_stack.sh` to build biblio-auth
-- Updated `start_stack.sh` and `stop_stack.sh` for biblio-auth
-- Removed all Keycloak environment variables
-- Updated landing page to link to Biblio Auth admin
-
-**Next Steps:**
-1. Fix the 404 routing issue (update BIBLIO_AUTH_URL)
-2. Test complete login flow end-to-end
-3. Remove Keycloak references from documentation
-4. Update Playwright tests
-
-**Future Enhancements**:
 - Traefik for automatic SSL/TLS
 - Monitoring (Prometheus/Grafana)
 - Health check dashboard
-- **Simplified User Management UI**: The default Keycloak admin console is too sophisticated for BiblioHub end users. A custom, simplified user management interface should be built using Keycloak's REST Admin API (`/admin/realms/{realm}/users`). This would provide a friendly UI for common operations (list users, create/delete users, reset passwords, assign roles) while hiding Keycloak's complexity. The API supports all CRUD operations and requires admin access tokens for authentication.
 
 ---
 
-*Last updated: 2026-01-29*
+*Last updated: 2026-02-02*
