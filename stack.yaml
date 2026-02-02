@@ -138,7 +138,7 @@ services:
       - TZ=UTC
       # Use biblio-auth mode for BiblioHub stack integration
       - AUTH_MODE=biblio-auth
-      - BIBLIO_AUTH_URL=http://biblio-auth:80
+      - BIBLIO_AUTH_URL=http://biblio-auth:80/auth
       - OIDC_REDIRECT_URL=http://${BIBLIO_HUB_HOSTNAME:-localhost}:${BIBLIO_HUB_PORT:-9900}/catalog/api/auth/oidc/callback
     volumes:
       - ./data/opds/db:/db
