@@ -329,6 +329,43 @@ All core services are deployed and functional:
 - ✅ Biblio Catalog with OPDS support and OIDC authentication
 - ✅ Keycloak authentication with pre-configured realm
 
+### Biblio Auth Integration
+
+**Status:** 95% Complete - One routing issue remaining  
+**Branch:** `feature/biblio-auth-integration`
+
+**Objective:** Replace Keycloak with a lightweight custom authentication service (Biblio Auth) for centralized user management across all Biblio services.
+
+**Completed:**
+- [x] Created new `biblio-auth` service repository
+- [x] Implemented Go backend with JWT authentication
+- [x] Created admin UI for user/group management
+- [x] Integrated into BiblioHub stack (stack.yaml, nginx, rebuild scripts)
+- [x] Removed Keycloak completely from BiblioHub
+- [x] Deployed and running at http://host:9900/auth/
+- [x] Catalog frontend redirects to Biblio Auth login
+- [x] Catalog backend validates auth_token cookies
+
+**Known Issue:**
+- Catalog calls `http://biblio-auth:80/api/validate` → 404 error
+- **Fix:** Update `BIBLIO_AUTH_URL` in stack.yaml to `http://nginx-gateway:80/auth`
+- See: `/home/ubuntu/git/biblio-ebooks-catalog/BIBLIO_AUTH_INTEGRATION.md`
+
+**Changes Made:**
+- Added `biblio-auth` service to `stack.yaml`
+- Updated `nginx.conf` to route `/auth/*` to biblio-auth with cookie forwarding
+- Removed Keycloak and keycloak-db services completely
+- Updated `rebuild_stack.sh` to build biblio-auth
+- Updated `start_stack.sh` and `stop_stack.sh` for biblio-auth
+- Removed all Keycloak environment variables
+- Updated landing page to link to Biblio Auth admin
+
+**Next Steps:**
+1. Fix the 404 routing issue (update BIBLIO_AUTH_URL)
+2. Test complete login flow end-to-end
+3. Remove Keycloak references from documentation
+4. Update Playwright tests
+
 **Future Enhancements**:
 - Traefik for automatic SSL/TLS
 - Monitoring (Prometheus/Grafana)
