@@ -250,3 +250,34 @@ footer {
         grid-template-columns: 1fr;
     }
 }
+
+/* User Info */
+.user-info {
+    position: absolute;
+    top: 1rem;
+    right: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.user-name {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.logout-btn {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+    background: var(--surface-hover);
+    border-color: var(--primary);
+}

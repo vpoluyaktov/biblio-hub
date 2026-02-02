@@ -15,6 +15,7 @@
                 <h1>BiblioHub</h1>
             </div>
             <p class="tagline">Your Digital Library Suite</p>
+            <div id="user-info" class="user-info"></div>
         </header>
 
         <main>
@@ -114,6 +115,28 @@
             return `${window.location.protocol}//${window.location.hostname}:${window.location.port}${path}`;
         }
 
+        async function checkAuth() {
+            try {
+                const response = await fetch('/auth/api/validate', { credentials: 'include' });
+                if (response.ok) {
+                    const data = await response.json();
+                    if (!data.valid) {
+                        // Not authenticated - redirect to login
+                        window.location.href = '/auth/login?returnUrl=' + encodeURIComponent(window.location.href);
+                        return false;
+                    }
+                    return true;
+                }
+                // Error response - redirect to login
+                window.location.href = '/auth/login?returnUrl=' + encodeURIComponent(window.location.href);
+                return false;
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                window.location.href = '/auth/login?returnUrl=' + encodeURIComponent(window.location.href);
+                return false;
+            }
+        }
+
         async function checkServiceHealth(basePath, elementId, healthPath) {
             const statusEl = document.getElementById(elementId);
             try {
@@ -134,7 +157,42 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
+        async function loadUserInfo() {
+            try {
+                const response = await fetch('/auth/api/user', { credentials: 'include' });
+                if (response.ok) {
+                    const user = await response.json();
+                    const userInfoEl = document.getElementById('user-info');
+                    userInfoEl.innerHTML = `
+                        <span class="user-name">👤 ${user.username}</span>
+                        <button class="logout-btn" onclick="logout()">Logout</button>
+                    `;
+                }
+            } catch (error) {
+                console.error('Failed to load user info:', error);
+            }
+        }
+
+        async function logout() {
+            try {
+                await fetch('/auth/api/logout', { method: 'POST', credentials: 'include' });
+                window.location.href = '/auth/login?returnUrl=' + encodeURIComponent(window.location.href);
+            } catch (error) {
+                console.error('Logout failed:', error);
+                window.location.reload();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check authentication first
+            const isAuthenticated = await checkAuth();
+            if (!isAuthenticated) {
+                return; // Will redirect to login
+            }
+            
+            // Load user info
+            loadUserInfo();
+            
             // Check service health using path-based routing
             checkServiceHealth('/abb-tts', 'status-abb-tts', '/health');
             checkServiceHealth('/catalog', 'status-opds', '/api/setup/check');
