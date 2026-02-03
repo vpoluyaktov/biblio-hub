@@ -16,6 +16,7 @@ BiblioHub is the central deployment and orchestration platform for the Biblio ap
 | **Biblio Catalog** | E-book library catalog with OPDS support | `/catalog/` | [Specification.md](https://github.com/vpoluyaktov/biblio-ebooks-catalog/blob/main/Specification.md) |
 | **TTS Server (OpenVoice)** | REST API for MeloTTS models | `/tts-openvoice/` | [Specification.md](https://github.com/vpoluyaktov/biblio-tts-server-openvoice/blob/main/Specification.md) |
 | **Biblio Auth** | Authentication and User Management | `/auth/` | [Specification.md](https://github.com/vpoluyaktov/biblio-auth/blob/main/Specification.md) |
+| **Stress Server (Silero)** | REST API for Silero Stress (Russian text stress marking) | `/stress-silero/` | [Specification.md](https://github.com/vpoluyaktov/biblio-stress-server-silero/blob/main/Specification.md) |
 
 All services are accessible through a single port (9900) via path-based routing.
 
@@ -27,6 +28,7 @@ All services are accessible through a single port (9900) via path-based routing.
 - **biblio-tts-server-silero**: [github.com/vpoluyaktov/biblio-tts-server-silero](https://github.com/vpoluyaktov/biblio-tts-server-silero)
 - **biblio-tts-server-openvoice**: [github.com/vpoluyaktov/biblio-tts-server-openvoice](https://github.com/vpoluyaktov/biblio-tts-server-openvoice)
 - **biblio-ebooks-catalog**: [github.com/vpoluyaktov/biblio-ebooks-catalog](https://github.com/vpoluyaktov/biblio-ebooks-catalog)
+- **biblio-stress-server-silero**: [github.com/vpoluyaktov/biblio-stress-server-silero](https://github.com/vpoluyaktov/biblio-stress-server-silero)
 
 ## Architecture
 
@@ -42,7 +44,8 @@ All services are accessible through a single port (9900) via path-based routing.
         ▼           │   │   - Proxy /tts-silero/* → tts-silero│               │
     ┌───────┐       │   │   - Proxy /tts-openvoice/* → tts-ov │               │
     │ Users │◄─────►│   │   - Proxy /auth/* → biblio-auth    │               │
-    └───────┘       │   └─────────────────────────────────────┘               │
+    └───────┘       │   │   - Proxy /stress-silero/* → stress│               │
+                    │   └─────────────────────────────────────┘               │
                     │                      │                                  │
                     │          ┌───────────┼───────────────┐                  │
                     │          ▼           ▼               ▼                  │
@@ -64,6 +67,7 @@ All services are accessible through a single port (9900) via path-based routing.
 ### Service Communication
 
 - **ABB-TTS → TTS-Silero**: Internal Docker network (`http://tts-silero:80/tts-silero`)
+- **ABB-TTS → Stress-Silero**: Internal Docker network (`http://stress-silero:80/stress-silero`)
 - **ABB-TTS → Biblio Catalog**: Internal Docker network (`http://biblio-catalog:80/catalog`)
 - **Biblio Catalog → Biblio Auth**: Internal Docker network for JWT authentication (`http://biblio-auth:80/auth`)
 - **Users → All Services**: Single port access (9900) via path-based routing
@@ -112,7 +116,8 @@ biblio-hub/
    ├── biblio-audiobook-builder-tts/
    ├── biblio-tts-server-silero/
    ├── biblio-tts-server-openvoice/
-   └── biblio-ebooks-catalog/
+   ├── biblio-ebooks-catalog/
+   └── biblio-stress-server-silero/
    ```
 
 ### Environment Configuration
@@ -171,7 +176,7 @@ This removes all services and networks but **preserves data volumes**.
 ```
 
 This will:
-1. Build all 6 Docker images from source (gateway, biblio-auth, abb-tts, tts-silero, tts-openvoice, catalog)
+1. Build all 7 Docker images from source (gateway, biblio-auth, abb-tts, tts-silero, tts-openvoice, catalog, stress-silero)
 2. Push them to Docker Hub with `dev-latest` tag
 3. Images are built from sibling repositories
 
@@ -257,6 +262,13 @@ echo "TTS_SILERO_REPLICAS=5" >> .env
 - **Volumes**: `./data/biblio_auth/db:/db` - SQLite database
 - **Features**: User management, JWT sessions, group-based authorization
 
+### stress-silero (Stress Server Silero)
+- **Image**: `vpoluyaktov/bibliohub-stress-server-silero:dev-latest`
+- **Path**: `/stress-silero/`
+- **Purpose**: Add stress markers to Russian text for improved TTS pronunciation
+- **Replicas**: 1 (lightweight, fast processing)
+- **Used by**: ABB-TTS (for Russian audiobook generation)
+
 ## Networks
 
 | Network | Purpose |
@@ -304,6 +316,7 @@ All core services are deployed and functional:
 - ✅ TTS Server OpenVoice with MeloTTS multi-language support
 - ✅ Biblio Catalog with OPDS support and Biblio Auth integration
 - ✅ Biblio Auth with user management and JWT authentication
+- ⏳ Stress Server Silero for Russian text stress marking (planned)
 
 ### Future Enhancements
 
