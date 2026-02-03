@@ -276,6 +276,16 @@ echo "TTS_SILERO_REPLICAS=5" >> .env
 | `bibliohub-frontend` | External access (nginx-gateway, abb-tts) |
 | `bibliohub-backend` | Internal service-to-service communication |
 
+## Load Balancing Architecture
+
+Services with multiple replicas (tts-silero, tts-openvoice, stress-silero) use `endpoint_mode: dnsrr` for true per-request load balancing:
+
+- **`endpoint_mode: dnsrr`**: Docker DNS returns all replica IPs instead of a single VIP
+- **nginx-gateway**: Uses variable-based `proxy_pass` (e.g., `set $upstream tts-silero:80; proxy_pass http://$upstream;`) which forces DNS resolution on each request
+- **Docker DNS resolver**: nginx resolves service names dynamically via Docker's internal DNS (127.0.0.11)
+
+This solves the issue where Docker Swarm's default VIP-based load balancing sends all requests from a persistent connection to the same container.
+
 ## Authentication
 
 BiblioHub uses **Biblio Auth** for centralized authentication:
@@ -326,4 +336,4 @@ All core services are deployed and functional:
 
 ---
 
-*Last updated: 2026-02-02*
+*Last updated: 2026-02-03*
