@@ -139,7 +139,7 @@ services:
       - STRESS_PORT=80
       - STRESS_BASE_PATH=/stress-silero
       - STRESS_DEVICE=cpu
-      - STRESS_LOG_LEVEL=INFO
+      - STRESS_LOG_LEVEL=DEBUG
     networks:
       - bibliohub-backend
     deploy:
