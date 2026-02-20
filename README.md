@@ -146,7 +146,7 @@ biblio-hub/
 All repositories should be cloned as siblings:
 
 ```
-~/git/
+~/git/biblio/
 ├── biblio-hub/                      # This repo
 ├── biblio-auth/                     # Authentication service
 ├── biblio-audiobook-builder-tts/    # Audiobook converter
