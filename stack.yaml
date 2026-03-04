@@ -52,6 +52,8 @@ services:
       - bibliohub-frontend
     depends_on:
       - tts-silero
+      - tts-openvoice
+      - tts-piper
       - stress-silero
       - biblio-catalog
     deploy:
