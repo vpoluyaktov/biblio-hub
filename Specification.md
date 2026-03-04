@@ -15,6 +15,7 @@ BiblioHub is the central deployment and orchestration platform for the Biblio ap
 | **TTS Server (Silero)** | REST API for Silero TTS models | `/tts-silero/` | [Specification.md](https://github.com/vpoluyaktov/biblio-tts-server-silero/blob/main/Specification.md) |
 | **Biblio Catalog** | E-book library catalog with OPDS support | `/catalog/` | [Specification.md](https://github.com/vpoluyaktov/biblio-ebooks-catalog/blob/main/Specification.md) |
 | **TTS Server (OpenVoice)** | REST API for MeloTTS models | `/tts-openvoice/` | [Specification.md](https://github.com/vpoluyaktov/biblio-tts-server-openvoice/blob/main/Specification.md) |
+| **TTS Server (Piper)** | REST API for Piper TTS models | `/tts-piper/` | [Specification.md](https://github.com/vpoluyaktov/biblio-tts-server-piper/blob/main/Specification.md) |
 | **Biblio Auth** | Authentication and User Management | `/auth/` | [Specification.md](https://github.com/vpoluyaktov/biblio-auth/blob/main/Specification.md) |
 | **Stress Server (Silero)** | REST API for Silero Stress (Russian text stress marking) | `/stress-silero/` | [Specification.md](https://github.com/vpoluyaktov/biblio-stress-server-silero/blob/main/Specification.md) |
 
@@ -27,6 +28,7 @@ All services are accessible through a single port (9900) via path-based routing.
 - **biblio-audiobook-builder-tts**: [github.com/vpoluyaktov/biblio-audiobook-builder-tts](https://github.com/vpoluyaktov/biblio-audiobook-builder-tts)
 - **biblio-tts-server-silero**: [github.com/vpoluyaktov/biblio-tts-server-silero](https://github.com/vpoluyaktov/biblio-tts-server-silero)
 - **biblio-tts-server-openvoice**: [github.com/vpoluyaktov/biblio-tts-server-openvoice](https://github.com/vpoluyaktov/biblio-tts-server-openvoice)
+- **biblio-tts-server-piper**: [github.com/vpoluyaktov/biblio-tts-server-piper](https://github.com/vpoluyaktov/biblio-tts-server-piper)
 - **biblio-ebooks-catalog**: [github.com/vpoluyaktov/biblio-ebooks-catalog](https://github.com/vpoluyaktov/biblio-ebooks-catalog)
 - **biblio-stress-server-silero**: [github.com/vpoluyaktov/biblio-stress-server-silero](https://github.com/vpoluyaktov/biblio-stress-server-silero)
 
@@ -52,6 +54,7 @@ flowchart LR
         C[Biblio Catalog\n/catalog/]
         S[TTS Server Silero\n/tts-silero/]
         O[TTS Server OpenVoice\n/tts-openvoice/]
+        P[TTS Server Piper\n/tts-piper/]
         R[Stress Server Silero\n/stress-silero/]
         B[Biblio Auth\n/auth/]
     end
@@ -62,11 +65,13 @@ flowchart LR
     G --> C
     G --> S
     G --> O
+    G --> P
     G --> R
     G --> B
 
     A --> S
     A --> O
+    A --> P
     A --> R
     C --> B
 ```
@@ -111,6 +116,7 @@ Implemented and running:
 In progress / planned adoption in stack flow:
 
 - ⏳ Stress Server (Silero) integration as a standard production component
+- ⏳ TTS Server (Piper) integration for expanded language and voice support
 
 ## Development Priorities
 

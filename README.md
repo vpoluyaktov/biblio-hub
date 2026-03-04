@@ -15,6 +15,7 @@ All services are accessible through a single port (9900) via path-based routing:
 | **Biblio Catalog** | E-book library catalog with OPDS support | `/catalog/` |
 | **TTS Server Silero** | Text-to-speech engine (Silero models) | `/tts-silero/` |
 | **TTS Server OpenVoice** | Text-to-speech engine (MeloTTS) | `/tts-openvoice/` |
+| **TTS Server Piper** | Text-to-speech engine (Piper models) | `/tts-piper/` |
 | **Biblio Auth** | Authentication and User Management | `/auth/` |
 
 ## Quick Start
@@ -50,6 +51,7 @@ Once deployed, access all services at `http://localhost:9900`:
 | Biblio Catalog | http://localhost:9900/catalog/ |
 | TTS Server Silero | http://localhost:9900/tts-silero/ |
 | TTS Server OpenVoice | http://localhost:9900/tts-openvoice/ |
+| TTS Server Piper | http://localhost:9900/tts-piper/ |
 | Biblio Auth Admin | http://localhost:9900/auth/admin |
 
 ## Building Images
@@ -60,7 +62,7 @@ Build and push all service images to Docker Hub:
 ./scripts/rebuild_stack.sh
 ```
 
-This builds all 6 images (gateway, biblio-auth, abb-tts, tts-silero, tts-openvoice, catalog) from sibling repositories and pushes them with `dev-latest` tag.
+This builds all 8 images (gateway, biblio-auth, abb-tts, tts-silero, tts-openvoice, tts-piper, stress-silero, catalog) from sibling repositories and pushes them with `dev-latest` tag.
 
 ## Configuration
 
@@ -81,6 +83,8 @@ SILERO_MODELS=v3_en,v5_ru,v5_1_ru
 TTS_SILERO_REPLICAS=3
 OPENVOICE_LANGUAGES=EN,ES
 TTS_OPENVOICE_REPLICAS=1
+PIPER_MODELS=en_US-lessac-medium,en_GB-alan-medium
+TTS_PIPER_REPLICAS=1
 
 # Biblio Auth
 BIBLIO_AUTH_SECRET_KEY=  # Generate a random string for production
@@ -101,6 +105,7 @@ The stack uses bind mounts to `./data/` directory (created automatically):
 | `data/abb_tts/logs/` | Log files |
 | `data/tts_silero/models/` | Silero TTS model cache |
 | `data/tts_openvoice/models/` | OpenVoice TTS model cache |
+| `data/tts_piper/models/` | Piper TTS model cache |
 | `data/opds/db/` | Biblio Catalog database |
 | `data/biblio_auth/db/` | Biblio Auth SQLite database |
 
@@ -152,7 +157,9 @@ All repositories should be cloned as siblings:
 ├── biblio-audiobook-builder-tts/    # Audiobook converter
 ├── biblio-ebooks-catalog/           # E-book catalog with OPDS
 ├── biblio-tts-server-silero/        # Silero TTS engine
-└── biblio-tts-server-openvoice/     # OpenVoice TTS engine
+├── biblio-tts-server-openvoice/     # OpenVoice TTS engine
+├── biblio-tts-server-piper/         # Piper TTS engine
+└── biblio-stress-server-silero/     # Russian stress marking
 ```
 
 - [biblio-hub](https://github.com/vpoluyaktov/biblio-hub) - This repository
@@ -161,6 +168,8 @@ All repositories should be cloned as siblings:
 - [biblio-ebooks-catalog](https://github.com/vpoluyaktov/biblio-ebooks-catalog) - E-book catalog with OPDS
 - [biblio-tts-server-silero](https://github.com/vpoluyaktov/biblio-tts-server-silero) - Silero TTS engine
 - [biblio-tts-server-openvoice](https://github.com/vpoluyaktov/biblio-tts-server-openvoice) - OpenVoice TTS engine
+- [biblio-tts-server-piper](https://github.com/vpoluyaktov/biblio-tts-server-piper) - Piper TTS engine
+- [biblio-stress-server-silero](https://github.com/vpoluyaktov/biblio-stress-server-silero) - Russian stress marking
 
 ## License
 

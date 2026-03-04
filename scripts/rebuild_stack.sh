@@ -16,6 +16,8 @@ echo "  BiblioHub - Rebuilding Docker Images"
 echo "=========================================="
 echo "Docker Hub user: $DOCKER_USER"
 echo "Tag: $TAG"
+echo ""
+echo "Building 8 images..."
 
 # Check if logged in to Docker Hub
 if ! docker info 2>/dev/null | grep -q "Username: $DOCKER_USER"; then
@@ -50,19 +52,25 @@ docker build -t "$DOCKER_USER/bibliohub-tts-server-silero:$TAG" -f "$HUB_DIR/../
 
 # Build TTS Server OpenVoice (TTS_OPENVOICE)
 echo ""
-echo "[5/7] Building biblio-tts-server-openvoice..."
+echo "[5/8] Building biblio-tts-server-openvoice..."
 echo "----------------------------------------------"
 docker build -t "$DOCKER_USER/bibliohub-tts-server-openvoice:$TAG" -f "$HUB_DIR/../biblio-tts-server-openvoice/docker/Dockerfile" "$HUB_DIR/../biblio-tts-server-openvoice"
 
+# Build TTS Server Piper (TTS_PIPER)
+echo ""
+echo "[6/8] Building biblio-tts-server-piper..."
+echo "----------------------------------------------"
+docker build -t "$DOCKER_USER/bibliohub-tts-server-piper:$TAG" -f "$HUB_DIR/../biblio-tts-server-piper/docker/Dockerfile" "$HUB_DIR/../biblio-tts-server-piper"
+
 # Build Biblio Catalog
 echo ""
-echo "[6/7] Building biblio-catalog..."
+echo "[7/8] Building biblio-catalog..."
 echo "----------------------------------------------"
 docker build -t "$DOCKER_USER/bibliohub-catalog:$TAG" -f "$HUB_DIR/../biblio-ebooks-catalog/docker/Dockerfile" "$HUB_DIR/../biblio-ebooks-catalog"
 
 # Build Stress Server Silero (STRESS_SILERO)
 echo ""
-echo "[7/7] Building biblio-stress-server-silero..."
+echo "[8/8] Building biblio-stress-server-silero..."
 echo "----------------------------------------------"
 docker build -t "$DOCKER_USER/bibliohub-stress-server-silero:$TAG" -f "$HUB_DIR/../biblio-stress-server-silero/docker/Dockerfile" "$HUB_DIR/../biblio-stress-server-silero"
 
@@ -94,15 +102,19 @@ echo "[4/7] Pushing bibliohub-tts-server-silero..."
 docker push "$DOCKER_USER/bibliohub-tts-server-silero:$TAG"
 
 echo ""
-echo "[5/7] Pushing bibliohub-tts-server-openvoice..."
+echo "[5/8] Pushing bibliohub-tts-server-openvoice..."
 docker push "$DOCKER_USER/bibliohub-tts-server-openvoice:$TAG"
 
 echo ""
-echo "[6/7] Pushing bibliohub-catalog..."
+echo "[6/8] Pushing bibliohub-tts-server-piper..."
+docker push "$DOCKER_USER/bibliohub-tts-server-piper:$TAG"
+
+echo ""
+echo "[7/8] Pushing bibliohub-catalog..."
 docker push "$DOCKER_USER/bibliohub-catalog:$TAG"
 
 echo ""
-echo "[7/7] Pushing bibliohub-stress-server-silero..."
+echo "[8/8] Pushing bibliohub-stress-server-silero..."
 docker push "$DOCKER_USER/bibliohub-stress-server-silero:$TAG"
 
 echo ""
@@ -124,5 +136,6 @@ echo "  - $DOCKER_USER/bibliohub-auth:$TAG"
 echo "  - $DOCKER_USER/bibliohub-audiobook-builder-tts:$TAG"
 echo "  - $DOCKER_USER/bibliohub-tts-server-silero:$TAG"
 echo "  - $DOCKER_USER/bibliohub-tts-server-openvoice:$TAG"
+echo "  - $DOCKER_USER/bibliohub-tts-server-piper:$TAG"
 echo "  - $DOCKER_USER/bibliohub-catalog:$TAG"
 echo "  - $DOCKER_USER/bibliohub-stress-server-silero:$TAG"
