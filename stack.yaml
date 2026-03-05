@@ -145,7 +145,7 @@ services:
       - PIPER_PORT=80
       - PIPER_BASE_PATH=/tts-piper
       - PIPER_CACHE_DIR=/data/piper
-      - PIPER_SERVED_MODELS=${PIPER_MODELS:-}
+      - PIPER_SERVED_MODELS=${PIPER_SERVED_MODELS:-}
       - PIPER_LOG_LEVEL=INFO
     volumes:
       - ./data/tts_piper/models:/data/piper
