@@ -52,6 +52,8 @@ services:
       - bibliohub-frontend
     depends_on:
       - tts-silero
+      - tts-openvoice
+      - tts-piper
       - stress-silero
       - biblio-catalog
     deploy:
@@ -119,6 +121,38 @@ services:
       - bibliohub-backend
     deploy:
       replicas: ${TTS_OPENVOICE_REPLICAS:-1}
+      endpoint_mode: dnsrr
+      update_config:
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 300s
+      retries: 5
+
+  # =============================================================================
+  # Biblio TTS Server Piper (TTS_PIPER) - Piper TTS engine
+  # Accessible via: http://host:9900/tts-piper/ (internal use)
+  # =============================================================================
+  tts-piper:
+    image: vpoluyaktov/bibliohub-tts-server-piper:dev-latest
+    environment:
+      - PIPER_HOST=0.0.0.0
+      - PIPER_PORT=80
+      - PIPER_BASE_PATH=/tts-piper
+      - PIPER_CACHE_DIR=/data/piper
+      - PIPER_SERVED_MODELS=${PIPER_SERVED_MODELS:-}
+      - PIPER_LOG_LEVEL=INFO
+    volumes:
+      - ./data/tts_piper/models:/data/piper
+    networks:
+      - bibliohub-backend
+    deploy:
+      replicas: ${TTS_PIPER_REPLICAS:-1}
       endpoint_mode: dnsrr
       update_config:
         order: stop-first

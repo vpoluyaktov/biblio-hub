@@ -68,6 +68,16 @@
                         </div>
                     </a>
 
+                    <a href="/tts-piper/" data-path="/tts-piper/" class="service-card" target="bibliohub-tts-piper">
+                        <div class="service-icon">🎵</div>
+                        <h3>TTS Server Piper</h3>
+                        <p>Fast neural text-to-speech powered by Piper. Supports 40+ languages with hundreds of high-quality voices from low to high quality models.</p>
+                        <div class="service-meta">
+                            <span class="port">Path: /tts-piper/</span>
+                            <span class="status" id="status-tts-piper">Checking...</span>
+                        </div>
+                    </a>
+
                     <a href="/auth/admin" class="service-card admin-card" target="bibliohub-auth">
                         <div class="service-icon">👥</div>
                         <h3>User Management</h3>
@@ -198,6 +208,7 @@
             checkServiceHealth('/catalog', 'status-opds', '/api/setup/check');
             checkServiceHealth('/tts-silero', 'status-tts-silero', '/health');
             checkServiceHealth('/tts-openvoice', 'status-tts-openvoice', '/health');
+            checkServiceHealth('/tts-piper', 'status-tts-piper', '/health');
             checkServiceHealth('/auth', 'status-auth', '/api/validate');
         });
     </script>
