@@ -210,12 +210,6 @@ section h2 {
     vertical-align: middle;
 }
 
-.service-footer {
-    padding-top: 0.75rem;
-    border-top: 1px solid var(--border);
-    margin-top: 0.5rem;
-}
-
 .github-link {
     color: #e87b00;
     text-decoration: none;
