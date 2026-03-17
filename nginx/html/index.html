@@ -98,6 +98,16 @@
                         </div>
                     </a>
 
+                    <a href="/audiobookshelf/" data-path="/audiobookshelf/" class="service-card" target="bibliohub-audiobookshelf">
+                        <div class="service-icon">📚</div>
+                        <h3>AudiobookShelf</h3>
+                        <p>Self-hosted audiobook and podcast server with mobile apps. Stream your audiobooks, track progress, and sync across devices. Uses its own authentication.</p>
+                        <div class="service-meta">
+                            <span class="port">Path: /audiobookshelf/</span>
+                            <span class="status" id="status-audiobookshelf">Checking...</span>
+                        </div>
+                    </a>
+
                 </div>
             </section>
 
@@ -225,6 +235,7 @@
             checkServiceHealth('/tts-openvoice', 'status-tts-openvoice', '/health');
             checkServiceHealth('/tts-piper', 'status-tts-piper', '/health');
             checkServiceHealth('/auth', 'status-auth', '/api/validate');
+            checkServiceHealth('/audiobookshelf', 'status-audiobookshelf', '/healthcheck');
         });
     </script>
 </body>
