@@ -47,6 +47,10 @@ mkdir -p "$HUB_DIR/data/tts_piper/models"
 mkdir -p "$HUB_DIR/data/opds/db"
 mkdir -p "$HUB_DIR/data/opds/books"
 mkdir -p "$HUB_DIR/data/biblio_auth/db"
+mkdir -p "$HUB_DIR/data/audiobookshelf/config"
+mkdir -p "$HUB_DIR/data/audiobookshelf/metadata"
+mkdir -p "$HUB_DIR/data/audiobookshelf/audiobooks"
+mkdir -p "$HUB_DIR/data/audiobookshelf/podcasts"
 echo "  - data/abb_tts/db              (database)"
 echo "  - data/abb_tts/temp            (temp files and audiobooks)"
 echo "  - data/abb_tts/logs            (log files)"
@@ -60,6 +64,10 @@ echo "  - data/tts_piper/models        (Piper TTS models cache)"
 echo "  - data/opds/db                 (database)"
 echo "  - data/opds/books              (e-book library)"
 echo "  - data/biblio_auth/db          (Biblio Auth database)"
+echo "  - data/audiobookshelf/config   (AudiobookShelf config)"
+echo "  - data/audiobookshelf/metadata (AudiobookShelf metadata)"
+echo "  - data/audiobookshelf/audiobooks (audiobooks library)"
+echo "  - data/audiobookshelf/podcasts (podcasts library)"
 
 # Deploy the stack (--resolve-image always forces pulling latest images)
 echo ""
@@ -68,7 +76,7 @@ cd "$HUB_DIR"
 docker stack deploy -c stack.yaml --resolve-image always "$STACK_NAME"
 
 # All services to monitor
-ALL_SERVICES="biblio-auth nginx-gateway biblio-catalog abb-tts abb-ia tts-silero tts-openvoice tts-piper stress-silero"
+ALL_SERVICES="biblio-auth nginx-gateway biblio-catalog abb-tts abb-ia tts-silero tts-openvoice tts-piper stress-silero audiobookshelf"
 MAX_WAIT=180  # Maximum wait time in seconds
 POLL_INTERVAL=3
 

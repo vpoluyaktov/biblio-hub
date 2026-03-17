@@ -27,6 +27,17 @@
             <section class="services">
                 <h2>Services</h2>
                 <div class="service-grid">
+
+                    <a href="/catalog/" data-path="/catalog/" class="service-card" target="bibliohub-opds">
+                        <div class="service-icon">📖</div>
+                        <h3>EBook Catalog</h3>
+                        <p>Browse and manage your e-book library. Import FB2 or EPUB collections, search by author, series, or genre, and download books via OPDS protocol.</p>
+                        <div class="service-meta">
+                            <span class="port">Path: /catalog/</span>
+                            <span class="status" id="status-opds">Checking...</span>
+                        </div>
+                    </a>
+
                     
                     <a href="/abb-tts/" data-path="/abb-tts/" class="service-card" target="bibliohub-abb-tts">
                         <div class="service-icon">🎧</div>
@@ -48,13 +59,15 @@
                         </div>
                     </a>
 
-                    <a href="/catalog/" data-path="/catalog/" class="service-card" target="bibliohub-opds">
-                        <div class="service-icon">📖</div>
-                        <h3>EBooks Catalog</h3>
-                        <p>Browse and manage your e-book library. Import FB2 collections, search by author, series, or genre, and download books via OPDS protocol.</p>
+                    <a href="/audiobookshelf/" data-path="/audiobookshelf/" class="service-card audiobookshelf-card" target="bibliohub-audiobookshelf">
+                        <div class="service-icon">
+                            <img src="https://raw.githubusercontent.com/advplyr/audiobookshelf/master/images/banner.svg" alt="AudiobookShelf" style="width: 100%; max-width: 200px; height: auto;">
+                        </div>
+                        <h3>AudiobookShelf </h3>
+                        <p>Self-hosted audiobook server with mobile apps support. Stream and sync across devices.</p>
                         <div class="service-meta">
-                            <span class="port">Path: /catalog/</span>
-                            <span class="status" id="status-opds">Checking...</span>
+                            <span class="port">Path: /audiobookshelf/</span>
+                            <span class="status" id="status-audiobookshelf">Checking...</span>
                         </div>
                     </a>
 
@@ -225,6 +238,7 @@
             checkServiceHealth('/tts-openvoice', 'status-tts-openvoice', '/health');
             checkServiceHealth('/tts-piper', 'status-tts-piper', '/health');
             checkServiceHealth('/auth', 'status-auth', '/api/validate');
+            checkServiceHealth('/audiobookshelf', 'status-audiobookshelf', '/healthcheck');
         });
     </script>
 </body>

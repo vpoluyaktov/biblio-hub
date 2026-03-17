@@ -19,6 +19,7 @@ BiblioHub is the central deployment and orchestration platform for the Biblio ap
 | **TTS Server (Piper)** | REST API for Piper TTS models | `/tts-piper/` | [Specification.md](https://github.com/vpoluyaktov/biblio-tts-server-piper/blob/main/Specification.md) |
 | **Biblio Auth** | Authentication and User Management | `/auth/` | [Specification.md](https://github.com/vpoluyaktov/biblio-auth/blob/main/Specification.md) |
 | **Stress Server (Silero)** | REST API for Silero Stress (Russian text stress marking) | `/stress-silero/` | [Specification.md](https://github.com/vpoluyaktov/biblio-stress-server-silero/blob/main/Specification.md) |
+| **AudiobookShelf** | Self-hosted audiobook and podcast server (Third-party) | `/audiobookshelf/` | [Official Docs](https://www.audiobookshelf.org/docs) |
 
 All services are accessible through a single port (9900) via path-based routing.
 
@@ -33,6 +34,7 @@ All services are accessible through a single port (9900) via path-based routing.
 - **biblio-tts-server-piper**: [github.com/vpoluyaktov/biblio-tts-server-piper](https://github.com/vpoluyaktov/biblio-tts-server-piper)
 - **biblio-ebooks-catalog**: [github.com/vpoluyaktov/biblio-ebooks-catalog](https://github.com/vpoluyaktov/biblio-ebooks-catalog)
 - **biblio-stress-server-silero**: [github.com/vpoluyaktov/biblio-stress-server-silero](https://github.com/vpoluyaktov/biblio-stress-server-silero)
+- **audiobookshelf** (third-party): [github.com/advplyr/audiobookshelf](https://github.com/advplyr/audiobookshelf)
 
 ## Architecture (High Level)
 
@@ -78,6 +80,10 @@ flowchart LR
     A --> P
     A --> R
     C --> B
+    
+    ABS[AudiobookShelf
+/audiobookshelf/]
+    G --> ABS
 ```
 
 ## Project Structure (Key Parts)
@@ -120,6 +126,7 @@ Implemented and running:
 In progress / planned adoption in stack flow:
 
 - ✅ Audiobook Builder IA - Internet Archive audiobook creation service
+- ✅ AudiobookShelf - Third-party audiobook and podcast server integration
 - ⏳ Stress Server (Silero) integration as a standard production component
 - ⏳ TTS Server (Piper) integration for expanded language and voice support
 
@@ -140,4 +147,4 @@ Near-term roadmap:
 
 ---
 
-*Last updated: 2026-03-17 (ABB-IA service added)*
+*Last updated: 2026-03-17 (AudiobookShelf integration added)*
