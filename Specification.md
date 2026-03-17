@@ -119,7 +119,7 @@ Implemented and running:
 
 In progress / planned adoption in stack flow:
 
-- ⏳ Audiobook Builder IA - Internet Archive audiobook creation service
+- ✅ Audiobook Builder IA - Internet Archive audiobook creation service
 - ⏳ Stress Server (Silero) integration as a standard production component
 - ⏳ TTS Server (Piper) integration for expanded language and voice support
 
@@ -140,4 +140,4 @@ Near-term roadmap:
 
 ---
 
-*Last updated: 2026-03-17*
+*Last updated: 2026-03-17 (ABB-IA service added)*

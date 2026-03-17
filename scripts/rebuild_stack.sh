@@ -33,6 +33,7 @@ declare -A COMPONENTS
 COMPONENTS[gateway]="Gateway (nginx + landing page)|$HUB_DIR/nginx|bibliohub-gateway"
 COMPONENTS[auth]="Biblio Auth|$HUB_DIR/../biblio-auth|bibliohub-auth|docker/Dockerfile"
 COMPONENTS[abb-tts]="Audiobook Builder TTS|$HUB_DIR/../biblio-audiobook-builder-tts|bibliohub-audiobook-builder-tts"
+COMPONENTS[abb-ia]="Audiobook Builder IA|$HUB_DIR/../biblio-audiobook-builder-ia|bibliohub-audiobook-builder-ia"
 COMPONENTS[tts-silero]="Silero TTS Server|$HUB_DIR/../biblio-tts-server-silero|bibliohub-tts-server-silero|docker/Dockerfile"
 COMPONENTS[tts-openvoice]="OpenVoice TTS Server|$HUB_DIR/../biblio-tts-server-openvoice|bibliohub-tts-server-openvoice|docker/Dockerfile"
 COMPONENTS[tts-piper]="Piper TTS Server|$HUB_DIR/../biblio-tts-server-piper|bibliohub-tts-server-piper|docker/Dockerfile"
@@ -43,14 +44,14 @@ COMPONENTS[stress-silero]="Stress Server Silero|$HUB_DIR/../biblio-stress-server
 SELECTED_COMPONENTS=()
 if [ $# -eq 0 ]; then
     # No arguments - build all
-    SELECTED_COMPONENTS=(gateway auth abb-tts tts-silero tts-openvoice tts-piper catalog stress-silero)
+    SELECTED_COMPONENTS=(gateway auth abb-tts abb-ia tts-silero tts-openvoice tts-piper catalog stress-silero)
 else
     # Check for help
     if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
         echo "Usage: $0 [component1] [component2] ..."
         echo ""
         echo "Available components:"
-        for comp in gateway auth abb-tts catalog tts-silero tts-openvoice tts-piper stress-silero; do
+        for comp in gateway auth abb-tts abb-ia catalog tts-silero tts-openvoice tts-piper stress-silero; do
             IFS='|' read -r name path image dockerfile <<< "${COMPONENTS[$comp]}"
             printf "  %-15s - %s\n" "$comp" "$name"
         done
@@ -66,7 +67,7 @@ else
     # Validate and collect components
     for arg in "$@"; do
         if [ "$arg" = "all" ]; then
-            SELECTED_COMPONENTS=(gateway auth abb-tts tts-silero tts-openvoice tts-piper catalog stress-silero)
+            SELECTED_COMPONENTS=(gateway auth abb-tts abb-ia tts-silero tts-openvoice tts-piper catalog stress-silero)
             break
         elif [ -n "${COMPONENTS[$arg]}" ]; then
             SELECTED_COMPONENTS+=("$arg")
