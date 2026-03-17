@@ -69,6 +69,49 @@ services:
       retries: 3
 
   # =============================================================================
+  # Biblio Audiobook Builder IA (ABB_IA) - Internet Archive audiobook builder
+  # Accessible via: http://host:9900/abb-ia/
+  # =============================================================================
+  abb-ia:
+    image: vpoluyaktov/bibliohub-audiobook-builder-ia:dev-latest
+    environment:
+      - ABB_IA_HOST=0.0.0.0
+      - ABB_IA_PORT=80
+      - ABB_IA_BASE_PATH=/abb-ia
+      - ABB_IA_DATABASE_PATH=/db/biblio-audiobook-builder-ia.db
+      - ABB_IA_OUTPUT_DIR=/data/output
+      - ABB_IA_TEMP_DIR=/data/temp
+      - ABB_IA_LOG_FILE=/logs/abb_ia.log
+      - ABB_IA_LOG_LEVEL=${ABB_IA_LOG_LEVEL:-INFO}
+      - ABB_IA_AUTH_MODE=biblio-auth
+      - ABB_IA_BIBLIO_AUTH_URL=http://biblio-auth:80/auth
+      - ABB_IA_AUDIOBOOKSHELF_URL=${ABB_IA_AUDIOBOOKSHELF_URL:-}
+      - ABB_IA_AUDIOBOOKSHELF_TOKEN=${ABB_IA_AUDIOBOOKSHELF_TOKEN:-}
+      - ABB_IA_AUDIOBOOKSHELF_LIBRARY_ID=${ABB_IA_AUDIOBOOKSHELF_LIBRARY_ID:-}
+      - TZ=UTC
+    volumes:
+      - ./data/abb_ia/db:/db
+      - ./data/abb_ia/output:/data/output
+      - ./data/abb_ia/temp:/data/temp
+      - ./data/abb_ia/logs:/logs
+    networks:
+      - bibliohub-backend
+      - bibliohub-frontend
+    depends_on:
+      - biblio-auth
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 5s
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/abb-ia/health"]
+      interval: 30s
+      timeout: 3s
+      start_period: 10s
+      retries: 3
+
+  # =============================================================================
   # Biblio TTS Server Silero (TTS_SILERO) - Text-to-Speech engine
   # Accessible via: http://host:9900/tts-silero/ (internal use)
   # =============================================================================
