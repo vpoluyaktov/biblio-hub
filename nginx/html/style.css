@@ -180,6 +180,55 @@ section h2 {
     filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.3));
 }
 
+/* AudiobookShelf card styling */
+.audiobookshelf-card {
+    border-color: #232323;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+}
+
+.audiobookshelf-card:hover {
+    border-color: #e87b00;
+    box-shadow: 0 8px 30px rgba(232, 123, 0, 0.2);
+}
+
+.audiobookshelf-card .service-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.third-party-badge {
+    display: inline-block;
+    font-size: 0.65rem;
+    padding: 0.2rem 0.5rem;
+    background: rgba(232, 123, 0, 0.2);
+    color: #e87b00;
+    border-radius: 4px;
+    margin-left: 0.5rem;
+    font-weight: 500;
+    vertical-align: middle;
+}
+
+.service-footer {
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+    margin-top: 0.5rem;
+}
+
+.github-link {
+    color: #e87b00;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.github-link:hover {
+    color: #ff9500;
+    text-decoration: underline;
+}
+
 /* Quick Links */
 .links-grid {
     display: grid;
