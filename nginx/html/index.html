@@ -38,6 +38,16 @@
                         </div>
                     </a>
 
+                    <a href="/abb-ia/" data-path="/abb-ia/" class="service-card" target="bibliohub-abb-ia">
+                        <div class="service-icon">🎙️</div>
+                        <h3>Audiobook Builder IA</h3>
+                        <p>Create audiobooks from Internet Archive MP3 collections. Search, download, and build M4B audiobooks with chapters and metadata.</p>
+                        <div class="service-meta">
+                            <span class="port">Path: /abb-ia/</span>
+                            <span class="status" id="status-abb-ia">Checking...</span>
+                        </div>
+                    </a>
+
                     <a href="/catalog/" data-path="/catalog/" class="service-card" target="bibliohub-opds">
                         <div class="service-icon">📖</div>
                         <h3>EBooks Catalog</h3>
@@ -104,7 +114,11 @@
                     </a>
                     <a href="https://github.com/vpoluyaktov/biblio-audiobook-builder-tts" target="_blank" class="link-card">
                         <span class="link-icon">🎧</span>
-                        <span>Audiobook Builder Docs</span>
+                        <span>Audiobook Builder TTS Docs</span>
+                    </a>
+                    <a href="https://github.com/vpoluyaktov/biblio-audiobook-builder-ia" target="_blank" class="link-card">
+                        <span class="link-icon">🎙️</span>
+                        <span>Audiobook Builder IA Docs</span>
                     </a>
                     <a href="https://github.com/vpoluyaktov/biblio-tts-server-silero" target="_blank" class="link-card">
                         <span class="link-icon">🔊</span>
@@ -205,6 +219,7 @@
             
             // Check service health using path-based routing
             checkServiceHealth('/abb-tts', 'status-abb-tts', '/health');
+            checkServiceHealth('/abb-ia', 'status-abb-ia', '/health');
             checkServiceHealth('/catalog', 'status-opds', '/api/setup/check');
             checkServiceHealth('/tts-silero', 'status-tts-silero', '/health');
             checkServiceHealth('/tts-openvoice', 'status-tts-openvoice', '/health');
