@@ -12,6 +12,7 @@ BiblioHub is the central deployment and orchestration platform for the Biblio ap
 |---------|-------------|----------|---------------|
 | **Landing Page** | Central hub with links to all services | `/` | This document |
 | **Audiobook Builder TTS** | Converts e-books to audiobooks using TTS | `/abb-tts/` | [Specification.md](https://github.com/vpoluyaktov/biblio-audiobook-builder-tts/blob/main/Specification.md) |
+| **Audiobook Builder IA** | Creates audiobooks from Internet Archive content | `/abb-ia/` | [Specification.md](https://github.com/vpoluyaktov/biblio-audiobook-builder-ia/blob/main/Specification.md) |
 | **TTS Server (Silero)** | REST API for Silero TTS models | `/tts-silero/` | [Specification.md](https://github.com/vpoluyaktov/biblio-tts-server-silero/blob/main/Specification.md) |
 | **Biblio Catalog** | E-book library catalog with OPDS support | `/catalog/` | [Specification.md](https://github.com/vpoluyaktov/biblio-ebooks-catalog/blob/main/Specification.md) |
 | **TTS Server (OpenVoice)** | REST API for MeloTTS models | `/tts-openvoice/` | [Specification.md](https://github.com/vpoluyaktov/biblio-tts-server-openvoice/blob/main/Specification.md) |
@@ -26,6 +27,7 @@ All services are accessible through a single port (9900) via path-based routing.
 - **biblio-hub** (this repo): [github.com/vpoluyaktov/biblio-hub](https://github.com/vpoluyaktov/biblio-hub)
 - **biblio-auth**: [github.com/vpoluyaktov/biblio-auth](https://github.com/vpoluyaktov/biblio-auth)
 - **biblio-audiobook-builder-tts**: [github.com/vpoluyaktov/biblio-audiobook-builder-tts](https://github.com/vpoluyaktov/biblio-audiobook-builder-tts)
+- **biblio-audiobook-builder-ia**: [github.com/vpoluyaktov/biblio-audiobook-builder-ia](https://github.com/vpoluyaktov/biblio-audiobook-builder-ia)
 - **biblio-tts-server-silero**: [github.com/vpoluyaktov/biblio-tts-server-silero](https://github.com/vpoluyaktov/biblio-tts-server-silero)
 - **biblio-tts-server-openvoice**: [github.com/vpoluyaktov/biblio-tts-server-openvoice](https://github.com/vpoluyaktov/biblio-tts-server-openvoice)
 - **biblio-tts-server-piper**: [github.com/vpoluyaktov/biblio-tts-server-piper](https://github.com/vpoluyaktov/biblio-tts-server-piper)
@@ -51,6 +53,7 @@ flowchart LR
         G[Nginx Gateway + Landing Page\nSingle public endpoint]
 
         A[ABB-TTS\n/abb-tts/]
+        I[ABB-IA\n/abb-ia/]
         C[Biblio Catalog\n/catalog/]
         S[TTS Server Silero\n/tts-silero/]
         O[TTS Server OpenVoice\n/tts-openvoice/]
@@ -62,6 +65,7 @@ flowchart LR
     U -->|HTTP(S)| G
 
     G --> A
+    G --> I
     G --> C
     G --> S
     G --> O
@@ -115,6 +119,7 @@ Implemented and running:
 
 In progress / planned adoption in stack flow:
 
+- ⏳ Audiobook Builder IA - Internet Archive audiobook creation service
 - ⏳ Stress Server (Silero) integration as a standard production component
 - ⏳ TTS Server (Piper) integration for expanded language and voice support
 
@@ -135,4 +140,4 @@ Near-term roadmap:
 
 ---
 
-*Last updated: 2026-02-14*
+*Last updated: 2026-03-17*
