@@ -84,7 +84,7 @@ services:
       - ABB_IA_LOG_FILE=/logs/abb_ia.log
       - ABB_IA_LOG_LEVEL=${ABB_IA_LOG_LEVEL:-INFO}
       - ABB_IA_AUTH_MODE=biblio-auth
-      - ABB_IA_BIBLIO_AUTH_URL=http://biblio-auth:80/auth
+      - ABB_IA_AUTH_URL=http://biblio-auth:80/auth
       - ABB_IA_AUDIOBOOKSHELF_URL=${ABB_IA_AUDIOBOOKSHELF_URL:-}
       - ABB_IA_AUDIOBOOKSHELF_TOKEN=${ABB_IA_AUDIOBOOKSHELF_TOKEN:-}
       - ABB_IA_AUDIOBOOKSHELF_LIBRARY_ID=${ABB_IA_AUDIOBOOKSHELF_LIBRARY_ID:-}
