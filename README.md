@@ -56,6 +56,8 @@ Once deployed, access all services at `http://localhost:9900`:
 
 ## Building Images
 
+**Prerequisites**: All Biblio repositories must be cloned locally as siblings (see [Related Repositories](#related-repositories)).
+
 Build and push all service images to Docker Hub:
 
 ```bash
@@ -63,6 +65,8 @@ Build and push all service images to Docker Hub:
 ```
 
 This builds all service images (router, biblio-auth, abb-tts, abb-ia, tts-silero, tts-openvoice, tts-piper, stress-silero, catalog) from sibling repositories and pushes them with `dev-latest` tag.
+
+**Note**: The rebuild process may take up to an hour depending on your system.
 
 ## Configuration
 
