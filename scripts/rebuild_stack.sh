@@ -30,7 +30,7 @@ TAG="dev-latest"
 
 # Component definitions
 declare -A COMPONENTS
-COMPONENTS[gateway]="Gateway (nginx + landing page)|$HUB_DIR/nginx|bibliohub-gateway"
+COMPONENTS[gateway]="Gateway (nginx + landing page)|$HUB_DIR/../biblio-router|bibliohub-router"
 COMPONENTS[auth]="Biblio Auth|$HUB_DIR/../biblio-auth|bibliohub-auth|docker/Dockerfile"
 COMPONENTS[abb-tts]="Audiobook Builder TTS|$HUB_DIR/../biblio-audiobook-builder-tts|bibliohub-audiobook-builder-tts"
 COMPONENTS[abb-ia]="Audiobook Builder IA|$HUB_DIR/../biblio-audiobook-builder-ia|bibliohub-audiobook-builder-ia"
