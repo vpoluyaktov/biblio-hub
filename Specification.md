@@ -95,11 +95,11 @@ biblio-hub/
 ├── README.md
 ├── stack.yaml
 ├── .env.example
-├── scripts/            # stack lifecycle scripts (start/stop)
+├── scripts/            # stack lifecycle and rebuild scripts
 └── data/               # persistent runtime data
 ```
 
-**Note**: Gateway/router configuration and build scripts are now in the separate [biblio-router](https://github.com/vpoluyaktov/biblio-router) repository.
+**Note**: Gateway/router configuration (nginx.conf, landing page) is in the separate [biblio-router](https://github.com/vpoluyaktov/biblio-router) repository.
 
 ## Operations Summary
 
@@ -107,10 +107,7 @@ BiblioHub lifecycle is managed through repository scripts:
 
 - `./scripts/start_stack.sh` - deploy/update stack
 - `./scripts/stop_stack.sh` - stop stack (data preserved)
-
-For rebuilding service images, use the build script from [biblio-router](https://github.com/vpoluyaktov/biblio-router):
-
-- `../biblio-router/rebuild_stack.sh` - rebuild and publish service images
+- `./scripts/rebuild_stack.sh` - rebuild and publish service images
 
 For exact operational and troubleshooting commands, see `README.md` and script sources.
 

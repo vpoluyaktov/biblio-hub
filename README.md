@@ -56,11 +56,10 @@ Once deployed, access all services at `http://localhost:9900`:
 
 ## Building Images
 
-To rebuild service images, use the build script from the [biblio-router](https://github.com/vpoluyaktov/biblio-router) repository:
+Build and push all service images to Docker Hub:
 
 ```bash
-cd ../biblio-router
-./rebuild_stack.sh
+./scripts/rebuild_stack.sh
 ```
 
 This builds all service images (router, biblio-auth, abb-tts, abb-ia, tts-silero, tts-openvoice, tts-piper, stress-silero, catalog) from sibling repositories and pushes them with `dev-latest` tag.
@@ -120,7 +119,7 @@ docker service scale bibliohub_tts-silero=5
 ./scripts/stop_stack.sh
 
 # Rebuild and redeploy after code changes
-cd ../biblio-router && ./rebuild_stack.sh && cd ../biblio-hub
+./scripts/rebuild_stack.sh
 ./scripts/start_stack.sh
 
 # View service logs
@@ -139,12 +138,13 @@ biblio-hub/
 ├── scripts/
 │   ├── start_stack.sh     # Start the stack
 │   ├── stop_stack.sh      # Stop the stack
+│   ├── rebuild_stack.sh   # Rebuild all Docker images
 │   ├── start_stack.bat    # Windows start script
 │   └── stop_stack.bat     # Windows stop script
 └── data/                  # Persistent data (auto-created)
 ```
 
-**Note**: Gateway/router configuration is now in the separate [biblio-router](https://github.com/vpoluyaktov/biblio-router) repository.
+**Note**: Gateway/router configuration (nginx.conf, landing page) is in the separate [biblio-router](https://github.com/vpoluyaktov/biblio-router) repository.
 
 ## Related Repositories
 
