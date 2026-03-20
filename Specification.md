@@ -26,6 +26,7 @@ All services are accessible through a single port (9900) via path-based routing.
 ### Component Repositories
 
 - **biblio-hub** (this repo): [github.com/vpoluyaktov/biblio-hub](https://github.com/vpoluyaktov/biblio-hub)
+- **biblio-router**: [github.com/vpoluyaktov/biblio-router](https://github.com/vpoluyaktov/biblio-router)
 - **biblio-auth**: [github.com/vpoluyaktov/biblio-auth](https://github.com/vpoluyaktov/biblio-auth)
 - **biblio-audiobook-builder-tts**: [github.com/vpoluyaktov/biblio-audiobook-builder-tts](https://github.com/vpoluyaktov/biblio-audiobook-builder-tts)
 - **biblio-audiobook-builder-ia**: [github.com/vpoluyaktov/biblio-audiobook-builder-ia](https://github.com/vpoluyaktov/biblio-audiobook-builder-ia)
@@ -95,9 +96,10 @@ biblio-hub/
 ├── stack.yaml
 ├── .env.example
 ├── scripts/            # stack lifecycle and rebuild scripts
-├── nginx/              # gateway config + landing page
 └── data/               # persistent runtime data
 ```
+
+**Note**: Gateway/router configuration (nginx.conf, landing page) is in the separate [biblio-router](https://github.com/vpoluyaktov/biblio-router) repository.
 
 ## Operations Summary
 
@@ -147,4 +149,4 @@ Near-term roadmap:
 
 ---
 
-*Last updated: 2026-03-17 (AudiobookShelf integration added)*
+*Last updated: 2026-03-18 (Extracted router/gateway to separate biblio-router repository)*

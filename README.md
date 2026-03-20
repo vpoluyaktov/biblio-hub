@@ -56,13 +56,17 @@ Once deployed, access all services at `http://localhost:9900`:
 
 ## Building Images
 
+**Prerequisites**: All Biblio repositories must be cloned locally as siblings (see [Related Repositories](#related-repositories)).
+
 Build and push all service images to Docker Hub:
 
 ```bash
 ./scripts/rebuild_stack.sh
 ```
 
-This builds all 8 images (gateway, biblio-auth, abb-tts, tts-silero, tts-openvoice, tts-piper, stress-silero, catalog) from sibling repositories and pushes them with `dev-latest` tag.
+This builds all service images (router, biblio-auth, abb-tts, abb-ia, tts-silero, tts-openvoice, tts-piper, stress-silero, catalog) from sibling repositories and pushes them with `dev-latest` tag.
+
+**Note**: The rebuild process may take up to an hour depending on your system.
 
 ## Configuration
 
@@ -138,13 +142,13 @@ biblio-hub/
 ├── scripts/
 │   ├── start_stack.sh     # Start the stack
 │   ├── stop_stack.sh      # Stop the stack
-│   └── rebuild_stack.sh   # Rebuild all Docker images
-├── nginx/
-│   ├── Dockerfile         # Gateway image
-│   ├── nginx.conf         # Path-based routing config
-│   └── html/              # Landing page
+│   ├── rebuild_stack.sh   # Rebuild all Docker images
+│   ├── start_stack.bat    # Windows start script
+│   └── stop_stack.bat     # Windows stop script
 └── data/                  # Persistent data (auto-created)
 ```
+
+**Note**: Gateway/router configuration (nginx.conf, landing page) is in the separate [biblio-router](https://github.com/vpoluyaktov/biblio-router) repository.
 
 ## Related Repositories
 
@@ -153,8 +157,10 @@ All repositories should be cloned as siblings:
 ```
 ~/git/biblio/
 ├── biblio-hub/                      # This repo
+├── biblio-router/                   # Gateway and landing page
 ├── biblio-auth/                     # Authentication service
 ├── biblio-audiobook-builder-tts/    # Audiobook converter
+├── biblio-audiobook-builder-ia/     # Internet Archive audiobook builder
 ├── biblio-ebooks-catalog/           # E-book catalog with OPDS
 ├── biblio-tts-server-silero/        # Silero TTS engine
 ├── biblio-tts-server-openvoice/     # OpenVoice TTS engine
@@ -163,8 +169,10 @@ All repositories should be cloned as siblings:
 ```
 
 - [biblio-hub](https://github.com/vpoluyaktov/biblio-hub) - This repository
+- [biblio-router](https://github.com/vpoluyaktov/biblio-router) - Gateway and landing page
 - [biblio-auth](https://github.com/vpoluyaktov/biblio-auth) - Authentication service
 - [biblio-audiobook-builder-tts](https://github.com/vpoluyaktov/biblio-audiobook-builder-tts) - Audiobook converter
+- [biblio-audiobook-builder-ia](https://github.com/vpoluyaktov/biblio-audiobook-builder-ia) - Internet Archive audiobook builder
 - [biblio-ebooks-catalog](https://github.com/vpoluyaktov/biblio-ebooks-catalog) - E-book catalog with OPDS
 - [biblio-tts-server-silero](https://github.com/vpoluyaktov/biblio-tts-server-silero) - Silero TTS engine
 - [biblio-tts-server-openvoice](https://github.com/vpoluyaktov/biblio-tts-server-openvoice) - OpenVoice TTS engine
