@@ -1,8 +1,41 @@
-# BiblioHub
+## Central orchestration hub for the Biblio application suite
+https://demo.bibliohub.org/](https://demo.bibliohub.org/
 
-> Central orchestration hub for the Biblio application suite
+---
+**Landing Page**  - Central hub with links to all services
+<img width="1272" height="872" alt="Screenshot 2026-03-22 at 22 54 53" src="https://github.com/user-attachments/assets/f728d46b-8b68-41ed-8747-58dd6fb5351d" />
 
-![BiblioHub Architecture](docs/images/bibliohub-architecture.png)
+---
+**Biblio Catalog** - E-book library catalog with OPDS support
+<img width="1728" height="842" alt="Screenshot 2026-03-22 at 23 00 50" src="https://github.com/user-attachments/assets/9c3cc736-8bb0-4047-bdc4-5256315144f1" />
+
+---
+**Audiobook Builder TTS** - Convert e-books to audiobooks using TTS 
+<img width="1185" height="846" alt="Screenshot 2026-03-22 at 23 01 55" src="https://github.com/user-attachments/assets/be814b84-7f47-4797-9e1e-7260d6105a91" />
+<img width="1189" height="858" alt="Screenshot 2026-03-22 at 23 01 43" src="https://github.com/user-attachments/assets/796dbf89-a616-447c-a09b-c72a702aa968" />
+
+---
+**Audiobook Builder IA** - Build audiobooks from Internet Archive content
+<img width="1727" height="540" alt="Screenshot 2026-03-22 at 23 02 57" src="https://github.com/user-attachments/assets/5bd1631a-0275-4c2f-9606-bd01a991266f" />
+
+---
+**Stress Server Silero** - Russian stress marking for TTS
+<img width="977" height="641" alt="Screenshot 2026-03-22 at 23 03 14" src="https://github.com/user-attachments/assets/d8184168-78b4-4c2a-b904-b5746f3e3c0a" />
+
+---
+**TTS Server OpenVoice** - Text-to-speech engine (MeloTTS)
+<img width="989" height="665" alt="Screenshot 2026-03-22 at 23 03 25" src="https://github.com/user-attachments/assets/a449aa18-3b9c-4640-9749-1f3c30e8dfc9" />
+
+---
+**TTS Server Piper** - Text-to-speech engine (Piper models)
+<img width="995" height="654" alt="Screenshot 2026-03-22 at 23 03 34" src="https://github.com/user-attachments/assets/b8c1208c-a83e-43e6-a512-c9f84150dc46" />
+
+---
+**Biblio Auth** - Authentication and user management
+<img width="1234" height="480" alt="Screenshot 2026-03-22 at 23 03 51" src="https://github.com/user-attachments/assets/a585acfd-c0e5-411f-8f8e-013dcc4dcdea" />
+
+
+
 
 BiblioHub provides unified deployment with path-based routing through a single nginx gateway, Biblio Auth authentication, and a landing page for all Biblio services using Docker Swarm.
 
