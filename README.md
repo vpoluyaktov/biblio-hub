@@ -1,5 +1,5 @@
 ## Central orchestration hub for the Biblio application suite
-https://demo.bibliohub.org/](https://demo.bibliohub.org/
+https://demo.bibliohub.org/
 
 ---
 **Landing Page**  - Central hub with links to all services
