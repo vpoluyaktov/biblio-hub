@@ -13,7 +13,7 @@ services:
       - bibliohub-frontend
       - bibliohub-backend
     deploy:
-      replicas: 1
+      replicas: ${NGINX_GATEWAY_REPLICAS:-1}
       update_config:
         order: stop-first
       restart_policy:
@@ -58,7 +58,7 @@ services:
       - stress-silero
       - biblio-catalog
     deploy:
-      replicas: 1
+      replicas: ${ABB_TTS_REPLICAS:-1}
       restart_policy:
         condition: any
         delay: 5s
@@ -101,7 +101,7 @@ services:
     depends_on:
       - biblio-auth
     deploy:
-      replicas: 1
+      replicas: ${ABB_IA_REPLICAS:-1}
       restart_policy:
         condition: any
         delay: 5s
@@ -260,7 +260,7 @@ services:
     networks:
       - bibliohub-backend
     deploy:
-      replicas: 1
+      replicas: ${BIBLIO_CATALOG_REPLICAS:-1}
       update_config:
         order: stop-first
       restart_policy:
@@ -299,7 +299,7 @@ services:
       - bibliohub-backend
       - bibliohub-frontend
     deploy:
-      replicas: 1
+      replicas: ${BIBLIO_AUTH_REPLICAS:-1}
       update_config:
         order: stop-first
       restart_policy:
@@ -329,7 +329,7 @@ services:
     networks:
       - bibliohub-frontend
     deploy:
-      replicas: 1
+      replicas: ${AUDIOBOOKSHELF_REPLICAS:-1}
       update_config:
         order: stop-first
       restart_policy:

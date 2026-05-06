@@ -331,6 +331,40 @@ echo "  - data/audiobookshelf/metadata (AudiobookShelf metadata)"
 echo "  - data/audiobookshelf/audiobooks (audiobooks library)"
 echo "  - data/audiobookshelf/podcasts (podcasts library)"
 
+# Set replica counts based on enable flags
+# Services without explicit replica env vars get set to 0 if disabled, 1 if enabled
+export BIBLIO_AUTH_REPLICAS=$(is_service_enabled "biblio-auth" && echo "1" || echo "0")
+export NGINX_GATEWAY_REPLICAS=1  # Always enabled
+export BIBLIO_CATALOG_REPLICAS=$(is_service_enabled "biblio-catalog" && echo "1" || echo "0")
+export ABB_TTS_REPLICAS=$(is_service_enabled "abb-tts" && echo "1" || echo "0")
+export ABB_IA_REPLICAS=$(is_service_enabled "abb-ia" && echo "1" || echo "0")
+export AUDIOBOOKSHELF_REPLICAS=$(is_service_enabled "audiobookshelf" && echo "1" || echo "0")
+
+# For services with configurable replicas, set to 0 if disabled, otherwise use configured value
+if is_service_enabled "tts-silero"; then
+    export TTS_SILERO_REPLICAS="${TTS_SILERO_REPLICAS:-5}"
+else
+    export TTS_SILERO_REPLICAS=0
+fi
+
+if is_service_enabled "tts-openvoice"; then
+    export TTS_OPENVOICE_REPLICAS="${TTS_OPENVOICE_REPLICAS:-5}"
+else
+    export TTS_OPENVOICE_REPLICAS=0
+fi
+
+if is_service_enabled "tts-piper"; then
+    export TTS_PIPER_REPLICAS="${TTS_PIPER_REPLICAS:-1}"
+else
+    export TTS_PIPER_REPLICAS=0
+fi
+
+if is_service_enabled "stress-silero"; then
+    export STRESS_SILERO_REPLICAS="${STRESS_SILERO_REPLICAS:-8}"
+else
+    export STRESS_SILERO_REPLICAS=0
+fi
+
 # Deploy the stack
 echo ""
 echo "Deploying stack '$STACK_NAME'..."
