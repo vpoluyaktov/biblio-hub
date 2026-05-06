@@ -10,6 +10,57 @@ HUB_DIR="$(dirname "$SCRIPT_DIR")"
 
 ALL_SERVICES="biblio-auth nginx-gateway biblio-catalog abb-tts abb-ia tts-silero tts-openvoice tts-piper stress-silero audiobookshelf"
 
+# Load environment variables from .env file if it exists
+if [ -f "$HUB_DIR/.env" ]; then
+    set -a
+    source "$HUB_DIR/.env"
+    set +a
+fi
+
+# Function to check if a service is enabled
+is_service_enabled() {
+    local service=$1
+    
+    # nginx-gateway is always enabled
+    if [ "$service" = "nginx-gateway" ]; then
+        return 0
+    fi
+    
+    # Map service names to environment variables
+    case "$service" in
+        "biblio-auth")
+            [ "${ENABLE_BIBLIO_AUTH:-true}" = "true" ]
+            ;;
+        "biblio-catalog")
+            [ "${ENABLE_BIBLIO_CATALOG:-true}" = "true" ]
+            ;;
+        "abb-tts")
+            [ "${ENABLE_ABB_TTS:-true}" = "true" ]
+            ;;
+        "abb-ia")
+            [ "${ENABLE_ABB_IA:-true}" = "true" ]
+            ;;
+        "tts-silero")
+            [ "${ENABLE_TTS_SILERO:-true}" = "true" ]
+            ;;
+        "tts-openvoice")
+            [ "${ENABLE_TTS_OPENVOICE:-true}" = "true" ]
+            ;;
+        "tts-piper")
+            [ "${ENABLE_TTS_PIPER:-true}" = "true" ]
+            ;;
+        "stress-silero")
+            [ "${ENABLE_STRESS_SILERO:-true}" = "true" ]
+            ;;
+        "audiobookshelf")
+            [ "${ENABLE_AUDIOBOOKSHELF:-true}" = "true" ]
+            ;;
+        *)
+            return 0
+            ;;
+    esac
+}
+
 show_list() {
     echo "Available services:"
     for service in $ALL_SERVICES; do
@@ -39,6 +90,13 @@ if ! echo "$ALL_SERVICES" | grep -qw "$TARGET_SERVICE"; then
     echo "Error: Unknown service '$TARGET_SERVICE'"
     echo ""
     show_list
+    exit 1
+fi
+
+# Check if service is enabled
+if ! is_service_enabled "$TARGET_SERVICE"; then
+    echo "Error: Service '$TARGET_SERVICE' is disabled in .env file"
+    echo "Set ENABLE_${TARGET_SERVICE^^} to 'true' to enable it"
     exit 1
 fi
 

@@ -42,6 +42,61 @@ BIBLIO_HUB_HOSTNAME="${BIBLIO_HUB_HOSTNAME:-localhost}"
 BIBLIO_HUB_PORT="${BIBLIO_HUB_PORT:-9900}"
 HUB_URL="http://${BIBLIO_HUB_HOSTNAME}:${BIBLIO_HUB_PORT}"
 
+# Function to check if a service is enabled
+is_service_enabled() {
+    local service=$1
+    
+    # nginx-gateway is always enabled
+    if [ "$service" = "nginx-gateway" ]; then
+        return 0
+    fi
+    
+    # Map service names to environment variables
+    case "$service" in
+        "biblio-auth")
+            [ "${ENABLE_BIBLIO_AUTH:-true}" = "true" ]
+            ;;
+        "biblio-catalog")
+            [ "${ENABLE_BIBLIO_CATALOG:-true}" = "true" ]
+            ;;
+        "abb-tts")
+            [ "${ENABLE_ABB_TTS:-true}" = "true" ]
+            ;;
+        "abb-ia")
+            [ "${ENABLE_ABB_IA:-true}" = "true" ]
+            ;;
+        "tts-silero")
+            [ "${ENABLE_TTS_SILERO:-true}" = "true" ]
+            ;;
+        "tts-openvoice")
+            [ "${ENABLE_TTS_OPENVOICE:-true}" = "true" ]
+            ;;
+        "tts-piper")
+            [ "${ENABLE_TTS_PIPER:-true}" = "true" ]
+            ;;
+        "stress-silero")
+            [ "${ENABLE_STRESS_SILERO:-true}" = "true" ]
+            ;;
+        "audiobookshelf")
+            [ "${ENABLE_AUDIOBOOKSHELF:-true}" = "true" ]
+            ;;
+        *)
+            return 0
+            ;;
+    esac
+}
+
+# Function to get list of enabled services
+get_enabled_services() {
+    local enabled=""
+    for service in $ALL_SERVICES; do
+        if is_service_enabled "$service"; then
+            enabled="$enabled $service"
+        fi
+    done
+    echo "$enabled" | xargs
+}
+
 # Handle --list flag
 if [ "$1" = "--list" ]; then
     show_list
@@ -112,6 +167,7 @@ get_service_status() {
 print_status_table() {
     local has_failed=false
     local all_ready=true
+    local enabled_services=$(get_enabled_services)
     
     printf "\033[H\033[J"
     
@@ -123,6 +179,11 @@ print_status_table() {
     echo "  ----------------------------------------"
     
     for service in $ALL_SERVICES; do
+        if ! is_service_enabled "$service"; then
+            printf "  %-20s %b\n" "$service" "\033[90m○ Disabled\033[0m"
+            continue
+        fi
+        
         local status=$(get_service_status "$service")
         local status_icon=""
         
@@ -209,6 +270,13 @@ if [ -n "$1" ]; then
         echo "Error: Unknown service '$TARGET_SERVICE'"
         echo ""
         show_list
+        exit 1
+    fi
+    
+    # Check if service is enabled
+    if ! is_service_enabled "$TARGET_SERVICE"; then
+        echo "Error: Service '$TARGET_SERVICE' is disabled in .env file"
+        echo "Set ENABLE_${TARGET_SERVICE^^} to 'true' to enable it"
         exit 1
     fi
     
